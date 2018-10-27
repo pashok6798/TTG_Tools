@@ -188,13 +188,78 @@ namespace TTG_Tools
 
                     listBox1.Items.Add("File " + fi[i].Name + " encrypted.");
                 }
+                if ((i + 1 < fi.Count()) && (fi[i].Extension == ".font") && (fi[i + 1].Extension.ToLower() == ".ttf") && GetNameOnly(i) == GetNameOnly(i + 1))
+                {
+                    byte[] vector_font = File.ReadAllBytes(fi[i + 1].FullName);
+                    byte[] font = File.ReadAllBytes(fi[i].FullName);
+
+                    byte[] header = new byte[4];
+                    byte[] version = new byte[4];
+
+                    Array.Copy(font, 0, header, 0, header.Length);
+                    Array.Copy(font, 16, version, 0, version.Length);
+
+                    if (Encoding.ASCII.GetString(header) != "6VSM" && BitConverter.ToInt32(version, 0) != 1)
+                    {
+                        vector_font = null;
+                        font = null;
+                        GC.Collect();
+
+                        listBox1.Items.Add("This file doesn't have vector fonts: " + fi[i].Name);
+                        goto end2;
+                    }
+
+                    byte[] beg_chunk; //Скопируется начальный шаблон
+                    byte[] block_sz = new byte[4];
+                    byte[] hz_size = new byte[4]; //Не знаю, зачем считаются ещё 8 байт к размеру шрифта
+                    byte[] font_size = new byte[4]; //Для размера шрифта
+                    byte[] last_chunk; //пригодится для после разъяснений с размерами шрифта
+
+                    int pos = 32;
+                    int beg_pos = pos;
+                    byte[] tmp = new byte[4];
+
+                    Array.Copy(font, pos, tmp, 0, tmp.Length);
+
+                    pos += BitConverter.ToInt32(tmp, 0) + 28;
+
+                    Array.Copy(font, pos, hz_size, 0, hz_size.Length);
+                    pos += 4;
+                    Array.Copy(font, pos, font_size, 0, font_size.Length);
+
+                    beg_chunk = new byte[pos + 4];
+                    Array.Copy(font, 0, beg_chunk, 0, beg_chunk.Length);
+
+                    beg_pos = pos + 4;
+
+                    pos += 4 + BitConverter.ToInt32(font_size, 0);
+                    last_chunk = new byte[font.Length - pos];
+                    Array.Copy(font, pos, last_chunk, 0, last_chunk.Length);
+
+                    int new_block_sz = (beg_chunk.Length - 32) + vector_font.Length + last_chunk.Length;
+                    hz_size = BitConverter.GetBytes((int)(vector_font.Length + 8));
+                    font_size = BitConverter.GetBytes((int)vector_font.Length);
+                    block_sz = BitConverter.GetBytes(new_block_sz);
+
+                    Array.Copy(block_sz, 0, beg_chunk, 4, block_sz.Length);
+                    Array.Copy(hz_size, 0, beg_chunk, beg_pos - 8, hz_size.Length);
+                    Array.Copy(font_size, 0, beg_chunk, beg_pos - 4, font_size.Length);
+
+                    if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
+
+                    FileStream fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);
+                    fs.Write(beg_chunk, 0, beg_chunk.Length);
+                    fs.Write(vector_font, 0, vector_font.Length);
+                    fs.Write(last_chunk, 0, last_chunk.Length);
+                    fs.Close();
+
+                    listBox1.Items.Add("File " + fi[i].Name + " successfully imported!");
+                }
                 else if (fi[i].Extension == ".font")
                 {
                     int version;
                     if (selected_index == 0) version = 2;
                     else version = 7;
-
-
 
                     FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
                     byte[] fontContent = Methods.ReadFull(fs);
@@ -202,7 +267,8 @@ namespace TTG_Tools
 
                     byte[] checkHeader = new byte[4];
                     Array.Copy(fontContent, 0, checkHeader, 0, 4);
-                    if ((Encoding.ASCII.GetString(checkHeader) != "5VSM") && (Encoding.ASCII.GetString(checkHeader) != "ERTM"))
+                    if ((Encoding.ASCII.GetString(checkHeader) != "5VSM") && (Encoding.ASCII.GetString(checkHeader) != "ERTM")
+                        && (Encoding.ASCII.GetString(checkHeader) != "6VSM"))
                     {
 
                         if (Methods.FindStartOfStringSomething(fontContent, 0, "DDS ") < fontContent.Length - 100)
@@ -272,25 +338,8 @@ namespace TTG_Tools
                             {
                                 if (BitConverter.ToInt32(database[all_text[q].number - 1].lenght_of_textblok, 0) != 8)
                                 {
-                                    //if (BitConverter.ToInt32(database[all_text[q].number - 1 + propusk].count_text, 0) == 1)
-                                    //{
-
                                     database[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
                                     database[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(database[all_text[q].number - 1].text.Length);
-
-                                    /*database[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
-                                    database[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(database[all_text[q].number - 1].text.Length);*/
-
-                                    //}
-                                    //else if (BitConverter.ToInt32(database[all_text[q].number - 1 + propusk].count_text, 0) == 2)
-                                    //{
-                                    //    database[all_text[q].number - 1 - propusk].text = all_text[q].text;
-                                    //    database[all_text[q].number - 1 - propusk].lenght_of_text = BitConverter.GetBytes(database[all_text[q].number - 1].text.Length);
-                                    //    q++;
-                                    //    database[all_text[q].number - 1 - propusk].text = all_text[q].text;
-                                    //    database[all_text[q].number - 1 - propusk].lenght_of_text = BitConverter.GetBytes(database[all_text[q].number - 1].text.Length);
-                                    //    propusk++;
-                                    //}
                                 }
                             }
                             Methods.DeleteCurrentFile(MainMenu.settings.pathForOutputFolder + "\\" + fi[i + offset1].Name.ToString());
@@ -1393,109 +1442,6 @@ namespace TTG_Tools
                                 {
                                     listBox1.Items.Add("Unknown error in file " + fi[i].Name + ". Code of Texture: " + tex_code + ". Please write me about it.");
                                 }
-                                
-                                //1 группа байт - это dxt5
-                                //if (BitConverter.ToInt32(head[3], 0) == 1)
-                                //{
-                                /*if (BitConverter.ToInt32(head[num], 0) == 66)//dxt5
-                                {
-                                    Array.Copy(tex_format[1].tex_header, 0, dds_head, 32, tex_format[1].tex_header.Length);
-                                    Array.Copy(chaptersOfDDS[chaptersOfDDS.Count - 1].lenght_of_chapter, 0, dds_head, 20, 4);
-                                    tex_info += ", texture format: DXT5";
-                                    //dds_head[87] = 0x35;
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 16)//alpha 8 bit (A8)
-                                {
-                                    Array.Copy(tex_format[2].tex_header, 0, dds_head, 32, tex_format[2].tex_header.Length);
-                                    tex_info += ", texture format: Alpha 8 bit (A8)";
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 64)//dxt1
-                                {
-                                    Array.Copy(tex_format[0].tex_header, 0, dds_head, 32, tex_format[0].tex_header.Length);
-                                    Array.Copy(chaptersOfDDS[chaptersOfDDS.Count - 1].lenght_of_chapter, 0, dds_head, 20, 4);
-                                    tex_info += ", texture format: DXT1";
-                                    //dds_head[67] = 0x31;//dxt1
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 37)//32f.32f.32f.32f
-                                {
-                                    Array.Copy(tex_format[3].tex_header, 0, dds_head, 32, tex_format[3].tex_header.Length);
-                                    tex_info += ", texture format: 32f.32f.32f.32f";
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 0) //8888 RGBA
-                                {
-                                    dds_head = dds_head_mobile;
-                                    Array.Copy(head[num_width], 0, dds_head, 12, 4);//ширина/длина
-                                    Array.Copy(head[num_height], 0, dds_head, 16, 4);//ширина/длина
-                                    Array.Copy(head[num_mipmaps], 0, dds_head, 28, 4);//Количество мип-мапов
-                                    Array.Copy(tex_format[4].tex_header, 0, dds_head, 32, tex_format[4].tex_header.Length);
-                                    tex_info += ", texture format: 8888 RGBA";
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 4) //4444 RGBA
-                                {
-                                    if (BitConverter.ToInt32(head[3], 0) > 1)
-                                    {
-                                        dds_head = dds_head_mobile;
-                                        Array.Copy(head[num_width], 0, dds_head, 12, 4);//ширина/длина
-                                        Array.Copy(head[num_height], 0, dds_head, 16, 4);//ширина/длина
-                                        Array.Copy(head[num_mipmaps], 0, dds_head, 28, 4);//Количество мип-мапов
-                                        Array.Copy(tex_format[6].tex_header, 0, dds_head, 32, tex_format[6].tex_header.Length);
-                                    }
-                                    else
-                                    {
-                                        dds_head = dds_head_mobile;
-                                        Array.Copy(head[num_width], 0, dds_head, 12, 4);//ширина/длина
-                                        Array.Copy(head[num_height], 0, dds_head, 16, 4);//ширина/длина
-                                        Array.Copy(head[num_mipmaps], 0, dds_head, 28, 4);//Количество мип-мапов
-                                        Array.Copy(tex_format[5].tex_header, 0, dds_head, 32, tex_format[5].tex_header.Length);
-                                    }
-                                    tex_info += ", texture format: 4444 RGBA";
-                                }
-                                else if ((BitConverter.ToInt32(head[num], 0) == 81) || (BitConverter.ToInt32(head[6], 0) == 83)) //PVRTC 4bpp
-                                {
-                                    Array.Copy(tex_format[7].tex_header, 0, dds_head, 32, tex_format[1].tex_header.Length);
-                                    Array.Copy(chaptersOfDDS[chaptersOfDDS.Count - 1].lenght_of_chapter, 0, dds_head, 20, 4);
-                                    tex_info += ", texture format: PVRTC 4bpp RGB/RGBA";
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 2) //PVRTC 2bpp
-                                {
-                                    Array.Copy(tex_format[8].tex_header, 0, dds_head, 32, tex_format[1].tex_header.Length);
-                                    Array.Copy(chaptersOfDDS[chaptersOfDDS.Count - 1].lenght_of_chapter, 0, dds_head, 20, 4);
-                                    tex_info += ", texture format: PVRTC 2bpp RGB/RGBA";
-                                }
-                                else if (BitConverter.ToInt32(head[num], 0) == 112) //ETC1
-                                {
-                                    if (BitConverter.ToInt32(head[3], 0) > 1)
-                                    {
-                                        dds_head = dds_head_mobile;
-                                        Array.Copy(head[num_width], 0, dds_head, 12, 4);//ширина/длина
-                                        Array.Copy(head[num_height], 0, dds_head, 16, 4);//ширина/длина
-                                        Array.Copy(head[num_mipmaps], 0, dds_head, 28, 4);//Количество мип-мапов
-                                        Array.Copy(tex_format[10].tex_header, 0, dds_head, 32, tex_format[10].tex_header.Length);
-                                    }
-                                    else
-                                    {
-                                        dds_head = dds_head_mobile;
-                                        Array.Copy(head[num_width], 0, dds_head, 12, 4);//ширина/длина
-                                        Array.Copy(head[num_height], 0, dds_head, 16, 4);//ширина/длина
-                                        Array.Copy(head[num_mipmaps], 0, dds_head, 28, 4);//Количество мип-мапов
-                                        Array.Copy(tex_format[9].tex_header, 0, dds_head, 32, tex_format[9].tex_header.Length);
-                                    }
-                                    tex_info += ", texture format: ETC1";
-                                }
-                                else
-                                {
-                                    //MessageBox.Show("File " + fi[i].FullName + " has unknown format!");
-                                    Array.Copy(tex_format[0].tex_header, 0, dds_head, 32, tex_format[0].tex_header.Length);
-                                    Array.Copy(chaptersOfDDS[chaptersOfDDS.Count - 1].lenght_of_chapter, 0, dds_head, 20, 4);
-                                    tex_info += ", texture format: unknown (DXT1 is default)";
-                                }*/
-
-                                //fs.Write(dds_head, 0, dds_head.Length);
-
-                                /*for (int k = chaptersOfDDS.Count - 1; k >= 0; k--)
-                                {
-                                    fs.Write(chaptersOfDDS[k].content_chapter, 0, chaptersOfDDS[k].content_chapter.Length);
-                                }*/
                             }
                             catch
                             {
@@ -1512,128 +1458,86 @@ namespace TTG_Tools
                     byte[] checkHeader = new byte[4];
                     Array.Copy(fontContent, 0, checkHeader, 0, 4);
 
+                    bool vectorFont = false;
+
                     if ((Encoding.ASCII.GetString(checkHeader) != "ERTM") && (Encoding.ASCII.GetString(checkHeader) != "5VSM"))
                     {
                         byte[] checkVer = new byte[4];
                         Array.Copy(fontContent, 4, checkVer, 0, 4);
-                        //MessageBox.Show(BitConverter.ToInt32(checkVer, 0).ToString());
-
-                        if ((BitConverter.ToInt32(checkVer, 0) < 0) || (BitConverter.ToInt32(checkVer, 0) > 6))
+                        if (Encoding.ASCII.GetString(checkHeader) == "6VSM")
                         {
-                            Methods.FindingDecrytKey(fontContent, "font");
-                            //Methods.meta_crypt(fontContent, MainMenu.gamelist[selected_index].key, 2, true);
-                            checkVer = new byte[4];
-                            Array.Copy(fontContent, 4, checkVer, 0, 4);
+                            Array.Copy(fontContent, 16, checkVer, 0, 4);
+                            vectorFont = BitConverter.ToInt32(checkVer, 0) == 1;
 
-                            if ((BitConverter.ToInt32(checkVer, 0) > 0) && (BitConverter.ToInt32(checkVer, 0) < 6))
+                            if (!vectorFont) listBox1.Items.Add("This is not a vector font: " + fi[i].Name);
+                            else
                             {
-                                if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
+                                byte[] getoffset = new byte[4];
+                                Array.Copy(fontContent, 32, getoffset, 0, 4);
 
-                                fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);
-                                fs.Write(fontContent, 0, fontContent.Length);
+                                int font_off = 64 + BitConverter.ToInt32(getoffset, 0);
+
+                                byte[] binLength = new byte[4];
+                                Array.Copy(fontContent, font_off, binLength, 0, 4);
+
+                                int len = BitConverter.ToInt32(binLength, 0);
+
+                                font_off += 4;
+
+                                byte[] vector_font = new byte[len];
+                                Array.Copy(fontContent, font_off, vector_font, 0, vector_font.Length);
+
+                                if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".font") + ".ttf")) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".font") + ".ttf");
+
+                                fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".font") + ".ttf", FileMode.CreateNew);
+                                fs.Write(vector_font, 0, vector_font.Length);
                                 fs.Close();
 
-                                listBox1.Items.Add("File " + fi[i].Name + " decrypted!");
+                                fontContent = null;
+                                vector_font = null;
+                                GC.Collect();
+
+                                listBox1.Items.Add("Vector font has successfully extracted from file " + fi[i].Name);
                             }
-                            else listBox1.Items.Add("Font couldn't decrypt. Try another key.");
                         }
                         else
                         {
-                            if (Methods.FindStartOfStringSomething(fontContent, 0, "DDS") > fontContent.Length - 100)
+                            if ((BitConverter.ToInt32(checkVer, 0) < 0) || (BitConverter.ToInt32(checkVer, 0) > 6))
                             {
                                 Methods.FindingDecrytKey(fontContent, "font");
+                                //Methods.meta_crypt(fontContent, MainMenu.gamelist[selected_index].key, 2, true);
+                                checkVer = new byte[4];
+                                Array.Copy(fontContent, 4, checkVer, 0, 4);
 
-                                if(File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
-                                fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);
-                                fs.Write(fontContent, 0, fontContent.Length);
-                                fs.Close();
-
-                                listBox1.Items.Add("File " + fi[i].Name + " decrypted!");
-                            }
-                            else listBox1.Items.Add("Font couldn't decrypt. Try another key.");
-                        }
-                    }
-
-                }
-                else if (fi[i].Extension == ".prop")
-                {
-                    listBox1.Items.Add("Temporary unavailable.");
-                    /*byte[] header = new byte[0];
-                    byte[] countOfBlock = new byte[0];
-                    byte[] header2 = new byte[0];
-                    byte[] lenght_of_all_text = new byte[4];
-                    byte[] end_of_file = new byte[0];
-                    List<Prop> prop = new List<Prop>();
-                    FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
-                    byte[] binContent = Methods.ReadFull(fs);
-                    ReadProp(binContent, prop, ref header, ref countOfBlock, ref header2, ref lenght_of_all_text, ref end_of_file);
-                    fs.Close();
-                    if (prop.Count > 0)
-                    {
-                        List<TextCollector.TXT_collection> all_text = new List<TextCollector.TXT_collection>();
-                        int c = 0;
-                        for (int q = 0; q < prop.Count; q++)
-                        {
-                            for (int w = 0; w < prop[q].textInProp.Count; w++)
-                            {
-                                c++;
-                                if (prop[q].textInProp[w].text != "" && prop[q].textInProp[w].name != "" || (prop[q].textInProp[w].text != "" && prop[q].textInProp[w].name == ""))
+                                if ((BitConverter.ToInt32(checkVer, 0) > 0) && (BitConverter.ToInt32(checkVer, 0) < 6))
                                 {
+                                    if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
 
-                                    all_text.Add(new TextCollector.TXT_collection(c, 0, prop[q].textInProp[w].name, prop[q].textInProp[w].text, false));
+                                    fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);
+                                    fs.Write(fontContent, 0, fontContent.Length);
+                                    fs.Close();
+
+                                    listBox1.Items.Add("File " + fi[i].Name + " decrypted!");
                                 }
-                            }
-                        }
-                        List<TextCollector.TXT_collection> all_text_for_export = new List<TextCollector.TXT_collection>();
-                        TextCollector.CreateExportingTXTfromOneFile(all_text, ref all_text_for_export);
-
-                        string path = "";
-                        if (i > 0)
-                        {
-                            if (fi[i].Extension == ".prop" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(GetNameOnly(i - 1), "(", ")") == GetNameOnly(i))
-                            {
-                                path = MainMenu.settings.pathForOutputFolder + "\\" + fi[i - 1].Name;
+                                else listBox1.Items.Add("Font couldn't decrypt. Try another key.");
                             }
                             else
                             {
-                                path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt";
-                            }
-                        }
-                        else
-                        {
-                            path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt";
-                        }
-                        Methods.DeleteCurrentFile(path);
+                                if (Methods.FindStartOfStringSomething(fontContent, 0, "DDS") > fontContent.Length - 100)
+                                {
+                                    Methods.FindingDecrytKey(fontContent, "font");
 
-                        FileStream MyExportStream = new FileStream(path, FileMode.CreateNew);
-                        for (int w = 0; w < all_text_for_export.Count; w++)
-                        {
-                            {
-                                TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.ASCII_N);
-                                TextCollector.SaveString(MyExportStream, (all_text_for_export[w].text + "\r\n"), MainMenu.settings.ASCII_N);
+                                    if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
+                                    fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);
+                                    fs.Write(fontContent, 0, fontContent.Length);
+                                    fs.Close();
+
+                                    listBox1.Items.Add("File " + fi[i].Name + " decrypted!");
+                                }
+                                else listBox1.Items.Add("Font couldn't decrypt. Try another key.");
                             }
-                        }
-                        MyExportStream.Close();
-                        if (i > 0)
-                        {
-                            if (fi[i].Extension == ".prop" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(GetNameOnly(i - 1), "(", ")") == GetNameOnly(i))
-                            {
-                                listBox1.Items.Add("File " + fi[i].Name + " exported in " + fi[i - 1].Name);
-                            }
-                            else
-                            {
-                                listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt");
-                            }
-                        }
-                        else
-                        {
-                            listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt");
                         }
                     }
-                    else
-                    {
-                        listBox1.Items.Add("File " + fi[i].Name + " is EMPTY!");
-                    }*/
                 }
                 else if ((fi[i].Extension == ".lenc") || (fi[i].Extension == ".lua"))
                 {
@@ -1664,6 +1568,7 @@ namespace TTG_Tools
         end:
             int closing = 0;
         }
+
         public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] header2, ref byte[] lenght_of_all_text, ref byte[] end_of_file)
         {
             byte[] vers_bytes = new byte[16];

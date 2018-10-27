@@ -121,14 +121,23 @@
     <value>TTG Tools 
 by Den Em (Е.Д.В.)
 moded by pashok6798 (from Den Em's agreement)
-(e-mail: d3n123@rambler.ru)
+Source code on github: https://github.com/pashok6798/TTG_Tools
+(Original developer's e-mail: d3n123@rambler.ru)
 
 Игры с полной поддержкой в примерном порядке появления их поддержки:
-Tales of Monkey Island, Sam and Max: Season Two, Wallace and Gromit's Grand Adventures, CSI: Deadly Intent, Sam and Max: The Devil's Playhouse, Puzzle Agent, CSI: Fatal Conspiracy, Poker Night at the Inventory, Back to the Future: The Game, Strong Bad, Hector: The Badge of Carnage, Puzzle Agent 2, Jurassic Park: The Game, The Walking Dead, Poker Night 2, Wolf Among Us, The Walking Dead Season Two, Tales from the Borderlands, Game of Thrones, Minecraft: Story Mode, Walking Dead: Michonne.
+Tales of Monkey Island, Sam and Max: Season Two, Wallace and Gromit's Grand Adventures, CSI: Deadly Intent, Sam and Max: The Devil's Playhouse, Puzzle Agent, CSI: Fatal Conspiracy, Poker Night at the Inventory, Back to the Future: The Game, Strong Bad, Hector: The Badge of Carnage, Puzzle Agent 2, Jurassic Park: The Game, The Walking Dead, Poker Night 2, Wolf Among Us, The Walking Dead Season Two, Tales from the Borderlands, Game of Thrones, Minecraft: Story Mode (Seasons one and two), Walking Dead: Michonne, Batman (Seasons one and two).
 Возможно работает ещё с чем-то, но я не проверял.
 
 ===
 [Version history]
+v.1.0.1 (27.10.18)
++TTG Tools
+Changed design main menu
++Auto(De)packer
+Added support extract/import vector fonts (TTF) for The Walking Dead
++Font Editor
+Some fixes for bitmap fonts (Walking Dead: The Final Season)
+
 v.1.0.0 (20.05.18)
 +Auto(De)packer
 Added support landb files for The Guardians of the Galaxy

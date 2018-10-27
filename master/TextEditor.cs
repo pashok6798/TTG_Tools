@@ -286,6 +286,7 @@ namespace TTG_Tools
         private void TextEditor_Load(object sender, EventArgs e)
         {
             button7.Enabled = false;
+            button11.Visible = false;
         }
 
         private void button8_Click(object sender, EventArgs e)

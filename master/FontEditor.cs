@@ -546,41 +546,36 @@ namespace TTG_Tools
                 }
                 if (read)
                 {
+                    recheck:
                     version_used = -1;
                     int DecKey = -1;
-                    //указывается позиция заголовка в файле
-                    int head_poz = Methods.FindStartOfStringSomething(binContent, 0, start_version) + start_version.Length;
 
-                recheck:
-                    int start = 0;
-                    int poz = 0;
-                    
                     byte[] header = new byte[4];
                     Array.Copy(binContent, 0, header, 0, 4);
+
+                    int start = 0;
+                    int poz = 0;
+
                     if (Encoding.ASCII.GetString(header) == "5VSM" || Encoding.ASCII.GetString(header) == "6VSM")
                     {
                         poz = 16;
                     }
                     else poz = 4;
-                    
 
                     byte[] version = new byte[4];
                     Array.Copy(binContent, poz, version, 0, 4);
 
                     version_used = BitConverter.ToInt32(version, 0);
 
-                    /*for (int q = 0; q < version_of_font.Count; q++)
+                    //Если шрифт векторный (последняя игра от теллтейлов), то тулза сообщит об этом
+                    if (version_used == 1 && Encoding.ASCII.GetString(header) == "6VSM")
                     {
-                        byte[] header_in_file = new byte[version_of_font[q].header.Length];
-                        Array.Copy(binContent, head_poz, header_in_file, 0, header_in_file.Length);
-                        if (CompareArray(header_in_file, version_of_font[q].header))
-                        {
-                            version_used = q;
-                            //MessageBox.Show(version_of_font[q].games); //Проверял на правильность определения.
-                            break;
-                        }
-                    }*/
+                        MessageBox.Show("This font is type of TrueType (vector font). You can try to extract it via Auto(De)Packer");
+                        goto stop_it;
+                    }
 
+                    //указывается позиция заголовка в файле
+                    int head_poz = Methods.FindStartOfStringSomething(binContent, 0, start_version) + start_version.Length;
                     
                     byte[] temp_ = new byte[10];
 
@@ -626,7 +621,7 @@ namespace TTG_Tools
                             version_used = 9;
                             poz = 116;
                         }
-                        else if (version_used < 9)
+                        else if (version_used < 9 && Encoding.ASCII.GetString(header) != "6VSM")
                         {
                             switch (version_used)
                             {
@@ -688,6 +683,10 @@ namespace TTG_Tools
                     byte[] nameLength = new byte[4];
                     Array.Copy(binContent, poz, nameLength, 0, 4);
                     poz += BitConverter.ToInt32(nameLength, 0);
+
+                    byte[] check_flag = new byte[1];
+                    Array.Copy(binContent, poz, check_flag, 0, 1);
+
                     if (version_used > 5 && version_used <= 10 && version_used != -1)
                     {
                         byte[] check_length = new byte[4];
@@ -704,7 +703,11 @@ namespace TTG_Tools
                         if (BitConverter.ToInt32(check_length, 0) != 256) poz += 9;
                         else poz += 5;
                     }
-                    else poz += 17;//TFtB, GoT
+                    else
+                    {
+                        if (check_flag[0] == '1') poz += 17;//TFtB, GoT, etc.
+                        else poz += 9; //Last Walking Dead.
+                    }
 
                     ffs.coord_lenght = new byte[4];
                     Array.Copy(binContent, poz, ffs.coord_lenght, 0, 4);
@@ -717,36 +720,8 @@ namespace TTG_Tools
 
                     read = true;
 
-
-                    //int temp_poz = 0;
-                    //while (temp_poz != 10)
-                    //{
-                    //    temp_poz = 0;
-                    //    Array.Copy(binContent, poz, temp_, 0, 10);
-                    //    if (BitConverter.ToInt32(temp_, 0) == 0)
-                    //    {
-                    //        read = true;
-                    //        break;
-                    //    }
-
-                    //    if (poz > (binContent.Length - 100))
-                    //    {
-                    //        read = false;
-                    //        MessageBox.Show("Error in font!");
-                    //        saveToolStripMenuItem.Enabled = false;
-                    //        saveAsToolStripMenuItem.Enabled = false;
-                    //        break;
-                    //    }
-                    //    poz++;
-                    //}
                     if (read)
                     {
-                        //старая строка
-                        //poz += 2 + 1;
-                        //poz = 158; //для belloscript50 160
-                        //poz += 10;
-
-                        //нашли его
                         start = poz - 8;//-8
 
                         //находим координаты
@@ -796,51 +771,6 @@ namespace TTG_Tools
 
                         if (version_used >= 9)
                         {
-
-                            //    for (int i = 0; i <= 255; i++)
-                            //    {
-                            //        byte[] nil = new byte[4];
-                            //        ffs.AddCoord(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
-
-                            //        ffs.coord[i].n_texture = new byte[4];
-                            //        Array.Copy(binContent, poz, ffs.coord[i].n_texture, 0, 4);
-                            //        poz += 4;
-
-                            //        ffs.coord[i].w_start = new byte[4];
-                            //        Array.Copy(binContent, poz, ffs.coord[i].w_start, 0, 4);
-                            //        poz += 4;
-
-                            //        ffs.coord[i].w_end = new byte[4];
-                            //        Array.Copy(binContent, poz, ffs.coord[i].w_end, 0, 4);
-                            //        poz += 4;
-
-                            //        ffs.coord[i].h_start = new byte[4];
-                            //        Array.Copy(binContent, poz, ffs.coord[i].h_start, 0, 4);
-                            //        poz += 4;
-
-                            //        ffs.coord[i].h_end = new byte[4];
-                            //        Array.Copy(binContent, poz, ffs.coord[i].h_end, 0, 4);
-                            //        poz += 4;
-
-
-                            //        if (version_used != -1)
-                            //        {
-                            //            ffs.coord[i].widht = new byte[4];
-                            //            Array.Copy(binContent, poz, ffs.coord[i].widht, 0, 4);
-                            //            poz += 4;
-                            //            ffs.coord[i].height = new byte[4];
-                            //            Array.Copy(binContent, poz, ffs.coord[i].height, 0, 4);
-                            //            poz += 4;
-                            //        }
-
-                            //        else
-                            //        {
-                            //            //MessageBox.Show("");
-                            //        }
-                            //    }
-                            //}
-                            //else
-                            //{
                             int i = 0;
                             int old_poz = poz;
                             while (poz < countByteOfCoordinates + old_poz - 8)//-8
@@ -1360,6 +1290,8 @@ namespace TTG_Tools
                         {
                             int temp_poz = poz;
 
+                            bool wrong = false;
+
                             for (int k = 0; k < BitConverter.ToInt32(ffs.count_dds, 0); k++)
                             {
                                 temp_poz += 16;
@@ -1418,10 +1350,7 @@ namespace TTG_Tools
                                 Array.Copy(binContent, temp_poz, mip, 0, mip.Length);
                                 temp_poz += 4;
 
-                                int end_of_header_dds = temp_poz;//FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                //int end_of_header_dds = FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                //if (end_of_header_dds < binContent.Length)
-                                //{
+                                int end_of_header_dds = temp_poz;
                                 byte[] nil2 = new byte[1];
 
                                 ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
@@ -1450,24 +1379,48 @@ namespace TTG_Tools
 
                                 ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
                                 ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
-                                //Array.Copy(binContent, temp_poz, ffs.dds[k].widht_in_font, 0, ffs.dds[k].widht_in_font.Length);
-                                //Array.Copy(binContent, temp_poz, ffs.dds[k].widht_in_dds, 0, ffs.dds[k].widht_in_dds.Length);
-                                //temp_poz += 4;
 
                                 ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
                                 ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
-                                //Array.Copy(binContent, temp_poz, ffs.dds[k].height_in_font, 0, ffs.dds[k].height_in_font.Length);
-                                //Array.Copy(binContent, temp_poz, ffs.dds[k].height_in_dds, 0, ffs.dds[k].height_in_dds.Length);
-                                //temp_poz += 104;
 
                                 ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[31];
-                                //Array.Copy(binContent, temp_poz, ffs.dds[k].size_in_font, 0, ffs.dds[k].size_in_font.Length);
                                 ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[31];
-                                //temp_poz += 28;
                             }
 
-                            poz = temp_poz;
-                            poz++;
+                            if (BitConverter.ToInt32(version, 0) > 10)
+                            {
+                                poz = temp_poz;
+                                poz++;
+                            }
+                            else
+                            {
+                                byte[] tmp = new byte[1];
+
+                                for(int i = 0; i < 3; i++)
+                                {
+                                    tmp = new byte[1];
+                                    Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+                                    if (tmp[0] == 0x30) temp_poz++;
+                                    else
+                                    {
+                                        MessageBox.Show("Unknown format! Please send me file.");
+                                        wrong = true;
+                                        break;
+                                    }
+                                }
+
+                                if (wrong) goto stop_it;
+
+                                tmp = new byte[4];
+                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+                                temp_poz += BitConverter.ToInt32(tmp, 0) + 4;
+
+                                tmp = new byte[4];
+                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+                                temp_poz += BitConverter.ToInt32(tmp, 0);
+
+                                poz = temp_poz;
+                            }
 
                             for(int j = 0; j < BitConverter.ToInt32(ffs.count_dds, 0); j++)
                             {
@@ -1489,8 +1442,9 @@ namespace TTG_Tools
                     }
                 }
             }
-        stop_it:
+            stop_it:
             binContent = null;
+            GC.Collect();
             //}
             //catch { MessageBox.Show("Maybe you forget decrypt font?", "Error!"); }
         }

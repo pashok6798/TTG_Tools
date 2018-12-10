@@ -74,6 +74,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.changeCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -232,7 +233,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1339, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1339, 26);
             this.menuStrip1.TabIndex = 24;
             this.menuStrip1.Text = "menuStrip1";
             this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
@@ -245,7 +246,7 @@
             this.saveAsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(40, 22);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
@@ -253,7 +254,7 @@
             this.openToolStripMenuItem.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -262,7 +263,7 @@
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -270,14 +271,14 @@
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.saveAsToolStripMenuItem.Text = "Save As ...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(173, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -348,30 +349,30 @@
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem,
             this.toolStripImportFNT});
             this.contextMenuStripExport_Import.Name = "contextMenuStripExport_Import";
-            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(502, 148);
+            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(510, 160);
             this.contextMenuStripExport_Import.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripExport_Import_Opening);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Enabled = false;
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(501, 24);
-            this.exportToolStripMenuItem.Text = "Export DDS";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
+            this.exportToolStripMenuItem.Text = "Export texture";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
             // importDDSToolStripMenuItem
             // 
             this.importDDSToolStripMenuItem.Enabled = false;
             this.importDDSToolStripMenuItem.Name = "importDDSToolStripMenuItem";
-            this.importDDSToolStripMenuItem.Size = new System.Drawing.Size(501, 24);
-            this.importDDSToolStripMenuItem.Text = "Import DDS";
+            this.importDDSToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
+            this.importDDSToolStripMenuItem.Text = "Import texture";
             this.importDDSToolStripMenuItem.Click += new System.EventHandler(this.importDDSToolStripMenuItem_Click);
             // 
             // exportCoordinatesToolStripMenuItem1
             // 
             this.exportCoordinatesToolStripMenuItem1.Enabled = false;
             this.exportCoordinatesToolStripMenuItem1.Name = "exportCoordinatesToolStripMenuItem1";
-            this.exportCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(501, 24);
+            this.exportCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(509, 26);
             this.exportCoordinatesToolStripMenuItem1.Text = "Export coordinates";
             this.exportCoordinatesToolStripMenuItem1.Click += new System.EventHandler(this.exportCoordinatesToolStripMenuItem1_Click);
             // 
@@ -379,21 +380,21 @@
             // 
             this.importCoordinatesToolStripMenuItem1.Enabled = false;
             this.importCoordinatesToolStripMenuItem1.Name = "importCoordinatesToolStripMenuItem1";
-            this.importCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(501, 24);
+            this.importCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(509, 26);
             this.importCoordinatesToolStripMenuItem1.Text = "Import coordinates";
             this.importCoordinatesToolStripMenuItem1.Click += new System.EventHandler(this.importCoordinatesToolStripMenuItem1_Click);
             // 
             // importCoordinatesFromFontStudioxmlToolStripMenuItem
             // 
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Name = "importCoordinatesFromFontStudioxmlToolStripMenuItem";
-            this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Size = new System.Drawing.Size(501, 24);
+            this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Text = "Import coordinates from FontStudio (Data Exporters *.xml)";
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Click += new System.EventHandler(this.importCoordinatesFromFontStudioxmlToolStripMenuItem_Click);
             // 
             // toolStripImportFNT
             // 
             this.toolStripImportFNT.Name = "toolStripImportFNT";
-            this.toolStripImportFNT.Size = new System.Drawing.Size(501, 24);
+            this.toolStripImportFNT.Size = new System.Drawing.Size(509, 26);
             this.toolStripImportFNT.Text = "Import coordinates from Bitmap Font Generator (*.fnt типа xml)";
             this.toolStripImportFNT.Click += new System.EventHandler(this.toolStripImportFNT_Click);
             // 
@@ -441,21 +442,22 @@
             this.contextMenuStripExp_imp_Coord.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.contextMenuStripExp_imp_Coord.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exportCoordinatesToolStripMenuItem,
-            this.importCoordinatesToolStripMenuItem});
+            this.importCoordinatesToolStripMenuItem,
+            this.changeCoordinatesToolStripMenuItem});
             this.contextMenuStripExp_imp_Coord.Name = "contextMenuStripExp_imp_Coord";
-            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(206, 52);
+            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(211, 110);
             // 
             // exportCoordinatesToolStripMenuItem
             // 
             this.exportCoordinatesToolStripMenuItem.Name = "exportCoordinatesToolStripMenuItem";
-            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(205, 24);
+            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             this.exportCoordinatesToolStripMenuItem.Text = "Export coordinates";
             this.exportCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.exportCoordinatesToolStripMenuItem_Click);
             // 
             // importCoordinatesToolStripMenuItem
             // 
             this.importCoordinatesToolStripMenuItem.Name = "importCoordinatesToolStripMenuItem";
-            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(205, 24);
+            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             this.importCoordinatesToolStripMenuItem.Text = "Import coordinates";
             this.importCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.importCoordinatesToolStripMenuItem_Click);
             // 
@@ -470,7 +472,7 @@
             this.groupBox2.Size = new System.Drawing.Size(195, 123);
             this.groupBox2.TabIndex = 28;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Импортировать/экспортировать:";
+            this.groupBox2.Text = "Import/Export:";
             // 
             // radioButton2
             // 
@@ -480,7 +482,7 @@
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(126, 21);
             this.radioButton2.TabIndex = 1;
-            this.radioButton2.Text = "без \"кернинга\"";
+            this.radioButton2.Text = "without Kerning";
             this.radioButton2.UseVisualStyleBackColor = true;
             // 
             // radioButton1
@@ -490,10 +492,10 @@
             this.radioButton1.Location = new System.Drawing.Point(9, 44);
             this.radioButton1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(119, 21);
+            this.radioButton1.Size = new System.Drawing.Size(106, 21);
             this.radioButton1.TabIndex = 0;
             this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "с \"кернингом\"";
+            this.radioButton1.Text = "with Kerning";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
             // groupBox3
@@ -510,7 +512,7 @@
             this.groupBox3.Size = new System.Drawing.Size(215, 123);
             this.groupBox3.TabIndex = 29;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Изменить ширину на";
+            this.groupBox3.Text = "Change char width to:";
             // 
             // radioButtonXstart
             // 
@@ -542,9 +544,9 @@
             this.label5.Location = new System.Drawing.Point(95, 27);
             this.label5.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(74, 17);
+            this.label5.Size = new System.Drawing.Size(47, 17);
             this.label5.TabIndex = 2;
-            this.label5.Text = "пикселей.";
+            this.label5.Text = "pixels.";
             // 
             // textBox1
             // 
@@ -565,6 +567,13 @@
             this.button1.Text = "Change";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // changeCoordinatesToolStripMenuItem
+            // 
+            this.changeCoordinatesToolStripMenuItem.Name = "changeCoordinatesToolStripMenuItem";
+            this.changeCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.changeCoordinatesToolStripMenuItem.Text = "Change coordinates";
+            this.changeCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.changeCoordinatesToolStripMenuItem_Click);
             // 
             // Column1
             // 
@@ -628,19 +637,19 @@
             // 
             // Column11
             // 
-            this.Column11.HeaderText = "Left side kerning";
+            this.Column11.HeaderText = "X offset";
             this.Column11.Name = "Column11";
             this.Column11.Width = 119;
             // 
             // Column12
             // 
-            this.Column12.HeaderText = "To top of simbol";
+            this.Column12.HeaderText = "Y offset";
             this.Column12.Name = "Column12";
             this.Column12.Width = 119;
             // 
             // Column13
             // 
-            this.Column13.HeaderText = "Widht with kerning";
+            this.Column13.HeaderText = "X advanced";
             this.Column13.Name = "Column13";
             this.Column13.Width = 119;
             // 
@@ -725,6 +734,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Height;
         private System.Windows.Forms.DataGridViewTextBoxColumn Width;
         private System.Windows.Forms.DataGridViewTextBoxColumn Size;
+        private System.Windows.Forms.ToolStripMenuItem changeCoordinatesToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;

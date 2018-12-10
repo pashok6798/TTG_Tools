@@ -466,7 +466,7 @@ namespace TTG_Tools
             {
                 byte[] new_ver_check = new byte[4];
                 Array.Copy(d3dtxContent, 16, new_ver_check, 0, 4);
-                offset = 12 * BitConverter.ToInt32(check_ver, 0) + 16 + 4;
+                offset = 12 * BitConverter.ToInt32(new_ver_check, 0) + 16 + 4;
                 check_ver = new byte[4];
                 Array.Copy(d3dtxContent, offset, check_ver, 0, 4);
                 /*if (BitConverter.ToInt32(new_ver_check, 0) < 7)
@@ -510,10 +510,11 @@ namespace TTG_Tools
             {
                 versionOfGame = "PN2";
             }
-            else if ((BitConverter.ToInt32(check_ver, 0) >= 4) && (Encoding.ASCII.GetString(new_header) == "5VSM"))
+            else if ((BitConverter.ToInt32(check_ver, 0) >= 3) && (Encoding.ASCII.GetString(new_header) == "5VSM"))
             {
                 switch (BitConverter.ToInt32(check_ver, 0))
                 {
+                    case 3:
                     case 4:
                         versionOfGame = "WAU";
                         break;

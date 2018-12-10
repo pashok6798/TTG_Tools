@@ -1082,8 +1082,16 @@ namespace TTG_Tools
                             for (int j = 0; j < countTextures; j++)
                             {
                                 int temp_poz = poz;
-                                temp_poz += 20;//20
-                                
+                                temp_poz += 16;
+
+                                byte[] platformType = new byte[4];
+                                Array.Copy(binContent, temp_poz, platformType, 0, 4);
+                                platform = BitConverter.ToInt32(platformType, 0);
+
+                                if (platform == 7 || platform == 9) iOS = true;
+                                else iOS = false;
+                                temp_poz += 4;
+
                                 byte[] countName = new byte[4];
                                 Array.Copy(binContent, temp_poz, countName, 0, 4);
                                 temp_poz += BitConverter.ToInt32(countName, 0);
@@ -1184,7 +1192,7 @@ namespace TTG_Tools
                                 Array.Copy(binContent, temp_poz, platformType, 0, 4);
                                 platform = BitConverter.ToInt32(platformType, 0);
 
-                                if (platform == 7) iOS = true;
+                                if (platform == 7 || platform == 9) iOS = true;
                                 else iOS = false;
                                 temp_poz += 4;
 
@@ -2386,22 +2394,26 @@ namespace TTG_Tools
                 {
 
                     string str = null;
-                        str = dataGridViewWithCoord[0, i].Value.ToString() + "  ";
+                        str = dataGridViewWithCoord[0, i].Value.ToString() + " ";
                         str += dataGridViewWithCoord[2, i].Value.ToString() + " ";
                         str += dataGridViewWithCoord[3, i].Value.ToString() + " ";
                         str += dataGridViewWithCoord[4, i].Value.ToString() + " ";
                         str += dataGridViewWithCoord[5, i].Value.ToString() + " ";
-                        str += dataGridViewWithCoord[6, i].Value.ToString() + " ";
+                        str += dataGridViewWithCoord[6, i].Value.ToString();
+
                         if (version_used >= 9)
                         {
                             if (radioButton1.Checked == true)
                             {
-                                str += " ||| " + dataGridViewWithCoord[10, i].Value.ToString() + " ";
+                                str += " ";
+                                str += dataGridViewWithCoord[9, i].Value.ToString() + " ";
+                                str += dataGridViewWithCoord[10, i].Value.ToString() + " ";
                                 str += dataGridViewWithCoord[11, i].Value.ToString() + " ";
-                                str += dataGridViewWithCoord[12, i].Value.ToString() + " ";
+                                str += dataGridViewWithCoord[12, i].Value.ToString();
                             }
                         }
-                        str += dataGridViewWithCoord[1, i].Value.ToString() + "\r\n";                    
+                    //str += dataGridViewWithCoord[1, i].Value.ToString() + "\r\n";                    
+                    if(i + 1 < dataGridViewWithCoord.RowCount) str += "\r\n";
                         TextCollector.SaveString(ExportStream, str, MainMenu.settings.unicodeSettings);
                 }
                 ExportStream.Close();
@@ -2427,10 +2439,10 @@ namespace TTG_Tools
                         int k;
                         for (int i = 0; i < dataGridViewWithCoord.RowCount; i++) //Чтобы не было вылетов при импорте, я сделал цикл (по сути, костыль)
                         {
-                            if (dataGridViewWithCoord[0, i].Value.ToString() == ch[0])//И проверку на наличие id символа (всё равно этот метод нужен будет только
+                            if (Convert.ToInt32(dataGridViewWithCoord[0, i].Value) == Convert.ToInt32(ch[0]))//И проверку на наличие id символа (всё равно этот метод нужен будет только
                             {
                                 k = Convert.ToInt32(ch[0]);
-                                if (k > dataGridViewWithCoord.RowCount) k = i;
+                                if (k >= dataGridViewWithCoord.RowCount) k = i;
                                 dataGridViewWithCoord[0, k].Value = ch[0];      //для импорта координат со старых шрифтов
                                 dataGridViewWithCoord[2, k].Value = ch[2];
                                 dataGridViewWithCoord[3, k].Value = ch[3];
@@ -2929,6 +2941,157 @@ namespace TTG_Tools
 
         }
 
+        private void changeCoordinatesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Font txt coords (*.txt) | *.txt";
 
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                FileStream fs = new FileStream(ofd.FileName, FileMode.Open);
+                StreamReader sr = new StreamReader(fs);
+
+                string tmp;
+                string[] block;
+
+                int index;
+
+                while(!sr.EndOfStream)
+                {
+                    tmp = sr.ReadLine();
+                    block = tmp.Split(' ');
+
+                    if(block.Length == 6 || block.Length == 10 && Methods.IsNumeric(block[0]))
+                    {
+                        index = -1;
+
+                        for(int i = 0; i < ffs.coord.Count; i++)
+                        {
+                            if(BitConverter.ToInt32(ffs.coord[i].symbol, 0) == Convert.ToInt32(block[0]))
+                            {
+                                index = i;
+                                break;
+                            }
+                        }
+
+                        if(index != -1)
+                        {
+                            int ch_id = Convert.ToInt32(block[0]);
+                            int x = Convert.ToInt32(block[1]);
+                            int x_end = Convert.ToInt32(block[2]);
+                            int y = Convert.ToInt32(block[3]);
+                            int y_end = Convert.ToInt32(block[4]);
+                            int tex_num = Convert.ToInt32(block[5]);
+
+                            int height = y_end - y;
+                            int width = x_end - x;
+
+                            int chnl = 0;
+                            int x_offset = 0;
+                            int y_offset = 0;
+                            int x_advance = width;
+
+                            if(version_used >= 9 && radioButton1.Checked && block.Length == 10)
+                            {
+                                chnl = Convert.ToInt32(block[6]);
+                                x_offset = Convert.ToInt32(block[7]);
+                                y_offset = Convert.ToInt32(block[8]);
+                                x_advance = Convert.ToInt32(block[9]);
+                            }
+
+                            dataGridViewWithCoord[0, index].Value = Convert.ToInt32(ch_id);
+                            dataGridViewWithCoord[1, index].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(ch_id));
+                            if (version_used >= 9 && MainMenu.settings.unicodeSettings == 0) dataGridViewWithCoord[1, index].Value = Encoding.Unicode.GetString(BitConverter.GetBytes(ch_id));
+                            dataGridViewWithCoord[2, index].Value = x;
+                            dataGridViewWithCoord[3, index].Value = x_end;
+                            dataGridViewWithCoord[4, index].Value = y;
+                            dataGridViewWithCoord[5, index].Value = y_end;
+                            dataGridViewWithCoord[6, index].Value = tex_num;
+
+                            if (version_used >= 9)
+                            {
+                                dataGridViewWithCoord[7, index].Value = width;
+                                dataGridViewWithCoord[8, index].Value = height;
+                                dataGridViewWithCoord[9, index].Value = chnl;
+                                dataGridViewWithCoord[10, index].Value = x_offset;
+                                dataGridViewWithCoord[11, index].Value = y_offset;
+                                dataGridViewWithCoord[12, index].Value = x_advance;
+                            }
+                            
+                            for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
+                            {
+                                dataGridViewWithCoord[j, index].Style.BackColor = System.Drawing.Color.Bisque;
+                            }
+                        }
+                        else
+                        {
+                            if(version_used >= 9)
+                            {
+                                int ch_id = Convert.ToInt32(block[0]);
+                                int x = Convert.ToInt32(block[1]);
+                                int x_end = Convert.ToInt32(block[2]);
+                                int y = Convert.ToInt32(block[3]);
+                                int y_end = Convert.ToInt32(block[4]);
+                                int tex_num = Convert.ToInt32(block[5]);
+
+                                int height = y_end - y;
+                                int width = x_end - x;
+
+                                int chnl = 0;
+                                int x_offset = 0;
+                                int y_offset = 0;
+                                int x_advance = width;
+
+                                if (radioButton1.Checked && block.Length == 10)
+                                {
+                                    chnl = Convert.ToInt32(block[6]);
+                                    x_offset = Convert.ToInt32(block[7]);
+                                    y_offset = Convert.ToInt32(block[8]);
+                                    x_advance = Convert.ToInt32(block[9]);
+                                }
+
+                                dataGridViewWithCoord.Rows.Add();
+                                index = dataGridViewWithCoord.RowCount - 1;
+
+                                //ffs.coord_count = BitConverter.GetBytes(index);
+                                //ffs.coord_lenght
+
+                                dataGridViewWithCoord[0, index].Value = Convert.ToInt32(ch_id);
+                                dataGridViewWithCoord[1, index].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(ch_id));
+                                if (MainMenu.settings.unicodeSettings == 0) dataGridViewWithCoord[1, index].Value = Encoding.Unicode.GetString(BitConverter.GetBytes(ch_id));
+                                dataGridViewWithCoord[2, index].Value = x;
+                                dataGridViewWithCoord[3, index].Value = x_end;
+                                dataGridViewWithCoord[4, index].Value = y;
+                                dataGridViewWithCoord[5, index].Value = y_end;
+                                dataGridViewWithCoord[6, index].Value = tex_num;
+
+                                if (version_used >= 9)
+                                {
+                                    dataGridViewWithCoord[7, index].Value = width;
+                                    dataGridViewWithCoord[8, index].Value = height;
+                                    dataGridViewWithCoord[9, index].Value = chnl;
+                                    dataGridViewWithCoord[10, index].Value = x_offset;
+                                    dataGridViewWithCoord[11, index].Value = y_offset;
+                                    dataGridViewWithCoord[12, index].Value = x_advance;
+                                }
+
+                                byte[] nil = new byte[4];
+                                ffs.AddCoord(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
+
+                                for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
+                                {
+                                    dataGridViewWithCoord[j, index].Style.BackColor = System.Drawing.Color.Aqua;
+                                }
+                            }
+                        }
+
+                        if(!edited) edited = true;
+                    }
+                }
+
+                sr.Close();
+                fs.Close();
+            }
+        }
     }
 }

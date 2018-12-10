@@ -1288,6 +1288,10 @@ namespace TTG_Tools
                             int num_height = 0; //номер заголовка с высотой
                             int num_mipmaps = 0; //номер количества мип-мапов
                             int platform_pos = 0; //Позиция данных о платформе (сделано для долбаного PVR формата!)
+                            int code_pos = 0; //Позиция кода
+                            int mips_pos = 0; //Позиция мип-текстур
+                            int mips_pos2 = 0;
+                            int add_mips = 0;
 
                             switch (versionOfGame)
                             {
@@ -1304,6 +1308,10 @@ namespace TTG_Tools
                                     num_width = 5;
                                     num_height = 4;
                                     num_mipmaps = 3;
+                                    code_pos = 4;
+                                    mips_pos = 0x44;
+                                    mips_pos2 = 8;
+                                    add_mips = 0;
                                     break;
                                 case "TFTB":
                                     platform_pos = 0x6C;
@@ -1325,6 +1333,10 @@ namespace TTG_Tools
                                                                //num_width = 5;
                                                                // num_height = 4;
                                                                // num_mipmaps = 3;
+                                    code_pos = 12;
+                                    mips_pos = 0x64;
+                                    mips_pos2 = 12;
+                                    add_mips = 4;
                                     break;
                             }
 
@@ -1351,6 +1363,7 @@ namespace TTG_Tools
                             poz += 4;
                             int size = BitConverter.ToInt32(content_size, 0);
                             poz += size;
+                            //if (size == 0) poz += content_size - 4;
                             poz += 4;
                             byte[] check = new byte[1];
                             Array.Copy(d3dtx, poz, check, 0, check.Length);
@@ -1369,11 +1382,19 @@ namespace TTG_Tools
                             Array.Copy(d3dtx, poz, width, 0, width.Length);
                             poz += 4;
                             Array.Copy(d3dtx, poz, height, 0, height.Length);
-                            poz += 12;
+                            poz += code_pos;
                             byte[] temp = new byte[4];
                             Array.Copy(d3dtx, poz, temp, 0, temp.Length);
                             tex_code = BitConverter.ToInt32(temp, 0);
-                            poz += 100;
+                            poz += mips_pos;
+
+                            if(versionOfGame == "WAU")
+                            {
+                                byte[] tmp = new byte[4];
+                                Array.Copy(width, 0, tmp, 0, width.Length);
+                                Array.Copy(height, 0, width, 0, height.Length);
+                                Array.Copy(tmp, 0, height, 0, tmp.Length);
+                            }
 
                             List<chapterOfDDS> chDDS = new List<chapterOfDDS>();
                             List<byte[]> temp_mas = new List<byte[]>();
@@ -1386,11 +1407,12 @@ namespace TTG_Tools
                                 Array.Copy(d3dtx, poz, some_shit, 0, some_shit.Length);
                                 temp_mas.Add(some_shit);
                                 //chDDS.Add(new chapterOfDDS(nul, nul, nul, nul, some_shit, nul));
-                                poz += 12;
+                                poz += mips_pos2;
+                                
 
                                 if(t != BitConverter.ToInt32(mips, 0) - 1)
                                 {
-                                    poz += 4;
+                                    poz += add_mips;
                                 }
                             }
 

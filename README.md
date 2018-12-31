@@ -1,6 +1,9 @@
 TTG Tools by Den Em
 Added some modifications into tool and uploaded from agreement of Den Em.
 
+For correct compilation you have to download zlib.net.dll from here: http://www.componentace.com/download/download.php?editionid=25
+and add it in zlib folder.
+
 Special thanks to:
 - Den Em for accept to upload his source code.
 - aluigi for source code of ttarchext;

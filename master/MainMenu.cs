@@ -477,7 +477,7 @@ namespace TTG_Tools
         private void buttonSettings_Click(object sender, EventArgs e)
         {
             Form settings = new FormSettings();
-            settings.Show();
+            settings.Show(this);
         }
 
         /// <summary>

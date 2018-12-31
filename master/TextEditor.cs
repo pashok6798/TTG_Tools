@@ -16,6 +16,7 @@ namespace TTG_Tools
         public class AllText
         {
             public int number;
+            public uint realID;
             public string orName;
             public string orText;
             public string trName;
@@ -23,9 +24,10 @@ namespace TTG_Tools
             public bool exported;
             public bool isChecked;
             public AllText() { }
-            public AllText(int _number, string _orName, string _orText, string _trName, string _trText, bool _exported, bool _isChecked)
+            public AllText(int _number, uint _realID, string _orName, string _orText, string _trName, string _trText, bool _exported, bool _isChecked)
             {
                 this.number = _number;
+                this.realID = _realID;
                 this.orName = _orName;
                 this.orText = _orText;
                 this.trName = _trName;
@@ -83,9 +85,13 @@ namespace TTG_Tools
             List<TextCollector.TXT_collection> tempText = new List<TextCollector.TXT_collection>();
             string error = string.Empty;
             AutoPacker.ImportTXT(path, ref tempText, false, MainMenu.settings.ASCII_N, "\r\n", ref error);
+
             for (int q = 0; q < tempText.Count; q++)
             {
-                int isStringExist = IsNumberOfStringExist(tempText[q].number - 1, allText);
+                int number = tempText[q].number - 1;
+                if (MainMenu.settings.exportRealID) number = (int)tempText[q].realId;
+                //int isStringExist = IsNumberOfStringExist(tempText[q].number - 1, allText);
+                int isStringExist = IsNumberOfStringExist(number, allText);
                 if (isEnglish)
                 {
                     if (isStringExist != -1)
@@ -95,7 +101,7 @@ namespace TTG_Tools
                     }
                     else
                     {
-                        allText.Add(new AllText(tempText[q].number - 1, tempText[q].name, tempText[q].text, "", "", false, false));
+                        allText.Add(new AllText(tempText[q].number - 1, tempText[q].realId, tempText[q].name, tempText[q].text, "", "", false, false));
                     }
                 }
                 else
@@ -107,7 +113,7 @@ namespace TTG_Tools
                     }
                     else //если строки нет когда она потеряна или начат импорт с переведенного файла
                     {
-                        allText.Add(new AllText(tempText[q].number - 1, "", "", tempText[q].name, tempText[q].text, false, false));
+                        if(!MainMenu.settings.exportRealID) allText.Add(new AllText(tempText[q].number - 1, tempText[q].realId, "", "", tempText[q].name, tempText[q].text, false, false));
                     }
                 }
                 //text_temp[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
@@ -117,13 +123,11 @@ namespace TTG_Tools
         }
         public static List<AllText> ImportTXTFromConvertedFile(string path, ref List<AllText> allText, int ASCII)
         {
-
             StreamReader sr = new StreamReader(path, System.Text.ASCIIEncoding.GetEncoding(ASCII));
-
-
             List<TextCollector.TXT_collection> tempText = new List<TextCollector.TXT_collection>();
             string error = string.Empty;
             AutoPacker.ImportTXT(path, ref tempText, false, MainMenu.settings.ASCII_N, "\r\n", ref error);
+
             for (int q = 0; q < tempText.Count; q++)
             {
                 int isStringExist = IsNumberOfStringExist(tempText[q].number - 1, allText);
@@ -135,7 +139,7 @@ namespace TTG_Tools
                 }
                 else
                 {
-                    allText.Add(new AllText(tempText[q].number - 1, tempText[q].name, tempText[q].text, "", "", false, false));
+                    allText.Add(new AllText(tempText[q].number - 1, (uint)tempText[q].number, tempText[q].name, tempText[q].text, "", "", false, false));
                 }
 
             }
@@ -151,7 +155,11 @@ namespace TTG_Tools
 
                 for (int i = 0; i < allText.Count(); i++)
                 {
-                    if (allText[i].number == posStr)
+                    int number = allText[i].number;
+
+                    if (MainMenu.settings.exportRealID) number = (int)allText[i].realID;
+                    //if (allText[i].number == posStr)
+                    if (number == posStr)
                     {
                         b = i;
                         break;
@@ -248,9 +256,11 @@ namespace TTG_Tools
             FileStream ExportStream = new FileStream(path, FileMode.Create);
             for (int i = 0; i < allText.Count; i++)
             {
-                TextCollector.SaveString(ExportStream, ((allText[i].number + 1) + ") " + allText[i].orName + "\r\n"), MainMenu.settings.ASCII_N);
+                if(MainMenu.settings.exportRealID) TextCollector.SaveString(ExportStream, ((allText[i].realID) + ") " + allText[i].orName + "\r\n"), MainMenu.settings.ASCII_N);
+                else TextCollector.SaveString(ExportStream, ((allText[i].number + 1) + ") " + allText[i].orName + "\r\n"), MainMenu.settings.ASCII_N);
                 TextCollector.SaveString(ExportStream, (allText[i].orText + "\r\n"), MainMenu.settings.ASCII_N);
-                TextCollector.SaveString(ExportStream, ((allText[i].number + 1) + ") " + allText[i].trName + "\r\n"), MainMenu.settings.ASCII_N);
+                if (MainMenu.settings.exportRealID) TextCollector.SaveString(ExportStream, ((allText[i].realID) + ") " + allText[i].trName + "\r\n"), MainMenu.settings.ASCII_N);
+                else TextCollector.SaveString(ExportStream, ((allText[i].number + 1) + ") " + allText[i].trName + "\r\n"), MainMenu.settings.ASCII_N);
                 TextCollector.SaveString(ExportStream, (allText[i].trText + "\r\n"), MainMenu.settings.ASCII_N);
             }
             ExportStream.Close();
@@ -279,6 +289,7 @@ namespace TTG_Tools
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 textBox4.Text = ofd.FileName.ToString();
+                file = ofd.SafeFileName;
                 ImportTXTFromConvertedFile(ofd.FileName, ref allText2, MainMenu.settings.ASCII_N);
             }
         }
@@ -305,6 +316,7 @@ namespace TTG_Tools
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "txt files (*.txt)|*.txt";
             sfd.FileName = file;
+
             if (sfd.ShowDialog() == DialogResult.OK)
             {
                 SaveFile(sfd.FileName, allText2);
@@ -358,6 +370,10 @@ namespace TTG_Tools
                     }
                 }
             }
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
         }
     }
 }

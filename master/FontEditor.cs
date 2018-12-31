@@ -1581,7 +1581,7 @@ namespace TTG_Tools
 
                 if (version_used >= 9)
                 {
-                    dataGridViewWithCoord[1, i].Value = Methods.ConvertHexToString(ffs.coord[i].symbol, 0, 4, MainMenu.settings.ASCII_N, false);
+                    //dataGridViewWithCoord[1, i].Value = Methods.ConvertHexToString(ffs.coord[i].symbol, 0, 4, MainMenu.settings.ASCII_N, false);
                     ffs.coord[i].HZ = BitConverter.GetBytes((int)Convert.ToInt32(dataGridViewWithCoord[9, i].Value.ToString()));
                     ffs.coord[i].kern_left_side = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[10, i].Value.ToString()));
                     ffs.coord[i].to_top = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[11, i].Value.ToString()));
@@ -1965,7 +1965,7 @@ namespace TTG_Tools
                     bool pvr = false;
                     string result = null;
 
-                    byte[] header = TextureWorker.genHeader(ffs.dds[file_n].height_in_dds, ffs.dds[file_n].widht_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
+                    byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
                     fs.Write(header, 0, header.Length);
                     fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
                         /*for (int i = 0; i < MainMenu.texture_header.Count; i++)

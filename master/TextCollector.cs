@@ -15,12 +15,12 @@ namespace TTG_Tools
         public class TXT_collection
         {
             public int number;
-            public Int64 realId;
+            public uint realId;
             public string name;
             public string text;
             public bool exported;
             public TXT_collection() { }
-            public TXT_collection(int _number, Int32 _realId, string _name, string _text, bool _exported)
+            public TXT_collection(int _number, uint _realId, string _name, string _text, bool _exported)
             {
                 this.realId = _realId;
                 this.name = _name;

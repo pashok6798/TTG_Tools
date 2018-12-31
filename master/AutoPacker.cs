@@ -103,9 +103,7 @@ namespace TTG_Tools
             customKey = textBox1.Text;
             isIOS = checkIOS.Checked;
 
-            //if (comboBox1.SelectedIndex == 0 || comboBox1.SelectedIndex == -1)
-
-            string versionOfGame = " ";// CheckVersionOfGameFromCombobox(comboBox1.SelectedIndex);
+            string versionOfGame = " ";
             numKey = comboBox1.SelectedIndex;
             selected_index = comboBox2.SelectedIndex;
 
@@ -367,7 +365,7 @@ namespace TTG_Tools
                 string[] temp_strings = strings[k].Split('\t');
                 if (MainMenu.settings.exportRealID)
                 {
-                    txt_collection.Add(new TextCollector.TXT_collection(0, Convert.ToInt32(temp_strings[0]), temp_strings[1], temp_strings[2], false));
+                    txt_collection.Add(new TextCollector.TXT_collection(k + 1, Convert.ToUInt32(temp_strings[0]), temp_strings[1], temp_strings[2], false));
                 }
                 else txt_collection.Add(new TextCollector.TXT_collection(Convert.ToInt32(temp_strings[0]), 0, temp_strings[1], temp_strings[2], false));
             }
@@ -394,6 +392,8 @@ namespace TTG_Tools
             string name = "";
             bool number_find = false;
             int n_str = -1;
+            int counter = 1;
+            bool need_count = false;
             //int number_of_next_list = 0;
 
             for (int i = 0; i < texts.Length; i++)
@@ -429,14 +429,25 @@ namespace TTG_Tools
                             //name = curLine.Substring(curLine.IndexOf(")"), (curLine.Length - curLine.IndexOf(")") - 1));
                             if (MainMenu.settings.exportRealID)
                             {
-                                txt_collection.Add(new TextCollector.TXT_collection(0, (Int32)pos_str, name, "", false));
+                                txt_collection.Add(new TextCollector.TXT_collection(counter, (UInt32)pos_str, name, "", false));
+                                if(need_count)
+                                {
+                                    counter++;
+                                    need_count = false;
+                                }
+                                else
+                                {
+                                    need_count = true;
+                                }
                             }
+                            else
                             {
                                 txt_collection.Add(new TextCollector.TXT_collection((Int32)pos_str, 0, name, "", false));
                             }
                             //number_of_next_list++;
                             number_find = true;
                             n_str++;
+                            //counter++;
                         }
                         catch
                         {
@@ -457,70 +468,6 @@ namespace TTG_Tools
                         number_find = false;
                     }
             }
-
-                /*while ((curLine = sr.ReadLine()) != null)
-                {
-                    if (curLine.IndexOf(")") > -1 && number_find == false)
-                    {
-                        if (Methods.IsNumeric(curLine.Substring(0, curLine.IndexOf(")"))))
-                        {
-                            pos_str = Convert.ToInt64(curLine.Substring(0, curLine.IndexOf(")")));
-                            try
-                            {
-                                //curLine = curLine.Replace(" ", string.Empty);
-                                string[] s;
-                                s = curLine.Split(')');
-                                if (s.Count() > 1)
-                                {
-                                    //тут отрезаем тупые пробелы между скобкой
-                                    name = "";
-                                    string[] temp = s[1].Split(' ');
-                                    foreach (string s_temp in temp)
-                                    {
-                                        if (s_temp != string.Empty)
-                                        {
-                                            if (name == string.Empty)
-                                            { name += s_temp; }
-                                            else
-                                            { name += " " + s_temp; }
-                                        }
-                                    }
-                                    //name = s[1]; 
-                                }
-                                else
-                                { name = ""; }
-                                //name = curLine.Substring(curLine.IndexOf(")"), (curLine.Length - curLine.IndexOf(")") - 1));
-                                if (MainMenu.settings.exportRealID)
-                                {
-                                    txt_collection.Add(new TextCollector.TXT_collection(0, (Int32)pos_str, name, "", false));
-                                }
-                                {
-                                    txt_collection.Add(new TextCollector.TXT_collection((Int32)pos_str, 0, name, "", false));
-                                }
-                                //number_of_next_list++;
-                                number_find = true;
-                                n_str++;
-                            }
-                            catch
-                            {
-                                MessageBox.Show("Error in string: " + curLine + "\r\n", "Error!");
-                                error = "Error in string: " + curLine;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            txt_collection[n_str].text += enter + curLine;
-                            number_find = false;
-                        }
-                    }
-                    else
-                    {
-                        txt_collection[n_str].text += enter + curLine;
-                        number_find = false;
-                    }
-                }
-                sr.Close();*/
 
                 for (int i = 0; i < txt_collection.Count; i++)
                 {
@@ -883,7 +830,8 @@ namespace TTG_Tools
                         {
                             if (landb[q].text != "" && landb[q].name != "" || (landb[q].text != "" && landb[q].name == ""))
                             {
-                                all_text.Add(new TextCollector.TXT_collection((q + 1), 0, landb[q].name, landb[q].text, false));
+                                if(MainMenu.settings.exportRealID) all_text.Add(new TextCollector.TXT_collection((q + 1), BitConverter.ToUInt32(landb[q].realID, 0), landb[q].name, landb[q].text, false));
+                                else all_text.Add(new TextCollector.TXT_collection((q + 1), 0, landb[q].name, landb[q].text, false));
                             }
                         }
                         List<TextCollector.TXT_collection> all_text_for_export = new List<TextCollector.TXT_collection>();
@@ -898,7 +846,8 @@ namespace TTG_Tools
                             }
                             else
                             {
-                                path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
+                                if (tsvFile) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
+                                else path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
                             }
                         }
                         else
@@ -919,7 +868,6 @@ namespace TTG_Tools
                                 if (!tsvFile) all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\r\n");
                                 else all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\\n");
 
-
                                 //тут добавил
                                 if (versionOfGame != "TFTB")
                                 {
@@ -938,51 +886,23 @@ namespace TTG_Tools
                                         all_text_for_export[w].text = UnicodeEncoding.UTF8.GetString(temp_string);
                                     }
                                 }
-                                /*if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings == 2))
-                                {
-                                    string alphabet = MainMenu.settings.additionalChar;
-                                    //for (int a = alphabet.Length - 1; a > 0; a--)
-                                    for (int a = 0; a < alphabet.Length; a++)
-                                    {
-                                        all_text_for_export[w].text = all_text_for_export[w].text.Replace(("Г" + alphabet[a].ToString()), alphabet[a].ToString());
-                                    }
-                                }*/
-
-
-                                /*if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings == 0))
-                                {
-                                    
-                                }
-                                if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings == 2))
-                                {
-                                    string alphabet = MainMenu.settings.additionalChar;
-                                    //for (int a = alphabet.Length - 1; a > 0; a--)
-                                    for (int a = 0; a < alphabet.Length; a++)
-                                    {
-                                        all_text_for_export[w].text = all_text_for_export[w].text.Replace(("Г" + alphabet[a].ToString()), alphabet[a].ToString());
-                                    }
-                                }
-                                else if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings == 1))
-                                {
-                                    TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.ASCII_N); //+ qwer.ToString() +  "\r\n"), MainMenu.settings.ASCII_N);
-                                    TextCollector.SaveString(MyExportStream, (all_text_for_export[w].text + "\r\n"), MainMenu.settings.ASCII_N);
-                                    w++;
-                                }*/
                                 if (tsvFile)
                                 {
                                     string tsv_str = all_text_for_export[w].number + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
+                                    if(MainMenu.settings.exportRealID) tsv_str = all_text_for_export[w].realId + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
                                     TextCollector.SaveString(MyExportStream, tsv_str, MainMenu.settings.unicodeSettings);
                                 }
                                 else
                                 {
-                                    TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.unicodeSettings); //+ qwer.ToString() +  "\r\n"), MainMenu.settings.ASCII_N);
+                                    if (MainMenu.settings.exportRealID) TextCollector.SaveString(MyExportStream, (all_text_for_export[w].realId + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.unicodeSettings);
+                                    else TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.unicodeSettings); //+ qwer.ToString() +  "\r\n"), MainMenu.settings.ASCII_N);
                                     TextCollector.SaveString(MyExportStream, (all_text_for_export[w].text + "\r\n"), MainMenu.settings.unicodeSettings);
                                 }
                                 w++;
                                 
                             }
                             MyExportStream.Close();
-                        //}
+
                         if (i > 0)
                         {
                             if (fi[i].Extension == ".landb" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(GetNameOnly(i - 1), "(", ")") == GetNameOnly(i))
@@ -1030,205 +950,12 @@ namespace TTG_Tools
                     if (Encoding.ASCII.GetString(check_header) == "5VSM" || Encoding.ASCII.GetString(check_header) == "6VSM")
                     {
                         Array.Copy(d3dtx, 16, check_ver, 0, 4);
-                        /*if (BitConverter.ToInt32(check_ver, 0) < 7)
-                        {
-                            check_ver = new byte[4];
-                            Array.Copy(d3dtx, 92, check_ver, 0, 4);
-                        }
-                        else
-                        {
-                            check_ver = new byte[4];
-                            Array.Copy(d3dtx, 104, check_ver, 0, 4);
-                        }*/
 
                         offset = 12 * BitConverter.ToInt32(check_ver, 0) + 16 + 4;
                         check_ver = new byte[4];
                         Array.Copy(d3dtx, offset, check_ver, 0, 4);
                     }
                     else Array.Copy(d3dtx, 4, check_ver, 0, 4);
-                    #region Временно закомментированный код (эксперименты над отдельным классом экспорта текстур)
-                    //if (((BitConverter.ToInt32(check_ver, 0) > 6) || (BitConverter.ToInt32(check_ver, 0) < 0)) && 
-                    //    ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
-                    //    && (Encoding.ASCII.GetString(check_header) != "NIBM")))
-                    //{
-                        //Пытаемся расшифровать файл
-
-                        
-                    //        string info = Methods.FindingDecrytKey(d3dtx, "texture");
-                    //        listBox1.Items.Add("File " + fi[i].Name + " decrypted! " + info);
-                            /*fs = new FileStream((MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds"), FileMode.OpenOrCreate);
-                            fs.Write(d3dtx, 0, d3dtx.Length);
-                            fs.Close();*/
-
-                     //       check_ver = new byte[4];
-                     //       Array.Copy(d3dtx, 4, check_ver, 0, 4);
-
-
-                        /*for (int a = 0; a < MainMenu.gamelist.Count; a++)
-                        {
-                            byte[] checkVerOld = new byte[4];
-                            byte[] checkVerNew = new byte[4];
-                            byte[] checkOldFile = new byte[d3dtx.Length]; //Проверочный файл (старый метод)
-                            byte[] checkNewFile = new byte[d3dtx.Length]; //Проверочный файл (новый метод)
-
-                            Array.Copy(d3dtx, 0, checkOldFile, 0, d3dtx.Length);
-                            Array.Copy(d3dtx, 0, checkNewFile, 0, d3dtx.Length);
-
-                            Methods.meta_crypt(checkOldFile, MainMenu.gamelist[a].key, 2, true);
-                            Array.Copy(checkOldFile, 4, checkVerOld, 0, 4);
-                            Methods.meta_crypt(checkNewFile, MainMenu.gamelist[a].key, 7, true);
-                            Array.Copy(checkNewFile, 4, checkVerNew, 0, 4);
-
-                            if ((BitConverter.ToInt32(checkVerOld, 0) > 0) && (BitConverter.ToInt32(checkVerOld, 0) < 6))
-                            {
-                                Array.Copy(checkOldFile, 0, d3dtx, 0, d3dtx.Length);
-                                numKey = a;
-                                version = 2;
-                                break;
-                            }
-                            else if ((BitConverter.ToInt32(checkVerNew, 0) > 0) && (BitConverter.ToInt32(checkVerNew, 0) < 6))
-                            {
-                                Array.Copy(checkNewFile, 0, d3dtx, 0, d3dtx.Length);
-                                numKey = a;
-                                version = 7;
-                                break;
-                            }
-                        }*/
-                    //}
-                   // if (comboBox1.SelectedIndex == 0)
-                   // {
-                  //  if (((BitConverter.ToInt32(check_ver, 0) < 6) && (BitConverter.ToInt32(check_ver, 0) > 0)) &&
-                   //     (Encoding.ASCII.GetString(check_header) != "5VSM"))
-                   //     {
-                   //         versionOfGame = " ";
-
-                     //       if ((Encoding.ASCII.GetString(check_header) != "ERTM") && (Encoding.ASCII.GetString(check_header) != "NIBM"))//Проверка старых текстур
-                       //     {
-                      //          int checkDDS = Methods.FindStartOfStringSomething(d3dtx, 0, "DDS");
-                      //          if (checkDDS > (d3dtx.Length - 100))
-                      //          {
-                      //                  string result = Methods.FindingDecrytKey(d3dtx, "texture");
-                       //                 listBox1.Items.Add("File " + fi[i].Name + " decrypted! " + result);
-                                        /*fs = new FileStream((MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds"), FileMode.OpenOrCreate);
-                                        fs.Write(d3dtx, 0, d3dtx.Length);
-                                        fs.Close();*/
-                                    
-
-                                    /*byte[] checkDDSLength = new byte[4];
-                                    Array.Copy(d3dtx, poz, checkDDSLength, 0, 4);
-                                    byte[] temp;
-                                    if (BitConverter.ToInt32(checkDDSLength, 0) < 2048) temp = new byte[BitConverter.ToInt32(checkDDSLength, 0)]; //Проверка, если текстура окажется меньше 2048 байт
-                                    else temp = new byte[2048];
-                                    Array.Copy(d3dtx, poz, temp, 0, temp.Length);
-                                    string result = Methods.FindingDecrytKey(temp, false, true);
-                                    Array.Copy(temp, 0, d3dtx, poz, temp.Length);*/
-                                    
-                      //          }
-                       //     }
-
-                       //     if (Methods.FindStartOfStringSomething(d3dtx, 0, "DDS") < (d3dtx.Length - 100))
-                       //     {
-                       //         fs = new FileStream((MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds"), FileMode.OpenOrCreate);
-                       //         int start = Methods.FindStartOfStringSomething(d3dtx, 0, "DDS");
-                       //         fs.Write(d3dtx, start, (d3dtx.Length - start));
-                       //         fs.Close();
-                       //         listBox1.Items.Add("Exported dds from: " + fi[i].Name);
-                       //     }
-                       //     else if (Methods.FindStartOfStringSomething(d3dtx, 0, "PVR!") < (d3dtx.Length - 100))
-                       //     {
-                       //         fs = new FileStream((MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".pvr"), FileMode.OpenOrCreate);
-                       //         int start = Methods.FindStartOfStringSomething(d3dtx, 0, "PVR!");
-
-                       //         byte[] pvrheader = { 0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                       //         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00,
-                       /*         0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x01,
-                                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-                                0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-                                byte[] texType = new byte[4];
-                                byte[] pvr_height = new byte[4];
-                                byte[] pvr_width = new byte[4];
-                                byte[] pvr_mipmap = new byte[4];
-                                byte[] pvr_dataSize = new byte[4];
-
-                                Array.Copy(d3dtx, start - 40, pvr_height, 0, 4);
-                                Array.Copy(d3dtx, start - 36, pvr_width, 0, 4);
-                                Array.Copy(d3dtx, start - 32, pvr_mipmap, 0, 4);
-                                Array.Copy(d3dtx, start - 28, texType, 0, 4);
-                                Array.Copy(d3dtx, start - 24, pvr_dataSize, 0, 4);
-
-                                int dataSize = BitConverter.ToInt32(pvr_dataSize, 0);
-
-                                
-                                int mip = BitConverter.ToInt32(pvr_mipmap, 0) + 1;
-
-                                string mip_info = mip.ToString();
-                                if (mip <= 1) mip_info = "No mip-maps";
-
-                                string info = " tex. format: ";
-                                byte[] pvr_tex = new byte[8];
-
-                                switch (BitConverter.ToUInt32(texType, 0))
-                                {
-                                    case 0x8010: //4444 RGBA
-                                    case 0x8110: //4444 RGBA
-                                        info += "4444 RGBA. Mip-maps count: " + mip_info;
-                                        pvr_tex = BitConverter.GetBytes(0x404040461626772);
-                                        Array.Copy(pvr_tex, 0, pvrheader, 8, pvr_tex.Length);
-                                        break;
-                                    case 0x830d: //PVRTC 4bpp RGBA
-                                    case 0x820d: //PVRTC 4bpp RGBA
-                                    case 0x20d: //PVRTC 4bpp RGBA
-                                    case 0x8a0d: //PVRTC 4bpp RGBA
-                                    case 0x8b0d: //PVRTC 4bpp RGBA
-                                        info += "PVRTC 4bpp RGBA. Mip-maps count: " + mip_info;
-                                        pvr_tex = BitConverter.GetBytes(3);
-                                        Array.Copy(pvr_tex, 0, pvrheader, 8, pvr_tex.Length);
-                                        break;
-                                    case 0xa0d: //PVRTC 4bpp RGB
-                                    case 0x30d: //PVRTC 4bpp RGB
-                                        info += "PVRTC 4bpp RGB. Mip-maps count: " + mip_info;
-                                        pvr_tex = BitConverter.GetBytes(2);
-                                        Array.Copy(pvr_tex, 0, pvrheader, 8, pvr_tex.Length);
-                                        break;
-                                    case 0x13: //565 RGB
-                                    case 0x113: //565 RGB
-                                        info += "565 RGB. Mip-maps count: " + mip_info;
-                                        pvr_tex = BitConverter.GetBytes(0x5060500626772);
-                                        Array.Copy(pvr_tex, 0, pvrheader, 8, pvr_tex.Length);
-                                        break;
-                                    case 0x8011:
-                                        info += "8888 RGBA. Mip-maps count: " + mip_info;
-                                        pvr_tex = BitConverter.GetBytes(0x808080861626772);
-                                        Array.Copy(pvr_tex, 0, pvrheader, 8, pvr_tex.Length);
-                                        break;
-                                    default:
-                                        info += "Unknown format. Its code is " + Convert.ToString(BitConverter.ToUInt32(texType, 0)) + ". Mip-maps count: " + mip_info;
-                                        break;
-                                }
-
-                                pvr_mipmap = new byte[4];
-                                pvr_mipmap = BitConverter.GetBytes(mip);
-                                Array.Copy(pvr_mipmap, 0, pvrheader, 44, pvr_mipmap.Length);
-                                Array.Copy(pvr_height, 0, pvrheader, 24, pvr_height.Length);
-                                Array.Copy(pvr_width, 0, pvrheader, 28, pvr_width.Length);
-
-                                byte[] texContent = new byte[dataSize];
-
-                                Array.Copy(d3dtx, start + 8, texContent, 0, dataSize);
-
-                                fs.Write(pvrheader, 0, pvrheader.Length);
-                                fs.Write(texContent, 0, texContent.Length);
-                                fs.Close();
-
-                                listBox1.Items.Add("Exported pvr from: " + fi[i].Name + info);
-                            }
-                        }*/
-                        //начинаем перебирать сложные версии
-                        /*if (versionOfGame == "PN2")
-                        {*/
-                    //else if ((BitConverter.ToInt32(check_ver, 0) == 6) && (Encoding.ASCII.GetString(check_header)) != "5VSM")
-                    #endregion
 
                     string result = null;
 
@@ -1623,138 +1350,11 @@ namespace TTG_Tools
             {
                 MessageBox.Show("Unkown prop. Please write me about this!");
             }
-            //try
-            {
-                //после длины фаила 0x10 байт фигни.
-                //далее количество текстовых блоков
-                //потом блок 8 байт
-                //блок имени 
-                //4 байта количество строк
-                //потом блоки текста(имя+текст)
-                //и потом снова 8 байт и т.д.
-
-                int z = 16;
-                header2 = new byte[z];
-                Array.Copy(binContent, poz, header2, 0, z);
-                poz += z;
-
-                countOfBlock = new byte[4];
-                Array.Copy(binContent, poz, countOfBlock, 0, 4);
-                int intCountOfBlock = BitConverter.ToInt32(countOfBlock, 0);
-                poz += 4;
-                bool withoutBlock = false;
-                byte[] b = { 0x01, 0x00, 0x00, 0x00, 0xB4, 0xF4, 0x5A, 0x5F, 0x60, 0x6E, 0x9C, 0xCD, 0x00, 0x00, 0x00, 0x00 };
-                if (header2 != b)
-                {
-                    withoutBlock = true;
-                }
-                while (prop.Count < intCountOfBlock)
-                {
-                    //кодить тут
-                    byte[] hz_data = new byte[8];
-                    Array.Copy(binContent, poz, hz_data, 0, 8);
-                    poz += 8;
-
-                    //имя блока
-                    byte[] lenght_of_name = new byte[4];
-                    Array.Copy(binContent, poz, lenght_of_name, 0, 4);
-                    poz += 4;
-                    //получаем что-то, если существует
-                    int len_name = BitConverter.ToInt32(lenght_of_name, 0);
-                    string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, false);
-                    poz += len_name;
-
-                    //получаем количество строк в блоке
-                    byte[] countOfString = new byte[4];
-                    Array.Copy(binContent, poz, countOfString, 0, 4);
-                    int count_of_string = BitConverter.ToInt32(countOfString, 0);
-                    poz += 4;
-
-                    List<TextInProp> textInProp = new List<TextInProp>();
-                    for (int i = 0; i < count_of_string; i++)
-                    {
-                        byte[] lenght_of_string_name = new byte[4];
-                        Array.Copy(binContent, poz, lenght_of_string_name, 0, 4);
-                        poz += 4;
-                        //получаем что-то, если существует
-                        int len_string_name = BitConverter.ToInt32(lenght_of_string_name, 0);
-                        string string_name = Methods.ConvertHexToString(binContent, poz, len_string_name, MainMenu.settings.ASCII_N, false);
-                        poz += len_string_name;
-                        byte[] lenght_of_string_text = new byte[4];
-                        Array.Copy(binContent, poz, lenght_of_string_text, 0, 4);
-                        poz += 4;
-                        //получаем текст
-                        int len_string_text = BitConverter.ToInt32(lenght_of_string_text, 0);
-                        string string_text = Methods.ConvertHexToString(binContent, poz, len_string_text, MainMenu.settings.ASCII_N, false);
-                        poz += len_string_text;
-
-                        textInProp.Add(new TextInProp(lenght_of_string_name, string_name, lenght_of_string_text, string_text));
-                    }
-                    prop.Add(new Prop(hz_data, lenght_of_name, name, textInProp));
-                }
-            }
-            //catch { }
         }
 
         public static void CreateProp(byte[] header, byte[] countOfBlock, byte[] header2, List<Prop> prop, byte[] end_of_file, string path)
         {
-            //проверяем наличие файла, удаляем его и создаем пустой
-            FileStream MyFileStream;
-            if (System.IO.File.Exists(path) == true)
-            {
-                System.IO.File.Delete(path);
-            }
-            MyFileStream = new FileStream(path, FileMode.OpenOrCreate);
-            //записываем заголовок
-
-            MyFileStream.Write(header, 0, header.Length);
-
-
-            int sizeLangdb = 4;
-            sizeLangdb += header2.Length;
-            sizeLangdb += countOfBlock.Length;
-            for (int i = 0; i < prop.Count; i++)
-            {
-
-                sizeLangdb += prop[i].hz_data.Length;
-                sizeLangdb += 4;//4 байта на количество строк в блоке
-                sizeLangdb += GetSizeOfByteMassiv(prop[i].lenght_of_name);//длина имени
-                sizeLangdb += GetSizeOfString(prop[i].name);
-                for (int j = 0; j < prop[i].textInProp.Count; j++)
-                {
-                    sizeLangdb += 8;
-                    sizeLangdb += prop[i].textInProp[j].name.Length;
-                    sizeLangdb += prop[i].textInProp[j].text.Length;
-                }
-                //sizeLangdb += GetSizeOfByteMassiv(prop[i].lenght_of_text);//длина текста
-                //sizeLangdb += GetSizeOfString(prop[i].text);  
-            }
-            byte[] hex_size = BitConverter.GetBytes(sizeLangdb);
-            MyFileStream.Write(hex_size, 0, hex_size.Length);
-            MyFileStream.Write(header2, 0, header2.Length);
-            MyFileStream.Write(countOfBlock, 0, countOfBlock.Length);
-
-
-            ////записываем всё остальное
-            for (int q = 0; q < prop.Count; q++)
-            {
-                //имя
-                MyFileStream.Write(prop[q].hz_data, 0, prop[q].hz_data.Length);
-                SaveStringInfoForProp(MyFileStream, prop[q].name, MainMenu.settings.ASCII_N);
-                //количество строк в блоке
-                byte[] hex_count = BitConverter.GetBytes(prop[q].textInProp.Count);
-                MyFileStream.Write(hex_count, 0, hex_count.Length);
-                //перечисляем имена со строками
-                for (int w = 0; w < prop[q].textInProp.Count; w++)
-                {
-                    //имя
-                    SaveStringInfoForProp(MyFileStream, prop[q].textInProp[w].name, MainMenu.settings.ASCII_N);
-                    //текст
-                    SaveStringInfoForProp(MyFileStream, prop[q].textInProp[w].text, MainMenu.settings.ASCII_N);
-                }
-            }
-            //закрываем поток
-            MyFileStream.Close();
+            
         }
 
         public static void ReadDlog(byte[] binContent, dlog[] first_database, List<Langdb> database, byte version)
@@ -1907,14 +1507,14 @@ namespace TTG_Tools
                             {
                                 byte[] magic_bytes = new byte[len_magic];
                                 Array.Copy(first_database[0].langdb, poz, magic_bytes, 0, len_magic);
-                                database.Add(new Langdb(hz_data, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
+                                database.Add(new Langdb(hz_data, null, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
                                 poz += len_magic;
                             }
                             else if ((BitConverter.ToInt32(count_text, 0) == 2))
                             {
                                 byte[] magic_bytes = new byte[8];
                                 Array.Copy(first_database[0].langdb, poz, magic_bytes, 0, 8);
-                                database.Add(new Langdb(hz_data, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
+                                database.Add(new Langdb(hz_data, null, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
                                 poz += 8;
 
                                 poz += 4;
@@ -1943,7 +1543,7 @@ namespace TTG_Tools
                                 Array.Copy(first_database[0].langdb, poz, magic_bytes, 0, 8);
                                 poz += 8;
 
-                                database.Add(new Langdb(null, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
+                                database.Add(new Langdb(null, null, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
                             }
                             else
                             {
@@ -1957,7 +1557,7 @@ namespace TTG_Tools
                             byte[] magic_bytes = new byte[len_magic];
                             Array.Copy(first_database[0].langdb, poz, magic_bytes, 0, len_magic);
                             poz += len_magic;
-                            database.Add(new Langdb(hz_data, lenght_of_textblok, null, null, null, null, null, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
+                            database.Add(new Langdb(hz_data, null, lenght_of_textblok, null, null, null, null, null, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
                         }
                         number++;
                         last_pozition = poz;
@@ -2030,8 +1630,6 @@ namespace TTG_Tools
 
                     if (vers == 9 || vers == 10)
                     {
-
-
                         switch (vers)
                         {
                             case 9:
@@ -2062,7 +1660,6 @@ namespace TTG_Tools
                             poz += 4;
                         }
                     }
-
                     else
                     { MessageBox.Show("Версия " + vers.ToString()); }
 
@@ -2079,6 +1676,8 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, hz_data, 0, 16 + 40);
                         poz += 16 + 40;
 
+                        byte[] langID = new byte[4];
+                        Array.Copy(hz_data, 0, langID, 0, 4);
 
                         //4 байта = длина текстового блока
                         byte[] lenght_of_textblok = new byte[4];
@@ -2110,7 +1709,7 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, magic_bytes, 0, len_magic);
                         poz += len_magic;
 
-                        landb.Add(new Langdb(hz_data, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
+                        landb.Add(new Langdb(hz_data, langID, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
                         c++;
                     }
                     int hvost = lenghtOfTextBlock + startPoz - poz;
@@ -2122,7 +1721,6 @@ namespace TTG_Tools
                     t = new byte[binContent.Length - poz];
                     Array.Copy(binContent, poz, t, 0, binContent.Length - poz);
                     end_of_file.Add(t);
-
                 }
             }
             else
@@ -2190,6 +1788,9 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, hz_data, 0, 16);
                         poz += 16;
 
+                        byte[] langID = new byte[4];
+                        Array.Copy(hz_data, 4, langID, 0, 4);
+
                         poz += 4;
                         byte[] lenght_of_animation = new byte[4];
                         Array.Copy(binContent, poz, lenght_of_animation, 0, 4);
@@ -2243,7 +1844,7 @@ namespace TTG_Tools
                         byte[] magic_bytes = new byte[len_magic];
                         Array.Copy(binContent, poz, magic_bytes, 0, len_magic);
                         poz += len_magic;
-                        landb.Add(new Langdb(hz_data, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
+                        landb.Add(new Langdb(hz_data, langID, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
                     }
                 }
             }
@@ -2315,6 +1916,8 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, hz_data, 0, 16 + 40);
                         poz += 16 + 40;
 
+                        byte[] langID = new byte[4];
+                        Array.Copy(hz_data, 0, langID, 0, 4);
 
                         //4 байта = длина текстового блока
                         byte[] lenght_of_textblok = new byte[4];
@@ -2347,7 +1950,7 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, magic_bytes, 0, len_magic);
                         poz += len_magic;
 
-                        landb.Add(new Langdb(hz_data, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
+                        landb.Add(new Langdb(hz_data, langID, lenght_of_textblok, null, lenght_of_name, name, lenght_of_text, text, null, null, null, null, magic_bytes));
                         c++;
                     }
                     int hvost = lenghtOfTextBlock + startPoz - poz;
@@ -2427,6 +2030,9 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, hz_data, 0, 16);
                         poz += 16;
 
+                        byte[] langID = new byte[4];
+                        Array.Copy(hz_data, 0, langID, 0, 4);
+
                         poz += 4;
                         byte[] lenght_of_animation = new byte[4];
                         Array.Copy(binContent, poz, lenght_of_animation, 0, 4);
@@ -2480,7 +2086,7 @@ namespace TTG_Tools
                         byte[] magic_bytes = new byte[len_magic];
                         Array.Copy(binContent, poz, magic_bytes, 0, len_magic);
                         poz += len_magic;
-                        landb.Add(new Langdb(hz_data, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
+                        landb.Add(new Langdb(hz_data, langID, lenght_of_textblok, count_text, lenght_of_name, name, lenght_of_text, text, lenght_of_waw, waw, lenght_of_animation, animation, magic_bytes));
                     }
                 }
             }
@@ -2509,63 +2115,25 @@ namespace TTG_Tools
 
         }
 
-
-        public class TextInProp
-        {
-            public byte[] lenght_of_name;
-            public string name;
-            public byte[] lenght_of_text;
-            public string text;
-
-            public TextInProp() { }
-            public TextInProp(byte[] lenght_of_name, string name, byte[] lenght_of_text, string text)
-            {
-                this.lenght_of_name = lenght_of_name;
-                this.lenght_of_text = lenght_of_text;
-                this.name = name;
-                this.text = text;
-            }
-        }
-
         public class Prop
         {
-            public byte[] hz_data;
-            public byte[] lenght_of_name;
-            public string name;
-            public List<TextInProp> textInProp;
-
-            public Prop() { }
-            public Prop(byte[] hz_data, byte[] lenght_of_name, string name, List<TextInProp> textInProp)
-            {
-                this.hz_data = hz_data;
-                this.lenght_of_name = lenght_of_name;
-                this.name = name;
-                this.textInProp = textInProp;
-            }
-        }
-
-        public class PropWithoutBlocks
-        {
-            public byte[] hz_data;
-            public byte[] lenght_of_name;
-            public string name;
+            public byte[] id;
             public byte[] lenght_of_text;
             public string text;
 
-            public PropWithoutBlocks() { }
-            public PropWithoutBlocks(byte[] hz_data, byte[] lenght_of_name, string name, byte[] lenght_of_text, string text)
+            public Prop() { }
+            public Prop(byte[] id, byte[] lenght_of_text, string text)
             {
-                this.hz_data = hz_data;
-                this.lenght_of_name = lenght_of_name;
-                this.name = name;
+                this.id = id;
                 this.lenght_of_text = lenght_of_text;
-                this.text = text;
+                this.text = text;                
             }
         }
 
         public class Langdb
         {
             public byte[] hz_data;
+            public byte[] realID;
             public byte[] lenght_of_textblok;
             public byte[] count_text;
             public byte[] lenght_of_name;
@@ -2579,12 +2147,13 @@ namespace TTG_Tools
             public byte[] magic_bytes;
 
             public Langdb() { }
-            public Langdb(byte[] hz_data, byte[] lenght_of_textblok, byte[] count_text, byte[] lenght_of_name,
+            public Langdb(byte[] hz_data, byte[] realID, byte[] lenght_of_textblok, byte[] count_text, byte[] lenght_of_name,
             string name, byte[] lenght_of_text, string text, byte[] lenght_of_waw,
             string waw, byte[] lenght_of_animation, string animation, byte[] magic_bytes)
             {
                 this.animation = animation;
                 this.hz_data = hz_data;
+                this.realID = realID;
                 this.lenght_of_animation = lenght_of_animation;
                 this.lenght_of_name = lenght_of_name;
                 this.lenght_of_text = lenght_of_text;

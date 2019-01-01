@@ -1304,6 +1304,45 @@ namespace TTG_Tools
                     fs.Close();
                     listBox1.Items.Add("File " + fi[i].Name + " decrypted.");
                 }
+                else if(fi[i].Extension == ".prop")
+                {
+                    FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
+                    byte[] binContent = Methods.ReadFull(fs);
+                    fs.Close();
+
+                    try
+                    {
+                        List<Prop> proplist = new List<Prop>();
+                        byte[] header = null, countOfBlock = null, lengthAllText = null, endOfFile = null;
+                        ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText, ref endOfFile);
+
+                        if(proplist.Count > 0)
+                        {
+                            string text_path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt";
+
+                            if (File.Exists(text_path)) File.Delete(text_path);
+
+                            FileStream fws = new FileStream(text_path, FileMode.CreateNew);
+                            StreamWriter sw = new StreamWriter(fws);
+
+                            for(int j = 0; j < proplist.Count; j++)
+                            {
+                                if (proplist[j].text.Contains("\n") && !proplist[j].text.Contains("\r\n")) proplist[j].text = proplist[j].text.Replace("\n", "\r\n");
+                                sw.Write((j + 1) + ")\r\n" + proplist[j].text);
+                                if (j + 1 < proplist.Count) sw.Write("\r\n");
+                            }
+
+                            sw.Close();
+                            fws.Close();
+
+                            listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".prop") + ".txt");
+                        }
+                    }
+                    catch
+                    {
+                        listBox1.Items.Add("Unknown error.");
+                    }
+                }
             }
 
             if (debug != null)
@@ -1318,37 +1357,84 @@ namespace TTG_Tools
             int closing = 0;
         }
 
-        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] header2, ref byte[] lenght_of_all_text, ref byte[] end_of_file)
+        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] lenght_of_all_text, ref byte[] end_of_file)
         {
-            byte[] vers_bytes = new byte[16];
-            Array.Copy(binContent, 4, vers_bytes, 0, 4);
+            byte[] b_header = new byte[4];
+            Array.Copy(binContent, 0, b_header, 0, b_header.Length);
+            byte[] vers_bytes = new byte[4];
+            Array.Copy(binContent, 4, vers_bytes, 0, vers_bytes.Length);
             int vers = BitConverter.ToInt32(vers_bytes, 0);
             int poz = 0;
             int end = 0;
-            bool first_blocks = false; //Если первое свойство имеет несколько значений
-            bool second_blocks = false; //Если второе свойство имеет несколько значений
-
-
-            //int end2 = 0;
-            if (vers == 3)
+           
+            if (vers == 3 && Encoding.ASCII.GetString(b_header) == "ERTM")
             {
-                //poz = 60;
-                poz = 52;
-                
-                byte[] blockLength = new byte[4]; //блок с названием файла. Если его нет, то длина равняется 8 байт.
-                                                  //Вообще, я так понял, тут и список зависимых свойств перечисляется.  
-                Array.Copy(binContent, poz, blockLength, 0, 4);
-                poz += BitConverter.ToInt32(blockLength, 0);
+                try
+                {
+                    //poz = 60;
+                    poz = 52;
 
-                header = new byte[poz];
-                Array.Copy(binContent, 0, header, 0, poz);
-                Array.Copy(binContent, poz, lenght_of_all_text, 0, 4);
-                poz += 4;
-                end = binContent.Length - BitConverter.ToInt32(lenght_of_all_text, 0) - poz + 8;
+                    byte[] blockLength = new byte[4]; //блок с названием файла. Если его нет, то длина равняется 8 байт.
+                                                      //Вообще, я так понял, тут и список зависимых свойств перечисляется.  
+                    Array.Copy(binContent, poz, blockLength, 0, 4);
+                    poz += BitConverter.ToInt32(blockLength, 0);
+
+                    header = new byte[poz];
+                    Array.Copy(binContent, 0, header, 0, poz);
+                    lenght_of_all_text = new byte[4];
+                    Array.Copy(binContent, poz, lenght_of_all_text, 0, 4);
+                    poz += 4;
+                    end = binContent.Length - BitConverter.ToInt32(lenght_of_all_text, 0) - poz + 8;
+
+                    byte[] count = new byte[4];
+                    Array.Copy(binContent, poz, count, 0, count.Length);
+
+                    if (BitConverter.ToInt32(count, 0) == 1) poz += 4;
+                    else throw new ArgumentException("Something wrong");
+
+                    byte[] check_command = new byte[8];
+                    Array.Copy(binContent, poz, check_command, 0, check_command.Length);
+
+                    if (BitConverter.ToString(check_command) == "B4-F4-5A-5F-60-6E-9C-CD")
+                    {
+                        poz += 8 + 4; //8 байт той команды + 4 байта нулевого значения
+                        countOfBlock = new byte[4];
+                        Array.Copy(binContent, poz, countOfBlock, 0, countOfBlock.Length);
+                        int countBlock = BitConverter.ToInt32(countOfBlock, 0);
+                        poz += 4;
+
+                        byte[] tmp;
+                        int str_len;
+
+                        for(int i = 0; i < countBlock; i++)
+                        {
+                            prop.Add(new Prop(null, null, null));
+
+                            tmp = new byte[8];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            prop[i].id = tmp;
+                            poz += 8 + 4;
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            prop[i].lenght_of_text = tmp;
+                            str_len = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+                            tmp = new byte[str_len];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            prop[i].text = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(tmp);
+                            poz += str_len;
+                        }
+                    }
+                    else throw new ArgumentException("Wrong command.");
+                }
+                catch
+                {
+                    MessageBox.Show("Something wrong with file. Please send me.");
+                }
             }
             else
             {
-                MessageBox.Show("Unkown prop. Please write me about this!");
+                MessageBox.Show("Unknown prop. Please write me about this!");
             }
         }
 

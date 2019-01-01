@@ -6,4 +6,7 @@
 /master/.vs/TTG Tools/v15
 /master/bin
 /master/obj
-/master/zlib/*
+/master/zlib/zlib.net.dll
+/.dropbox
+/desktop.ini
+/master/.vs/TTG Tools/v14

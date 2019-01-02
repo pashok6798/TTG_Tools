@@ -181,10 +181,15 @@ namespace TTG_Tools
             extention.Add(".tsv");
             extention.Add(".txt");
 
+            bool show = false;
+
             for (int d = 0; d < destination.Count; d++)
             {
                 destinationForExport = destination[d];
                 whatImport = extention[d];
+
+                show = false;
+
                 if (Directory.Exists(pathInput) && Directory.Exists(pathOutput))
                 {
                     DirectoryInfo dir = new DirectoryInfo(pathInput);
@@ -192,18 +197,6 @@ namespace TTG_Tools
                     
                         for (int i = 0; i < inputFiles.Length; i++)
                         {
-                            if (destinationForExport == ".font" && versionOfGame != " " && versionOfGame != "WAU" && versionOfGame != "PN2")
-                            {
-                                //Шифрование шрифта для СиМ 20х
-                                FileStream fs = new FileStream(inputFiles[i].FullName, FileMode.Open);
-                                byte[] font = Methods.ReadFull(fs);
-                                fs.Close();
-                                int poz_of_encrypt = Methods.FindStartOfStringSomething(font, 0, "DDS");
-                                //byte[] font_encrypted = Methods.EncryptFile(MainMenu.settings.pathForInputFolder, MainMenu.settings.pathForTempFolder, inputFiles[i].Name, font, versionOfGame, poz_of_encrypt, MainMenu.settings.pathForTtarchext);
-                                ReportForWork("File " + inputFiles[i].Name + " encrypted");
-                                //Methods.PackFile(MainMenu.settings.pathForOutputFolder, MainMenu.settings.pathForTempFolder, inputFiles[i].Name, font_encrypted, versionOfGame, MainMenu.settings.pathForTtarchext);
-                                ReportForWork("File " + inputFiles[i].Name + " packed");
-                            }
                             int countCorrectWork = 0;//переменная для подсчёта корректного импорта текстур
                             int countOfAllFiles = 0;//всего файлов для импорта
                             string onlyNameImporting = inputFiles[i].Name.Split('(')[0].Split('.')[0];
@@ -222,8 +215,6 @@ namespace TTG_Tools
                                 }
                                 countOfAllFiles += fileDestination.Count();
 
-
-
                                 for (int j = 0; j < fileDestination.Length; j++)
                                 {
                                     switch (destinationForExport)
@@ -231,21 +222,25 @@ namespace TTG_Tools
                                         case ".d3dtx":
                                             {
                                                 ImportDDSinD3DTX(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
+                                                show = true;
                                                 break;
                                             }
                                         case ".landb":
                                             {
                                                 ImportTXTinLANDB(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
+                                                show = true;
                                                 break;
                                             }
                                         case ".langdb":
                                             {
-                                                ImportTXTinLANGDB(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);                                                
+                                                ImportTXTinLANGDB(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
+                                                show = true;
                                                 break;
                                             }
                                         case ".prop":
                                             {
                                                 ImportTXTinPROP(inputFiles, fileDestination, i, j, pathOutput, ref correct_work);
+                                                show = true;
                                                 break;
                                             }
                                         default:
@@ -274,12 +269,73 @@ namespace TTG_Tools
                 {
                     ReportForWork("Check for existing Input and Output folders and check pathes in config.xml!");
                 }
-                ReportForWork("IMPORT OF ALL ***" + destinationForExport.ToUpper() + " IS COMPLETE!");
+                if(show) ReportForWork("IMPORT OF ALL *" + destinationForExport.ToUpper() + " IS COMPLETE!");
             }
         }
+
         public void ImportTXTinPROP(FileInfo[] inputFiles, FileInfo[] fileDestination, int i, int j, string pathOutput, ref bool correctWork)
         {
-            
+            FileStream fs = new FileStream(inputFiles[i].FullName, FileMode.Open);
+            byte[] binContent = Methods.ReadFull(fs);
+            fs.Close();
+
+            List<AutoPacker.Prop> proplist = new List<AutoPacker.Prop>();
+            List<string> strs = new List<string>();
+
+            byte[] header = null, countOfBlock = null, lengthAllText = null;
+
+            AutoPacker.ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText);
+
+            string[] texts = File.ReadAllLines(fileDestination[i].FullName);
+
+            bool number_find = false;
+            int n_str = -1;
+            //int number_of_next_list = 0;
+
+            for (int c = 0; c < texts.Length; c++)
+            {
+                if (texts[c].IndexOf(")") > -1 && number_find == false)
+                {
+                    if ((Methods.IsNumeric(texts[c].Substring(0, texts[c].IndexOf(")")))))
+                    {
+                        number_find = true;
+                        n_str++;
+                        strs.Add("");
+                    }
+                    else
+                    {
+                        strs[n_str] += "\r\n" + texts[c];
+                        number_find = false;
+                    }
+                }
+                else
+                {
+                    strs[n_str] += texts[c];
+                    number_find = false;
+                }
+            }
+
+            if (proplist.Count == strs.Count)
+            {
+                try
+                {
+                    for (int c = 0; c < proplist.Count; c++)
+                    {
+                        proplist[c].text = strs[c];
+                        if (proplist[c].text.Contains("\r\n")) proplist[c].text = proplist[c].text.Replace("\r\n", "\n");
+                        byte[] tmp = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(proplist[c].text);
+                        proplist[c].lenght_of_text = BitConverter.GetBytes((int)tmp.Length);
+                    }
+
+                    AutoPacker.CreateProp(header, countOfBlock, proplist, (pathOutput + "\\" + inputFiles[i].Name));
+                    ReportForWork("File " + Methods.GetNameOfFileOnly(inputFiles[i].Name, ".prop") + ".txt imported in " + inputFiles[i].Name);
+                }
+                catch
+                {
+                    ReportForWork("Something wrong with import file " + inputFiles[i].Name);
+                }
+            }
+            else ReportForWork("Count of strings doesn't equal in files " + inputFiles[i].Name + " & " + fileDestination[j].Name);
         }
 
         public void findStringByID(List<TextCollector.TXT_collection> all_text, int c, ref int id)

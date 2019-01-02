@@ -118,7 +118,7 @@ namespace TTG_Tools
         public void builder_ttarch2(string input_folder, string output_path, bool compression, byte[] key, bool encLua, int version_archive, bool newEngine)
         {                           
             DirectoryInfo di = new DirectoryInfo(input_folder);
-            fi = di.GetFiles();
+            fi = di.GetFiles("*", SearchOption.AllDirectories);
             UInt64[] name_crc = new UInt64[fi.Length];
             string[] name = new string[fi.Length];
             UInt64 offset = 0;
@@ -128,7 +128,7 @@ namespace TTG_Tools
                 name[i] = null;
                 if ((fi[i].Extension == ".lua") && (DontEncLua == false))
                 {
-                    if (newEngine == false) name[i] = fi[i].Name.Replace(".lua", ".lenc");
+                    if (!newEngine) name[i] = fi[i].Name.Replace(".lua", ".lenc");
                     else name[i] = fi[i].Name;
                 }
                 else name[i] = fi[i].Name;
@@ -354,10 +354,8 @@ namespace TTG_Tools
         {
             if ((CheckDll(Application.StartupPath + "\\zlib.net.dll") == false)
                 && (version_archive > 2 && version_archive < 8)) compression = false; //Проверка на наличие библиотеки для сжатия старых архивов
-            /*try
-            {*/
+
             DirectoryInfo di = new DirectoryInfo(input_folder);
-            // fi = di.GetFiles();
             MemoryStream ms = new MemoryStream(); //Для создания заголовка
             DirectoryInfo[] di1 = di.GetDirectories("*", SearchOption.AllDirectories); //Возня с папками и подпапками (если их не будет, тупо зальются файлы)
 
@@ -577,8 +575,6 @@ namespace TTG_Tools
                     empty_bytes = new byte[4];
                     empty_bytes = BitConverter.GetBytes(0);
 
-                    /*fs.Write(empty_bytes, 0, empty_bytes.Length);*/
-
                     byte[] block_sz = { 0x40 }; //В версиях 8 и 9 используются блоки размером 64 КБ. Только в ToMI видел блоки в 128 КБ
                     fs.Write(block_sz, 0, 1);
                     pos_header += 1;
@@ -665,14 +661,10 @@ namespace TTG_Tools
                                 case 7:
                                     table_files = ZlibCompressor(table_files);
                                     binCompressedTS = BitConverter.GetBytes(table_files.Length);
-                                    //paded_table = ZlibCompressor(paded_table);
-                                    //binCompressedTS = BitConverter.GetBytes(paded_table.Length);
                                     break;
                                 default:
                                     table_files = DeflateCompressor(table_files);
                                     binCompressedTS = BitConverter.GetBytes(table_files.Length);
-                                    //paded_table = DeflateCompressor(paded_table);
-                                    //binCompressedTS = BitConverter.GetBytes(paded_table.Length);
                                     break;
                             }
                         }
@@ -734,8 +726,6 @@ namespace TTG_Tools
                                 fa.Write(empty_bytes, 0, empty_bytes.Length);
                             }
 
-                            /*fa.Write(empty_bytes, 0, 4);
-                            fa.Write(empty_bytes, 0, 4);*/
                             fa.Write(block_sz, 0, 1);
                             if (version_archive == 7)
                             {
@@ -754,10 +744,9 @@ namespace TTG_Tools
                         if (version_archive >= 7)
                         {
                             fa.Write(binCompressedTS, 0, 4);
-                            //fa.Write(paded_table, 0, paded_table.Length);
                             fa.Write(table_files, 0, table_files.Length);
                         }
-                        else fa.Write(table_files, 0, table_files.Length);//fa.Write(paded_table, 0, paded_table.Length);
+                        else fa.Write(table_files, 0, table_files.Length);
 
 
                         progressBar1.Maximum = blocks - 1;
@@ -806,12 +795,9 @@ namespace TTG_Tools
 
         private void ArchivePacker_Load(object sender, EventArgs e)
         {
-
-
-
             for (int i = 0; i < MainMenu.gamelist.Count(); i++)
             {
-                comboGameList.Items.Add(i + " " + MainMenu.gamelist[i].gamename);
+                comboGameList.Items.Add(i + ". " + MainMenu.gamelist[i].gamename);
             }
 
             ttarchRB.Checked = true;
@@ -909,14 +895,11 @@ namespace TTG_Tools
                 if (checkDI.Exists)
                 {
                     string example = "96CA99A085CF988AE4DBE2CDA6968388C08B99E39ED89BB6D790DCBEAD9D9165B6A69EBBC2C69EB3E7E3E5D5AB6382A09CC4929FD1D5A4";
-
                     
-
                     compression = checkCompress.Checked;
                     encryptArchive = EncryptIt.Checked;
                     DontEncLua = DontEncLuaCheck.Checked;
                     NewVersionScripts = newEngineLua.Checked;
-
                     
                     archiveVersion = Convert.ToInt32(versionSelection.SelectedItem);
 
@@ -938,7 +921,7 @@ namespace TTG_Tools
                         }
                     }
 
-                    if ((outputArchive.IndexOf(".obb") > 0) || (outputArchive.IndexOf(".OBB") > 0)) compression = false;
+                    if ((outputArchive.ToLower().IndexOf(".obb") > 0)) compression = false;
 
                     if (ttarchRB.Checked == true) builder_ttarch(inputFolder, outputArchive, keyEnc, compression, archiveVersion, encryptArchive, DontEncLua);
                     else builder_ttarch2(inputFolder, outputArchive, compression, keyEnc, DontEncLua, archiveVersion, NewVersionScripts);      

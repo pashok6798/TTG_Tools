@@ -1313,8 +1313,8 @@ namespace TTG_Tools
                     try
                     {
                         List<Prop> proplist = new List<Prop>();
-                        byte[] header = null, countOfBlock = null, lengthAllText = null, endOfFile = null;
-                        ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText, ref endOfFile);
+                        byte[] header = null, countOfBlock = null, lengthAllText = null;
+                        ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText);
 
                         if(proplist.Count > 0)
                         {
@@ -1357,7 +1357,8 @@ namespace TTG_Tools
             int closing = 0;
         }
 
-        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] lenght_of_all_text, ref byte[] end_of_file)
+        //Made for Walking Dead season 1
+        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] length_of_all_text)
         {
             byte[] b_header = new byte[4];
             Array.Copy(binContent, 0, b_header, 0, b_header.Length);
@@ -1369,6 +1370,7 @@ namespace TTG_Tools
            
             if (vers == 3 && Encoding.ASCII.GetString(b_header) == "ERTM")
             {
+                int num = -1;
                 try
                 {
                     //poz = 60;
@@ -1379,17 +1381,17 @@ namespace TTG_Tools
                     Array.Copy(binContent, poz, blockLength, 0, 4);
                     poz += BitConverter.ToInt32(blockLength, 0);
 
-                    header = new byte[poz];
-                    Array.Copy(binContent, 0, header, 0, poz);
-                    lenght_of_all_text = new byte[4];
-                    Array.Copy(binContent, poz, lenght_of_all_text, 0, 4);
+                    //header = new byte[poz];
+                    //Array.Copy(binContent, 0, header, 0, poz);
+                    length_of_all_text = new byte[4];
+                    Array.Copy(binContent, poz, length_of_all_text, 0, 4);
                     poz += 4;
-                    end = binContent.Length - BitConverter.ToInt32(lenght_of_all_text, 0) - poz + 8;
 
                     byte[] count = new byte[4];
                     Array.Copy(binContent, poz, count, 0, count.Length);
 
                     if (BitConverter.ToInt32(count, 0) == 1) poz += 4;
+                    else if (BitConverter.ToInt32(count, 0) == 2) poz += 20;
                     else throw new ArgumentException("Something wrong");
 
                     byte[] check_command = new byte[8];
@@ -1397,7 +1399,10 @@ namespace TTG_Tools
 
                     if (BitConverter.ToString(check_command) == "B4-F4-5A-5F-60-6E-9C-CD")
                     {
+                        num = 0;
                         poz += 8 + 4; //8 байт той команды + 4 байта нулевого значения
+                        header = new byte[poz];
+                        Array.Copy(binContent, 0, header, 0, poz);
                         countOfBlock = new byte[4];
                         Array.Copy(binContent, poz, countOfBlock, 0, countOfBlock.Length);
                         int countBlock = BitConverter.ToInt32(countOfBlock, 0);
@@ -1425,6 +1430,90 @@ namespace TTG_Tools
                             poz += str_len;
                         }
                     }
+                    else if(BitConverter.ToString(check_command) == "25-03-C6-1F-D8-64-1B-4F")
+                    {
+                        num = 1;
+                        poz += 12;
+                        byte[] tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        int countStrings = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+                        header = new byte[poz];
+                        Array.Copy(binContent, 0, header, 0, header.Length);
+
+                        int counter = 0, block_counter = 0, block_count = 0;
+
+                        while(counter != countStrings)
+                        {
+                            byte[] tmp2 = new byte[8];
+                            Array.Copy(binContent, poz, tmp2, 0, tmp2.Length);
+                            poz += 12;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            poz += 4;
+
+                            block_count = BitConverter.ToInt32(tmp, 0);
+
+                            block_counter = 0;
+
+                            while(block_counter != (block_count * 2))
+                            {
+                                prop.Add(new Prop(tmp2, null, null));
+                                prop[prop.Count - 1].lenght_of_text = new byte[4];
+                                Array.Copy(binContent, poz, prop[prop.Count - 1].lenght_of_text, 0, 4);
+                                poz += 4;
+                                tmp = new byte[BitConverter.ToInt32(prop[prop.Count - 1].lenght_of_text, 0)];
+
+                                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                                prop[prop.Count - 1].text = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(tmp);
+                                poz += tmp.Length;
+
+                                block_counter++;
+                            }
+
+                            counter++;
+                            tmp2 = null;
+                        }
+                    }
+                    else if(BitConverter.ToString(check_command) == "56-7E-6B-6B-27-B7-2B-64")
+                    {
+                        num = 2;
+                        poz += 12;
+                        byte[] tmp = new byte[1];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        if (tmp[0] == 0x30) poz++;
+                        else throw new ArgumentException("Unknown prop file.");
+
+                        header = new byte[poz];
+                        Array.Copy(binContent, 0, header, 0, header.Length);
+
+                        poz += (16 * BitConverter.ToInt32(count, 0));
+
+                        for(int i = 0; i < BitConverter.ToInt32(count, 0); i++)
+                        {
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            poz += 4;
+
+                            for(int j = 0; j < BitConverter.ToInt32(tmp, 0); j++)
+                            {
+                                tmp = new byte[4];
+                                prop.Add(new Prop(null, null, null));
+
+                                prop[prop.Count - 1].lenght_of_text = new byte[4];
+                                Array.Copy(binContent, poz, prop[prop.Count - 1].lenght_of_text, 0, 4);
+                                poz += 4;
+                                tmp = new byte[BitConverter.ToInt32(prop[prop.Count - 1].lenght_of_text, 0)];
+                                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                                prop[prop.Count - 1].text = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(tmp);
+                                if (prop[prop.Count - 1].text.Contains("\n")) prop[prop.Count - 1].text = prop[prop.Count - 1].text.Replace("\n", "\r\n");
+                                poz += tmp.Length;
+                            }
+                        }
+                    }
                     else throw new ArgumentException("Wrong command.");
                 }
                 catch
@@ -1438,9 +1527,46 @@ namespace TTG_Tools
             }
         }
 
-        public static void CreateProp(byte[] header, byte[] countOfBlock, byte[] header2, List<Prop> prop, byte[] end_of_file, string path)
+        public static void CreateProp(byte[] header, byte[] countOfBlock, List<Prop> prop, string path)
         {
-            
+            int poz = 52;
+            byte[] tmp = new byte[4];
+            Array.Copy(header, poz, tmp, 0, tmp.Length);
+
+            poz += BitConverter.ToInt32(tmp, 0);
+
+            tmp = new byte[4];
+            Array.Copy(header, poz + 4, tmp, 0, tmp.Length);
+            int count = BitConverter.ToInt32(tmp, 0);
+            int length = 4 + 4 + 4 +(12 * count) + (16 * BitConverter.ToInt32(countOfBlock, 0));
+
+            count = BitConverter.ToInt32(countOfBlock, 0);
+
+            MemoryStream ms = new MemoryStream();
+            ms.Write(header, 0, header.Length);
+            ms.Write(countOfBlock, 0, countOfBlock.Length);
+
+            for(int i = 0; i < count; i++)
+            {
+                ms.Write(prop[i].id, 0, prop[i].id.Length);
+                tmp = BitConverter.GetBytes(0);
+                ms.Write(tmp, 0, tmp.Length);
+                ms.Write(prop[i].lenght_of_text, 0, prop[i].lenght_of_text.Length);
+                tmp = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(prop[i].text);
+                ms.Write(tmp, 0, tmp.Length);
+                length += prop[i].text.Length;
+            }
+
+            byte[] binContent = ms.ToArray();
+            tmp = BitConverter.GetBytes(length);
+
+            Array.Copy(tmp, 0, binContent, poz, tmp.Length);
+
+            if (File.Exists(path)) File.Delete(path);
+
+            FileStream fs = new FileStream(path, FileMode.CreateNew);
+            fs.Write(binContent, 0, binContent.Length);
+            fs.Close();
         }
 
         public static void ReadDlog(byte[] binContent, dlog[] first_database, List<Langdb> database, byte version)

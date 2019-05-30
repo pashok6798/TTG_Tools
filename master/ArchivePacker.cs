@@ -43,7 +43,12 @@ namespace TTG_Tools
             return (num);
         }
 
+        public static Int32 pad_size(Int32 num, Int32 pad)
+        {
+            while (num % pad != 0) num++;
 
+            return num;
+        }
         private bool CheckDll(string filePath)
         {
             if (File.Exists(filePath) == true)
@@ -198,12 +203,11 @@ namespace TTG_Tools
 
             progressBar1.Maximum = fi.Length - 1;
             
-
             for (int k = 0; k < fi.Length; k++) //создаю заголовок с данными о файлах
             {
 
                 byte[] crc64_hash = new byte[8]; //хеш-сумма названия файла
-                crc64_hash = BitConverter.GetBytes(name_crc[k]);//CRCs.CRC64(0, fi[k].Name));
+                crc64_hash = BitConverter.GetBytes(name_crc[k]);
                 Array.Copy(crc64_hash, 0, info_table, Convert.ToInt64(offset), 8);
                 offset += 8;
                 byte[] fo_bin = new byte[8]; //смещение файла
@@ -308,7 +312,6 @@ namespace TTG_Tools
                 fs.Write(bin_blocks_count, 0, 4);
                 fs.Write(chunk_table, 0, chunk_table.Length);
 
-
                 FileStream temp_fr = new FileStream(temp_path, FileMode.Open);
                 temp_fr.Seek(12, SeekOrigin.Begin);
 
@@ -345,11 +348,6 @@ namespace TTG_Tools
             
         }
 
-        private void progress(int counter)
-        {
-
-        }
-
         public void builder_ttarch(string input_folder, string output_path, byte[] key, bool compression, int version_archive, bool encryptCheck, bool DontEncLua) //Функция сборки
         {
             if ((CheckDll(Application.StartupPath + "\\zlib.net.dll") == false)
@@ -369,14 +367,11 @@ namespace TTG_Tools
                 WithoutParentFolders = true;
             }
 
-
-
             byte[] dir_name_count = new byte[4];
             dir_name_count = BitConverter.GetBytes(directories);
             ms.Write(dir_name_count, 0, 4);
 
             byte[] empty_bytes = { 0x00, 0x00, 0x00, 0x00 }; //Я не знал, как назвать те 00 00 00 00 байты
-
 
             for (int i = 0; i < directories; i++) //Считываю названия папок
             {
@@ -391,17 +386,12 @@ namespace TTG_Tools
                 ms.Write(dir_name, 0, dir_name.Length);
             }
 
-
             fi = di.GetFiles("*", SearchOption.AllDirectories);
 
             byte[] files_count = new byte[4]; //Количество файлов
             files_count = BitConverter.GetBytes(fi.Length);
             ms.Write(files_count, 0, 4);
            
-
-            //ms.Write(empty_bytes, 0, 4);
-            //ms.Write(files_count, 0, files_count.Length);
-
             long file_offset = 0; //Смещение файлов
 
             for (int j = 0; j < fi.Length; j++)
@@ -446,7 +436,6 @@ namespace TTG_Tools
                 ms.Write(empty_bytes, 0, 1);
             }
 
-
             byte[] table_files = ms.ToArray(); //Выгружаем полученную запись в переменную массива байтов
             ms.Close(); //Закрываем MemoryStream
 
@@ -456,7 +445,6 @@ namespace TTG_Tools
                 Array.Copy(table_files, 0, tempHeader, 0, table_files.Length);
 
                 uint temp_table_size = (uint)tempHeader.Length;
-                //temp_table_size = Convert.ToUInt32(pad_it(Convert.ToUInt64(temp_table_size), Convert.ToUInt64(8))) + 4;
                 temp_table_size += 4;
 
                 byte[] binTable = new byte[4];
@@ -477,20 +465,14 @@ namespace TTG_Tools
             }
 
             uint table_size = (uint)table_files.Length;
-            /*table_size = Convert.ToUInt32(pad_it(Convert.ToUInt64(table_size), Convert.ToUInt64(8)));
-            byte[] paded_table = new byte[table_size];
-            Array.Copy(table_files, 0, paded_table, 0, table_files.Length);*/
 
             byte[] header_crc32 = new byte[4];
-            //header_crc32 = CRCs.CRC32_generator(paded_table);
             header_crc32 = CRCs.CRC32_generator(table_files);
 
-            //long header_size = paded_table.Length; //Размер заголовка
             long header_size = table_size;
 
             if ((version_archive == 2) || (encryptCheck == true))
             {
-                //paded_table = encryptFunction(paded_table, key, version_archive);
                 table_files = encryptFunction(table_files, key, version_archive);
             }
 
@@ -507,8 +489,8 @@ namespace TTG_Tools
             byte[] hz2 = { 0x01, 0x00, 0x00, 0x00 }; //Хрен знает, что это [1]
             byte[] priority = new byte[4];
             priority = BitConverter.GetBytes(0); //Поставил приоритет архивам 0
-            //if ((archiveVersion < 8) && compression == true) compression = false; //Пока не найду решение, будет такой костыль.
             int pos_header = 0;
+
             //Удаляем существующий файл, если он на самом деле есть и создаём новый временный файл.
             if (File.Exists(Application.StartupPath + "\\temp.file") == true) File.Delete(Application.StartupPath + "\\temp.file");
 
@@ -604,8 +586,6 @@ namespace TTG_Tools
 
             fs.Write(bin_header_size, 0, 4);
             pos_header += 4;
-            //fs.Write(paded_table, 0, paded_table.Length);
-            //pos_header += paded_table.Length;
             fs.Write(table_files, 0, table_files.Length);
             pos_header += table_files.Length;
 
@@ -619,7 +599,7 @@ namespace TTG_Tools
 
                 if ((fi[j].Extension == ".lenc") || ((fi[j].Extension == ".lua") && (DontEncLua == false)))
                 {
-                    file = Methods.encryptLua(file, key, false, version_archive); //false - старый движок. Там нету никакой ереси
+                    file = Methods.encryptLua(file, key, false, version_archive); //false - старый движок. Там нет никакой ереси
                 }
 
                 int meta = Methods.meta_crypt(file, key, version_archive, false);
@@ -788,7 +768,6 @@ namespace TTG_Tools
                         fa.Close();
                         file_reader.Close();
                         if (File.Exists(Application.StartupPath + "\\temp.file") == true) File.Delete(Application.StartupPath + "\\temp.file");
-
                 }
             }
     

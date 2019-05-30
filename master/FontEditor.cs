@@ -1693,6 +1693,7 @@ namespace TTG_Tools
                 ffs.coord_lenght = BitConverter.GetBytes(dataGridViewWithCoord.Rows.Count * 12 * 4 + 8);
                 fs.Write(ffs.coord_lenght, 0, 4);
                 fs.Write(ffs.coord_count, 0, 4);
+
                 for (int i = 0; i < ffs.coord.Count; i++)
                 {
                     fs.Write(ffs.coord[i].symbol, 0, 4);

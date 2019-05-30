@@ -39,6 +39,7 @@ namespace TTG_Tools
         public static bool custKey;
         public static bool tsvFile;
         public static bool isIOS;
+        public static bool pvr;
 
         public struct langdb
         {
@@ -119,34 +120,6 @@ namespace TTG_Tools
             parametresD3DTX.Add(MainMenu.settings.deleteDDSafterImport.ToString());
             var threadD3DTX = new Thread(new ParameterizedThreadStart(processD3DTX.DoImportEncoding));
             threadD3DTX.Start(parametresD3DTX);
-
-            ////Создаем нить для импорта текста в LANDB
-            //var processLANDB = new ForThreads();
-            //processLANDB.ReportForWork += AddNewReport;
-            //List<string> parametresLANDB = new List<string>();
-            //parametresLANDB.Add(".landb");
-            //parametresLANDB.Add(".txt");
-            //parametresLANDB.Add(MainMenu.settings.pathForInputFolder);
-            //parametresLANDB.Add(MainMenu.settings.pathForOutputFolder);
-            //parametresLANDB.Add(MainMenu.settings.pathForTempFolder);
-            //parametresLANDB.Add(false.ToString());
-            //parametresLANDB.Add(false.ToString());
-            //var threadLANDB = new Thread(new ParameterizedThreadStart(processLANDB.DoImportEncoding));
-            //threadLANDB.Start(parametresLANDB);
-
-            ////Создаем нить для импорта текста в LANGDB
-            //var processLANGDB = new ForThreads();
-            //processLANGDB.ReportForWork += AddNewReport;
-            //List<string> parametresLANGDB = new List<string>();
-            //parametresLANGDB.Add(".langdb");
-            //parametresLANGDB.Add(".txt");
-            //parametresLANGDB.Add(MainMenu.settings.pathForInputFolder);
-            //parametresLANGDB.Add(MainMenu.settings.pathForOutputFolder);
-            //parametresLANGDB.Add(MainMenu.settings.pathForTempFolder);
-            //parametresLANGDB.Add(false.ToString());
-            //parametresLANGDB.Add(false.ToString());
-            //var threadLANGDB = new Thread(new ParameterizedThreadStart(processLANGDB.DoImportEncoding));
-            //threadLANGDB.Start(parametresLANGDB);
             ////Работаем дальше
 
 
@@ -670,6 +643,8 @@ namespace TTG_Tools
             if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
             else MainMenu.settings.unicodeSettings = 1;
 
+            pvr = checkIOS.Checked;
+
             tsvFile = tsvFilesRB.Checked;
 
             custKey = checkCustomKey.Checked;
@@ -700,22 +675,11 @@ namespace TTG_Tools
             var processLANGDB = new ForThreads();
             processLANGDB.ReportForWork += AddNewReport;
             List<string> parametresLANGDB = new List<string>();
-            parametresLANGDB.Add(".langdb");
             parametresLANGDB.Add(MainMenu.settings.pathForInputFolder);
             parametresLANGDB.Add(MainMenu.settings.pathForOutputFolder);
             parametresLANGDB.Add(versionOfGame);
             var threadLANGDB = new Thread(new ParameterizedThreadStart(processLANGDB.DoExportEncoding));
             threadLANGDB.Start(parametresLANGDB);
-
-            //var processD3DTX = new ForThreads();
-            //processLANGDB.ReportForWork += AddNewReport;
-            //List<string> parametresD3DTX = new List<string>();
-            //parametresD3DTX.Add(".d3dtx");
-            //parametresD3DTX.Add(MainMenu.settings.pathForInputFolder);
-            //parametresD3DTX.Add(MainMenu.settings.pathForOutputFolder);
-            //parametresD3DTX.Add(MainMenu.settings.pathForTempFolder);
-            //var threadD3DTX = new Thread(new ParameterizedThreadStart(processD3DTX.DoExportEncoding));
-            //threadD3DTX.Start(parametresD3DTX);
 
             for (int i = 0; i < fi.Length; i++)
             {
@@ -931,272 +895,7 @@ namespace TTG_Tools
                 }
                 else if (fi[i].Extension == ".d3dtx")
                 {
-                    //try
-                    //{
-                    //старые добрые времена с текстурами без извращений
-                    FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
-                    byte[] d3dtx = Methods.ReadFull(fs);
-                    fs.Close();
-
-                    byte[] check_header = new byte[4];
-                    Array.Copy(d3dtx, 0, check_header, 0, 4);
-                    int version = 2;
-                    if(selected_index == 1) version = 7;
-
-                    int offset = 0;
-
-                    byte[] check_ver = new byte[4];
-
-                    if (Encoding.ASCII.GetString(check_header) == "5VSM" || Encoding.ASCII.GetString(check_header) == "6VSM")
-                    {
-                        Array.Copy(d3dtx, 16, check_ver, 0, 4);
-
-                        offset = 12 * BitConverter.ToInt32(check_ver, 0) + 16 + 4;
-                        check_ver = new byte[4];
-                        Array.Copy(d3dtx, offset, check_ver, 0, 4);
-                    }
-                    else Array.Copy(d3dtx, 4, check_ver, 0, 4);
-
-                    string result = null;
-
-                    if(((Encoding.ASCII.GetString(check_header) != "5VSM") && BitConverter.ToInt32(check_ver, 0) < 6))
-                    {
-                        bool pvr = false;
-                        byte[] BinContent = TextureWorker.extract_old_textures(d3dtx, ref result, ref pvr);
-                        if (BinContent != null)
-                        {
-                            string message = "File " + fi[i].Name + " exported in dds file. " + result;
-                            string path = TTG_Tools.MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds";
-                            if (pvr)
-                            {
-                                message = "File " + fi[i].Name + " exported in pvr file. " + result;
-                                path = TTG_Tools.MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".pvr";
-                            }
-                            
-                            fs = new FileStream(path, FileMode.OpenOrCreate);
-                            fs.Write(BinContent, 0, BinContent.Length);
-                            fs.Close();
-                            listBox1.Items.Add(message);
-                        }
-                        else listBox1.Items.Add("Unknown error in file " + fi[i].Name + ". Please write me about it.");
-                    }
                     
-                    if ((BitConverter.ToInt32(check_ver, 0) == 6) && (Encoding.ASCII.GetString(check_header)) == "ERTM")
-                        {
-                            versionOfGame = "PN2";
-                        }
-                        else if ((BitConverter.ToInt32(check_ver, 0) >= 4) && (Encoding.ASCII.GetString(check_header) == "5VSM"))
-                        {
-                            switch (BitConverter.ToInt32(check_ver, 0))
-                            {
-                                case 4:
-                                    versionOfGame = "WAU";
-                                    break;
-                                case 5:
-                                    versionOfGame = "TFTB";
-                                    break;
-                                case 7:
-                                    versionOfGame = "WDM"; //Для Walking Dead Michonne
-                                    break;
-                            }
-                        }
-                    else if (BitConverter.ToInt32(check_ver, 0) >= 8 && (Encoding.ASCII.GetString(check_header) == "6VSM"))
-                    {
-                        versionOfGame = "Batman";
-                    }
-                    
-                        if (versionOfGame != " ")
-                        {
-                        try
-                        {
-                            int num = 0; //номер формата текстуры
-
-                            int num_width = 0; //номер заголовка с шириной
-                            int num_height = 0; //номер заголовка с высотой
-                            int num_mipmaps = 0; //номер количества мип-мапов
-                            int platform_pos = 0; //Позиция данных о платформе (сделано для долбаного PVR формата!)
-                            int code_pos = 0; //Позиция кода
-                            int mips_pos = 0; //Позиция мип-текстур
-                            int mips_pos2 = 0;
-                            int add_mips = 0;
-
-                            switch (versionOfGame)
-                            {
-                                case "PN2":
-                                    platform_pos = 0x60;
-                                    num = 6;
-                                    num_width = 5;
-                                    num_height = 4;
-                                    num_mipmaps = 3;
-                                    break;
-                                case "WAU":
-                                    platform_pos = 0x6C;
-                                    num = 6;
-                                    num_width = 5;
-                                    num_height = 4;
-                                    num_mipmaps = 3;
-                                    code_pos = 4;
-                                    mips_pos = 0x44;
-                                    mips_pos2 = 8;
-                                    add_mips = 0;
-                                    break;
-                                case "TFTB":
-                                    platform_pos = 0x6C;
-                                    num = 7;
-                                    num_width = 6;
-                                    num_height = 5;
-                                    num_mipmaps = 4;
-                                    break;
-                                case "WDM":
-                                    platform_pos = 0x78;
-                                    num = 6;
-                                    num_width = 5;
-                                    num_height = 4;
-                                    num_mipmaps = 3;
-                                    break;
-                                case "Batman":
-                                    platform_pos = offset + 16;//0x78;
-                                                               //num = 8;
-                                                               //num_width = 5;
-                                                               // num_height = 4;
-                                                               // num_mipmaps = 3;
-                                    code_pos = 12;
-                                    mips_pos = 0x64;
-                                    mips_pos2 = 12;
-                                    add_mips = 4;
-                                    break;
-                            }
-
-                            List<chapterOfDDS> chaptersOfDDS = new List<chapterOfDDS>();
-                            //int start = Methods.FindStartOfStringSomething(d3dtx, 0, ".d3dtx") + 5 + 2;
-                            int start = Methods.FindStartOfStringSomething(d3dtx, 0, ".d3dtx") + 6;
-                            int poz = start;
-                            //List<byte[]> head = new List<byte[]>();
-                            byte[] getPlatform = new byte[4];
-                            Array.Copy(d3dtx, platform_pos, getPlatform, 0, 4);
-
-                            //string res = Methods.GetChaptersOfDDS(d3dtx, poz, head, chaptersOfDDS, versionOfGame);
-                            byte[] mips = new byte[4];
-                            byte[] width = new byte[4];
-                            byte[] height = new byte[4];
-                            int tex_code = 0;
-
-
-                            byte[] block_size = new byte[4];
-                            Array.Copy(d3dtx, poz, block_size, 0, block_size.Length);
-                            poz += 4;
-                            byte[] content_size = new byte[4];
-                            Array.Copy(d3dtx, poz, content_size, 0, content_size.Length);
-                            poz += 4;
-                            int size = BitConverter.ToInt32(content_size, 0);
-                            poz += size;
-                            //if (size == 0) poz += content_size - 4;
-                            poz += 4;
-                            byte[] check = new byte[1];
-                            Array.Copy(d3dtx, poz, check, 0, check.Length);
-                            poz += 1;
-                            byte ch = check[0];
-                            if (ch == 0x31)
-                            {
-                                poz += 8;
-                                byte[] temp_sz = new byte[4];
-                                Array.Copy(d3dtx, poz, temp_sz, 0, temp_sz.Length);
-                                poz += BitConverter.ToInt32(temp_sz, 0);
-                            }
-
-                            Array.Copy(d3dtx, poz, mips, 0, mips.Length);
-                            poz += 4;
-                            Array.Copy(d3dtx, poz, width, 0, width.Length);
-                            poz += 4;
-                            Array.Copy(d3dtx, poz, height, 0, height.Length);
-                            poz += code_pos;
-                            byte[] temp = new byte[4];
-                            Array.Copy(d3dtx, poz, temp, 0, temp.Length);
-                            tex_code = BitConverter.ToInt32(temp, 0);
-                            poz += mips_pos;
-
-                            if(versionOfGame == "WAU")
-                            {
-                                byte[] tmp = new byte[4];
-                                Array.Copy(width, 0, tmp, 0, width.Length);
-                                Array.Copy(height, 0, width, 0, height.Length);
-                                Array.Copy(tmp, 0, height, 0, tmp.Length);
-                            }
-
-                            List<chapterOfDDS> chDDS = new List<chapterOfDDS>();
-                            List<byte[]> temp_mas = new List<byte[]>();
-
-
-                            for (int t = 0; t < BitConverter.ToInt32(mips, 0); t++)
-                            {
-                                byte[] some_shit = new byte[4];
-                                poz += 8;
-                                Array.Copy(d3dtx, poz, some_shit, 0, some_shit.Length);
-                                temp_mas.Add(some_shit);
-                                //chDDS.Add(new chapterOfDDS(nul, nul, nul, nul, some_shit, nul));
-                                poz += mips_pos2;
-                                
-
-                                if(t != BitConverter.ToInt32(mips, 0) - 1)
-                                {
-                                    poz += add_mips;
-                                }
-                            }
-
-                            for(int t = 0; t < temp_mas.Count; t++)
-                            {
-                                int size_tex = BitConverter.ToInt32(temp_mas[t], 0);
-                                byte[] nul = new byte[4];
-                                byte[] some_shit = new byte[size_tex];
-
-                                Array.Copy(d3dtx, poz, some_shit, 0, some_shit.Length);
-                                poz += some_shit.Length;
-                                chDDS.Add(new chapterOfDDS(nul, nul, nul, nul, some_shit, nul));
-                            }
-
-                            string tex_info = "MIP-map count: ";
-                            /*if (BitConverter.ToInt32(head[num_mipmaps], 0) <= 1) tex_info += "no mip-maps";
-                            else tex_info += BitConverter.ToInt32(head[num_mipmaps], 0); //Информация о текстурах*/
-
-                            if (BitConverter.ToInt32(mips, 0) <= 1) tex_info += "no mip-maps";
-                            else tex_info += BitConverter.ToInt32(mips, 0); //Информация о текстурах
-
-
-                            string AdditionalInfo = null;
-                                bool pvr = checkIOS.Checked;
-                                int platform = BitConverter.ToInt32(getPlatform, 0);
-
-
-                            byte[] Content = TextureWorker.extract_new_textures(tex_code, width, height, mips, platform, ref pvr, chDDS, ref AdditionalInfo);
-
-                            //byte[] Content = TextureWorker.extract_new_textures(num, num_width, num_height, num_mipmaps, platform, ref pvr, head, chaptersOfDDS, ref AdditionalInfo);
-
-                            AdditionalInfo += " " + tex_info;
-
-                                //AdditionalInfo += " Tex code: " + BitConverter.ToString(head[num]);
-                                
-
-                                if (Content != null)
-                                {
-                                    string FilePath = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds";
-                                    if (pvr) FilePath = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".pvr";
-                                    fs = new FileStream(FilePath, FileMode.OpenOrCreate);
-                                    fs.Write(Content, 0, Content.Length);
-                                    fs.Close();
-
-                                    if (pvr) listBox1.Items.Add("Exported pvr from: " + fi[i].Name + ", " + AdditionalInfo);
-                                    else listBox1.Items.Add("Exported dds from: " + fi[i].Name + ", " + AdditionalInfo);
-                                }
-                                else
-                                {
-                                    listBox1.Items.Add("Unknown error in file " + fi[i].Name + ". Code of Texture: " + tex_code + ". Please write me about it.");
-                                }
-                            }
-                            catch
-                            {
-                                listBox1.Items.Add("Something is wrong. Please, contact with me.");
-                            }
-                        }
                 }
                 else if(fi[i].Extension == ".font") //Может, доработать чуть позже авторасшифровку в Font Editor и удалить отсюда этот код?
                 {
@@ -1314,7 +1013,8 @@ namespace TTG_Tools
                     {
                         List<Prop> proplist = new List<Prop>();
                         byte[] header = null, countOfBlock = null, lengthAllText = null;
-                        ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText);
+                        int type = -1;
+                        ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText, ref type);
 
                         if(proplist.Count > 0)
                         {
@@ -1358,8 +1058,9 @@ namespace TTG_Tools
         }
 
         //Made for Walking Dead season 1
-        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] length_of_all_text)
+        public static void ReadProp(byte[] binContent, List<Prop> prop, ref byte[] header, ref byte[] countOfBlock, ref byte[] length_of_all_text, ref int type) //type - временное решение для удобного импорта файлов
         {
+            type = -1;
             byte[] b_header = new byte[4];
             Array.Copy(binContent, 0, b_header, 0, b_header.Length);
             byte[] vers_bytes = new byte[4];
@@ -1370,7 +1071,6 @@ namespace TTG_Tools
            
             if (vers == 3 && Encoding.ASCII.GetString(b_header) == "ERTM")
             {
-                int num = -1;
                 try
                 {
                     //poz = 60;
@@ -1399,7 +1099,7 @@ namespace TTG_Tools
 
                     if (BitConverter.ToString(check_command) == "B4-F4-5A-5F-60-6E-9C-CD")
                     {
-                        num = 0;
+                        type = 0;
                         poz += 8 + 4; //8 байт той команды + 4 байта нулевого значения
                         header = new byte[poz];
                         Array.Copy(binContent, 0, header, 0, poz);
@@ -1432,7 +1132,7 @@ namespace TTG_Tools
                     }
                     else if(BitConverter.ToString(check_command) == "25-03-C6-1F-D8-64-1B-4F")
                     {
-                        num = 1;
+                        type = 1;
                         poz += 12;
                         byte[] tmp = new byte[4];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -1479,7 +1179,7 @@ namespace TTG_Tools
                     }
                     else if(BitConverter.ToString(check_command) == "56-7E-6B-6B-27-B7-2B-64")
                     {
-                        num = 2;
+                        type = 2;
                         poz += 12;
                         byte[] tmp = new byte[1];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -1527,46 +1227,49 @@ namespace TTG_Tools
             }
         }
 
-        public static void CreateProp(byte[] header, byte[] countOfBlock, List<Prop> prop, string path)
+        public static void CreateProp(byte[] header, byte[] countOfBlock, List<Prop> prop, string path, int type) //type - временное решение
         {
-            int poz = 52;
-            byte[] tmp = new byte[4];
-            Array.Copy(header, poz, tmp, 0, tmp.Length);
-
-            poz += BitConverter.ToInt32(tmp, 0);
-
-            tmp = new byte[4];
-            Array.Copy(header, poz + 4, tmp, 0, tmp.Length);
-            int count = BitConverter.ToInt32(tmp, 0);
-            int length = 4 + 4 + 4 +(12 * count) + (16 * BitConverter.ToInt32(countOfBlock, 0));
-
-            count = BitConverter.ToInt32(countOfBlock, 0);
-
-            MemoryStream ms = new MemoryStream();
-            ms.Write(header, 0, header.Length);
-            ms.Write(countOfBlock, 0, countOfBlock.Length);
-
-            for(int i = 0; i < count; i++)
+            if (BitConverter.ToInt32(countOfBlock, 0) == 1)
             {
-                ms.Write(prop[i].id, 0, prop[i].id.Length);
-                tmp = BitConverter.GetBytes(0);
-                ms.Write(tmp, 0, tmp.Length);
-                ms.Write(prop[i].lenght_of_text, 0, prop[i].lenght_of_text.Length);
-                tmp = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(prop[i].text);
-                ms.Write(tmp, 0, tmp.Length);
-                length += prop[i].text.Length;
+                int poz = 52;
+                byte[] tmp = new byte[4];
+                Array.Copy(header, poz, tmp, 0, tmp.Length);
+
+                poz += BitConverter.ToInt32(tmp, 0);
+
+                tmp = new byte[4];
+                Array.Copy(header, poz + 4, tmp, 0, tmp.Length);
+                int count = BitConverter.ToInt32(tmp, 0);
+                int length = 4 + 4 + 4 + (12 * count) + (16 * BitConverter.ToInt32(countOfBlock, 0));
+
+                count = BitConverter.ToInt32(countOfBlock, 0);
+
+                MemoryStream ms = new MemoryStream();
+                ms.Write(header, 0, header.Length);
+                ms.Write(countOfBlock, 0, countOfBlock.Length);
+
+                for (int i = 0; i < count; i++)
+                {
+                    ms.Write(prop[i].id, 0, prop[i].id.Length);
+                    tmp = BitConverter.GetBytes(0);
+                    ms.Write(tmp, 0, tmp.Length);
+                    ms.Write(prop[i].lenght_of_text, 0, prop[i].lenght_of_text.Length);
+                    tmp = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(prop[i].text);
+                    ms.Write(tmp, 0, tmp.Length);
+                    length += prop[i].text.Length;
+                }
+
+                byte[] binContent = ms.ToArray();
+                tmp = BitConverter.GetBytes(length);
+
+                Array.Copy(tmp, 0, binContent, poz, tmp.Length);
+
+                if (File.Exists(path)) File.Delete(path);
+
+                FileStream fs = new FileStream(path, FileMode.CreateNew);
+                fs.Write(binContent, 0, binContent.Length);
+                fs.Close();
             }
-
-            byte[] binContent = ms.ToArray();
-            tmp = BitConverter.GetBytes(length);
-
-            Array.Copy(tmp, 0, binContent, poz, tmp.Length);
-
-            if (File.Exists(path)) File.Delete(path);
-
-            FileStream fs = new FileStream(path, FileMode.CreateNew);
-            fs.Write(binContent, 0, binContent.Length);
-            fs.Close();
         }
 
         public static void ReadDlog(byte[] binContent, dlog[] first_database, List<Langdb> database, byte version)

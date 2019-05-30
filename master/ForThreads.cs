@@ -139,6 +139,7 @@ namespace TTG_Tools
             }
             return false;
         }
+
         //Импорт
         public void DoImportEncoding(object parametres)
         {
@@ -283,10 +284,11 @@ namespace TTG_Tools
             List<string> strs = new List<string>();
 
             byte[] header = null, countOfBlock = null, lengthAllText = null;
+            int type = -1;
 
-            AutoPacker.ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText);
+            AutoPacker.ReadProp(binContent, proplist, ref header, ref countOfBlock, ref lengthAllText, ref type);
 
-            string[] texts = File.ReadAllLines(fileDestination[i].FullName);
+            string[] texts = File.ReadAllLines(fileDestination[j].FullName);
 
             bool number_find = false;
             int n_str = -1;
@@ -327,7 +329,7 @@ namespace TTG_Tools
                         proplist[c].lenght_of_text = BitConverter.GetBytes((int)tmp.Length);
                     }
 
-                    AutoPacker.CreateProp(header, countOfBlock, proplist, (pathOutput + "\\" + inputFiles[i].Name));
+                    AutoPacker.CreateProp(header, countOfBlock, proplist, (pathOutput + "\\" + inputFiles[i].Name), type);
                     ReportForWork("File " + Methods.GetNameOfFileOnly(inputFiles[i].Name, ".prop") + ".txt imported in " + inputFiles[i].Name);
                 }
                 catch
@@ -783,46 +785,60 @@ namespace TTG_Tools
         lonec:
             int konec = 0;
         }
+
         //Экспорт
         public void DoExportEncoding(object parametres)
         {
             List<string> param = parametres as List<string>;
-            string destinationForExport = param[0];
-            string pathInput = param[1];
-            string pathOutput = param[2];
-            string versionOfGame = param[3];
+            string pathInput = param[0];
+            string pathOutput = param[1];
+            string versionOfGame = param[2];
 
             if (Directory.Exists(pathInput) && Directory.Exists(pathOutput))
             {
-                DirectoryInfo dir = new DirectoryInfo(pathInput);
-                FileInfo[] inputFiles = dir.GetFiles('*' + destinationForExport);
-                for (int i = 0; i < inputFiles.Length; i++)
+                List<string> destinationForExportList = new List<string>();
+                destinationForExportList.Add(".langdb");
+                destinationForExportList.Add(".d3dtx");
+
+                foreach (string destinationForExport in destinationForExportList)
                 {
-                    int lenghtOfExtension = inputFiles[i].Extension.Length;
-                    string fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".txt";
-                    if (AutoPacker.tsvFile) fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".tsv";
+                    DirectoryInfo dir = new DirectoryInfo(pathInput);
+                    FileInfo[] inputFiles = dir.GetFiles('*' + destinationForExport);
 
-                    switch (destinationForExport)
+                    if (inputFiles.Length > 0)
                     {
-                        case ".langdb":
+                        for (int i = 0; i < inputFiles.Length; i++)
+                        {
+                            switch (destinationForExport)
                             {
-                                ExportTXTfromLANGDB(inputFiles, i, pathOutput, fileName, versionOfGame);
-                                break;
+                                case ".langdb":
+                                    {
+                                        int lenghtOfExtension = inputFiles[i].Extension.Length;
+                                        string fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".txt";
+                                        if (AutoPacker.tsvFile) fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".tsv";
+                                        ExportTXTfromLANGDB(inputFiles, i, pathOutput, fileName, versionOfGame);
+                                        break;
+                                    }
+                                case ".d3dtx":
+                                    {
+                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, versionOfGame, AutoPacker.pvr);
+                                        if (message != "") ReportForWork(message);
+                                        else ReportForWork("Unknown error. Please send me file.");
+                                        //AutoPacker.ExportDDSfromD3DTX(inputFiles, i, pathOutput, fileName);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        System.Windows.Forms.MessageBox.Show("Error in Switch!");
+                                        break;
+                                    }
                             }
-                        case ".d3dtx":
-                            {
-                                AutoPacker.ExportDDSfromD3DTX(inputFiles, i, pathOutput, fileName);
-                                break;
-                            }
-                        default:
-                            {
-                                System.Windows.Forms.MessageBox.Show("Error in Switch!");
-                                break;
-                            }
-                    }
 
+                        }
+
+                        ReportForWork("EXPORT OF ALL ***" + destinationForExport.ToUpper() + " IS COMPLETE!");
+                    }
                 }
-                ReportForWork("EXPORT OF ALL ***" + destinationForExport.ToUpper() + " IS COMPLETE!");
             }
 
         }

@@ -374,6 +374,60 @@ namespace TTG_Tools
 
         private void button12_Click(object sender, EventArgs e)
         {
+            allText.Clear();
+            OpenFileDialog ofd = new OpenFileDialog();
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "txt files (*.txt) | *.txt";
+            ofd.Filter = "txt files (*.txt) | *.txt";
+            ofd.Title = "Set file!";
+
+            string str = "";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                textBox3.Text = ofd.FileName.ToString();
+                try
+                {
+                    ImportTXTFromConvertedFile(ofd.FileName, ref allText, MainMenu.settings.ASCII_N);
+                    
+                    if(allText.Count > 0)
+                    {
+                        for(int i = 0; i < allText.Count; i++)
+                        {
+                            if(allText[i].orText == allText[i].trText)
+                            {
+                                if (MainMenu.settings.exportRealID) str += allText[i].realID;
+                                else str += allText[i].number;
+                                str += ") " + allText[i].orName + "\r\n" + allText[i].orText + "\r\n";
+
+                                if (MainMenu.settings.exportRealID) str += allText[i].realID;
+                                else str += allText[i].number;
+                                str += ") " + allText[i].trName + "\r\n" + allText[i].trText + "\r\n";
+                            }
+                        }
+                    }
+
+                    if(str != "")
+                    {
+                        sfd.FileName = ofd.FileName;
+                        if(sfd.ShowDialog() == DialogResult.OK)
+                        {
+                            File.WriteAllText(sfd.FileName, str);
+
+                            MessageBox.Show("Done");
+                        }
+
+                        str = "";
+                    }
+
+                    //button7.Enabled = true;
+                }
+                catch
+                {
+                    MessageBox.Show("Error in file" + ofd.FileName);
+                }
+
+            }
         }
     }
 }

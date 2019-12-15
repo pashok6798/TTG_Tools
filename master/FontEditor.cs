@@ -115,64 +115,6 @@ namespace TTG_Tools
             #endregion
 
             #region//Шаблоны некоторых шрифтов.
-            /*byte[] b = { 
-                           0x69, 0xCB, 0x4D, 0x86, 0x2C, 0x29, 0xC2, 0x04, 
-                           0x23, 0xFA, 0x4B, 0xAB, 0x99, 0xD1, 0xF3, 0x85, 0x95, 0x38, 0x98, 0x86, 
-                           0xAA, 0xB3, 0xA0, 0x53, 0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F,
-                           0x7E, 0x9E, 0x24, 0x3E, 0xC1, 0xBB, 0x5B, 0xED, 0xE3, 0x88, 0x09, 0x7A, 
-                           0x48, 0x5D, 0x7F, 0x93, 0x15, 0x03, 0x42, 0xA2 };
-            version_of_font.Add(new Version_of_font(b, "Puzzle Agent - The Mystery of Scoggins"));//0
-
-            byte[] c = {   0x17, 0x3D, 0x13, 0x3C, 0x2C, 0x29, 0xC2, 0x04, 0x23, 
-                           0xFA, 0x4B, 0xAB, 0x99, 0xD1, 0xF3, 0x85, 0x95, 0x38, 0x98, 0x86, 0xAA, 
-                           0xB3, 0xA0, 0x53, 0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F, 0x7E, 
-                           0x9E, 0x24, 0x3E, 0x21, 0xBF, 0x36, 0x9F, 0xE3, 0x88, 0x09, 0x7A, 0x48, 
-                           0x5D, 0x7F, 0x93, 0x15, 0x03, 0x42, 0xA2, 0x41, 0x16, 0xD7, 0x79, 0xB9, 
-                           0x3C, 0x28, 0x84, 0xA7, 0xDB, 0x4A, 0x1D};
-            version_of_font.Add(new Version_of_font(c, "CSI: Fatal Conspiracy"));//1
-
-
-            byte[] d = { 
-                           0x17, 0x3D, 0x13, 0x3C, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB,
-                           0x99, 0xD1, 0xF3, 0x85, 0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53,
-                           0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F, 0x7E, 0x9E, 0x24, 0x3E,
-                           0x13, 0x56, 0x95, 0xE0, 0xE3, 0x88, 0x09, 0x7A, 0x48, 0x5D, 0x7F, 0x93,
-                           0x15, 0x03, 0x42, 0xA2, 0x41, 0x16, 0xD7, 0x79, 0xB9, 0x3C, 0x28, 0x84,
-                           0xA7, 0xDB, 0x4A, 0x1D, 0x07, 0x1A, 0x1F, 0xE6, 0x44, 0xA2, 0xBC, 0x7B,
-                           0x4C, 0x6C, 0xFC, 0x6D };
-            version_of_font.Add(new Version_of_font(d, "Hector: Ep 1"));//2
-
-            byte[] f = { 
-                           0x17, 0x3D, 0x13, 0x3C, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB,
-                           0x99, 0xD1, 0xF3, 0x85, 0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53,
-                           0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F, 0x7E, 0x9E, 0x24, 0x3E,
-                           0xFB, 0x6B, 0xF5, 0x20, 0xE3, 0x88, 0x09, 0x7A, 0x48, 0x5D, 0x7F, 0x93,
-                           0x15, 0x03, 0x42, 0xA2, 0x41, 0x16, 0xD7, 0x79, 0xB9, 0x3C, 0x28, 0x84,
-                           0xA7, 0xDB, 0x4A, 0x1D, 0x07, 0x1A, 0x1F, 0xE6, 0x44, 0xA2, 0xBC, 0x7B,
-                           0x4C, 0x6C, 0xFC, 0x6D };
-            version_of_font.Add(new Version_of_font(f, "Puzzle Agent 2/Jurassic Park"));//3
-
-            byte[] g = {
-                                0x17, 0x3D, 0x13, 0x3C, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B,
-                                0xAB, 0x99, 0xD1, 0xF3, 0x85, 0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3,
-                                0xA0, 0x53, 0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F, 0x7E,
-                                0x9E, 0x24, 0x3E, 0x0E, 0x15, 0x17, 0xBA, 0xE3, 0x88, 0x09, 0x7A,
-                                0x48, 0x5D, 0x7F, 0x93, 0x15, 0x03, 0x42, 0xA2, 0x41, 0x16, 0xD7,
-                                0x79, 0xB9, 0x3C, 0x28, 0x84, 0xA7, 0xDB, 0x4A, 0x1D, 0x07, 0x1A,
-                                0x1F, 0xE6, 0x44, 0xA2, 0xBC, 0x7B, 0x4C, 0x6C, 0xFC, 0x6D };
-            version_of_font.Add(new Version_of_font(g, "The Walking Dead"));//4
-
-            byte[] h = {
-                           0x59, 0x54, 0x9A, 0x16, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB, 0xE3, 0xAD, 0x43, 0xE9, 
-                           0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53, 0x04, 0xBB, 0x8A, 0xCB, 0xE2, 0xCC, 0x38, 0x6F, 
-                           0x7E, 0x9E, 0x24, 0x3E, 0xE7, 0xD0, 0x53, 0x1F, 0xE3, 0x88, 0x09, 0x7A, 0x48, 0x5D, 0x7F, 0x93, 
-                           0x15, 0x03, 0x42, 0xA2, 0x8C, 0x59, 0x05, 0x84, 0xB7, 0xFB, 0x88, 0x8E, 0xDE, 0xD0, 0x18, 0x2F, 
-                           0x07, 0x1A, 0x1F, 0xE6, 0x44, 0xA2, 0xBC, 0x7B, 0x4C, 0x6C, 0xFC, 0x6D, 0x0F, 0xF4, 0x20, 0xE6, 
-                           0x20, 0xBA, 0xA1, 0xEF, 0x1D, 0x8A, 0xC1, 0x06, 0xEA, 0x0E, 0x30, 0xAE, 0xF1, 0x19, 0x46, 0x58, 
-                           0xF3, 0x94, 0xEB, 0x32
-                       };
-            version_of_font.Add(new Version_of_font(h, "Poker Night 2"));//5*/
-
             byte[] i = {
                            0xAC, 0xC7, 0x49, 0x03, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB, 0x95, 0x3E, 0xA6, 0xA9,
                            0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53, 0xEC, 0xF4, 0x33, 0x77, 0xE2, 0xCC, 0x38, 0x6F,
@@ -705,8 +647,7 @@ namespace TTG_Tools
                     }
                     else
                     {
-                        if (check_flag[0] == '1') poz += 17;//TFtB, GoT, etc.
-                        else poz += 9; //Last Walking Dead.
+                        poz += 17;//TFtB, GoT, etc.
                     }
 
                     ffs.coord_lenght = new byte[4];
@@ -986,7 +927,11 @@ namespace TTG_Tools
                             {
 
                                 int temp_poz = poz;
-                                temp_poz += 20;
+                                temp_poz += 16;
+                                byte[] tmp = new byte[4];
+                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+                                platform = BitConverter.ToInt32(tmp, 0);
+                                temp_poz += 4;
 
                                 byte[] countName = new byte[4];
                                 Array.Copy(binContent, temp_poz, countName, 0, 4);
@@ -1117,6 +1062,7 @@ namespace TTG_Tools
                                 //теперь разбираем 5С байт по группам из 4 байт
                                 string s_temp = "";
                                 List<byte[]> head = new List<byte[]>();
+
                                 for (int i = 0; i < 25; i++)//было 25
                                 {
                                     byte[] temp = new byte[4];
@@ -1124,7 +1070,6 @@ namespace TTG_Tools
                                     head.Add(temp);
                                     poz += 4;
                                     s_temp += BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
-
                                 }
 
                                 //MessageBox.Show(s_temp);
@@ -1171,9 +1116,6 @@ namespace TTG_Tools
                                 poz += size_of_dds;
 
                                 ffs.dds[q].size_of_dds = ffs.dds[q].size_in_font;
-
-
-
                             }
                             //}
                         }
@@ -1249,17 +1191,12 @@ namespace TTG_Tools
                                 int height_num = 4;
                                 int width_num = 3;
 
-                                if (version_used > 11 && version_used < 13)
-                                {
-                                    height_num = 3;
-                                    width_num = 2;
-                                }
-                                else if (version_used == 13)
+                                if (version_used == 13)
                                 {
                                     height_num = 3;
                                     width_num = 2;
                                     length_tex_num = 29;
-                                }
+                                }                                
 
                                 ffs.dds[j].height_in_font = new byte[4];
                                 Array.Copy(head[height_num], 0, ffs.dds[j].height_in_font, 0, 4);
@@ -1398,34 +1335,48 @@ namespace TTG_Tools
                             if (BitConverter.ToInt32(version, 0) > 10)
                             {
                                 poz = temp_poz;
-                                poz++;
-                            }
-                            else
-                            {
-                                byte[] tmp = new byte[1];
-
-                                for(int i = 0; i < 3; i++)
+                                if(BitConverter.ToInt32(version, 0) == 13)
                                 {
+                                    byte[] tmp = new byte[1];
+
                                     tmp = new byte[1];
                                     Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
                                     if (tmp[0] == 0x30) temp_poz++;
                                     else
                                     {
-                                        MessageBox.Show("Unknown format! Please send me file.");
-                                        wrong = true;
-                                        break;
+                                       MessageBox.Show("Unknown format! Please send me file.");
+                                       wrong = true;
                                     }
+
+                                    if (wrong) goto stop_it;
+
+                                    poz = temp_poz;
+                                }
+                                else poz++;
+                            }
+                            else
+                            {
+                                byte[] tmp = new byte[1];
+
+                                tmp = new byte[1];
+                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+
+                                if (tmp[0] == 0x30) temp_poz++;
+                                else
+                                {
+                                    MessageBox.Show("Unknown format! Please send me file.");
+                                    wrong = true;
                                 }
 
                                 if (wrong) goto stop_it;
 
-                                tmp = new byte[4];
+                                /*tmp = new byte[4];
                                 Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
                                 temp_poz += BitConverter.ToInt32(tmp, 0) + 4;
 
                                 tmp = new byte[4];
                                 Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                temp_poz += BitConverter.ToInt32(tmp, 0);
+                                temp_poz += BitConverter.ToInt32(tmp, 0);*/
 
                                 poz = temp_poz;
                             }
@@ -1657,7 +1608,9 @@ namespace TTG_Tools
                     byte[] ddsOffset, ddsLenght = new byte[4];
                     int offset = ffs.header_of_file.Length - 128 + dataGridViewWithCoord.Rows.Count * 12 * 4 + 8 + 8;
                     if (version_used >= 12 && version_used < 14) offset -= 12;
-                    else if (version_used == 14) offset -= (12 + 36);
+                    //временное решение
+                    else if (version_used == 14) offset -= 13;
+                    //else if (version_used == 14) offset -= (12 + 36);
 
                     //MessageBox.Show(Convert.ToString(offset));
                     
@@ -1672,12 +1625,26 @@ namespace TTG_Tools
                         offset += ffs.dds[i].header.Length;
                         lenght += ffs.dds[i].dds_content.Length;
 
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
+                        //Временное решение
+                        if (version_used < 14)
                         {
-                            offset += ffs.dds[i].pn2dds_head[j].Length;
+                            for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
+                            {
+                                offset += ffs.dds[i].pn2dds_head[j].Length;
+                            }
                         }
                     }
-                    
+
+                    if (version_used == 14)
+                    {
+                        for (int j = 0; j < ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count; j++)
+                        {
+                            offset += ffs.dds[ffs.dds.Count - 1].pn2dds_head[j].Length;
+                        }
+
+                        offset += 4 + 8 + 8 + 3;
+                    }
+
                     ddsOffset = BitConverter.GetBytes(offset);
 
                     Array.Copy(ddsOffset, 0, ffs.header_of_file, 4, 4);
@@ -1717,8 +1684,12 @@ namespace TTG_Tools
                     {
                         lenghtDds += ffs.dds[i].dds_content.Length;
                     }
-                    lenghtDds += +ffs.dds[i].header.Length + ffs.dds[i].pn2dds_head.Count * 4;
+                    //Временное решение
+                    if(version_used == 14) lenghtDds += ffs.dds[i].header.Length;
+                    else lenghtDds += ffs.dds[i].header.Length + ffs.dds[i].pn2dds_head.Count * 4;
                 }
+
+                if (version_used == 14) lenghtDds += ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count * 4;
 
                 byte[] lenghtDdsByte = new byte[4];
                 lenghtDdsByte = BitConverter.GetBytes(lenghtDds);
@@ -1756,14 +1727,42 @@ namespace TTG_Tools
                 {
                     for (int i = 0; i < ffs.dds.Count; i++)
                     {
+                        //Временное решение
                         fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
+
+                        if (version_used < 14)
                         {
-                            fs.Write(ffs.dds[i].pn2dds_head[j], 0, 4);
+                            for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
+                            {
+                                fs.Write(ffs.dds[i].pn2dds_head[j], 0, 4);
+                            }
                         }
                     }
+
+                    if(version_used == 14)
+                    {
+                        for (int j = 0; j < ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count; j++)
+                        {
+                            fs.Write(ffs.dds[ffs.dds.Count - 1].pn2dds_head[j], 0, 4);
+                        }
+                    }
+
                     byte[] z = { 0x30 };
-                    fs.Write(z, 0, 1);
+                    if (version_used == 14) z = Encoding.ASCII.GetBytes("000");
+
+                    fs.Write(z, 0, z.Length);
+
+                    //Временное решение
+                    if(version_used == 14)
+                    {
+                        z = BitConverter.GetBytes(8);
+                        fs.Write(z, 0, z.Length);
+                        z = Encoding.ASCII.GetBytes("\x00\x00\x00\x00\x00\x00\x00\x00");
+                        fs.Write(z, 0, z.Length);
+                        z = Encoding.ASCII.GetBytes("\x08\x00\x00\x00\x00\x00\x00\x00");
+                        fs.Write(z, 0, z.Length);
+                    }
+
                     for (int i = 0; i < ffs.dds.Count; i++)
                     {
                         fs.Write(ffs.dds[i].dds_content, 0, ffs.dds[i].dds_content.Length);
@@ -1956,7 +1955,7 @@ namespace TTG_Tools
                 {
                     int num = 4;
 
-                    if (version_used == 11) num = 5;
+                    if (version_used == 11 || version_used == 12) num = 5;
                     else if (version_used == 13) num = 6;
                     else if (version_used == 14) num = 4;
 
@@ -1969,94 +1968,6 @@ namespace TTG_Tools
                     byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
                     fs.Write(header, 0, header.Length);
                     fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                        /*for (int i = 0; i < MainMenu.texture_header.Count; i++)
-                        {
-                            if ((MainMenu.texture_header[i].code == BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0))
-                                && (MainMenu.texture_header[i].Is_iOS == iOS))
-                            {
-                                byte[] header = new byte[MainMenu.texture_header[i].sample.Length];
-                                Array.Copy(MainMenu.texture_header[i].sample, 0, header, 0, header.Length);
-
-                                if (iOS)
-                                {
-                                    Array.Copy(ffs.dds[file_n].height_in_dds, 0, header, 24, ffs.dds[file_n].height_in_dds.Length);
-                                    Array.Copy(ffs.dds[file_n].widht_in_dds, 0, header, 28, ffs.dds[file_n].widht_in_dds.Length);
-                                }
-                                else
-                                {
-                                    Array.Copy(ffs.dds[file_n].height_in_dds, 0, header, 12, ffs.dds[file_n].height_in_dds.Length);
-                                    Array.Copy(ffs.dds[file_n].widht_in_dds, 0, header, 16, ffs.dds[file_n].widht_in_dds.Length);
-                                    byte[] dataLength = new byte[4];
-                                    dataLength = BitConverter.GetBytes(ffs.dds[file_n].dds_content.Length);
-                                    Array.Copy(dataLength, 0, header, 20, dataLength.Length);
-                                }
-
-                                fs.Write(header, 0, header.Length);
-                                fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                            }
-                        }*/
-                        /*switch (BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0)) //Проверка на наличие кода
-                        {
-                            case 0x42: //DXT5
-                                fs.Write(dds_head, 0, dds_head.Length);
-                                fs.Write(ffs.dds[file_n].height_in_dds, 0, ffs.dds[file_n].height_in_dds.Length);
-                                fs.Write(ffs.dds[file_n].widht_in_dds, 0, ffs.dds[file_n].widht_in_dds.Length);
-                                dataLength = BitConverter.GetBytes(ffs.dds[file_n].dds_content.Length);
-                                Array.Copy(dataLength, 0, tex_format[0].sample, 0, dataLength.Length);
-
-                                fs.Write(tex_format[0].sample, 0, tex_format[0].sample.Length);
-                                fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                                break;
-
-                            case 0x62: //ATITC
-                                Array.Copy(tex_format[5].sample, 0, dds_head_cont, 9, tex_format[5].sample.Length);
-                                fs.Write(dds_head, 0, dds_head.Length);
-                                fs.Write(ffs.dds[file_n].height_in_dds, 0, ffs.dds[file_n].height_in_dds.Length);
-                                fs.Write(ffs.dds[file_n].widht_in_dds, 0, ffs.dds[file_n].widht_in_dds.Length);
-                                fs.Write(dds_head_cont, 0, dds_head_cont.Length);
-                                fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                                break;
-
-                            case 0x04: //4444 Power VR
-                                if (iOS)
-                                {
-                                    byte[] header = tex_format[4].sample;
-                                    Array.Copy(ffs.dds[file_n].widht_in_dds, 0, header, 28, ffs.dds[file_n].widht_in_dds.Length);
-                                    Array.Copy(ffs.dds[file_n].height_in_dds, 0, header, 24, ffs.dds[file_n].height_in_dds.Length);
-                                    fs.Write(header, 0, header.Length);
-                                }
-                                else
-                                {
-                                    fs.Write(dds_head, 0, dds_head.Length);
-                                    fs.Write(ffs.dds[file_n].height_in_dds, 0, ffs.dds[file_n].height_in_dds.Length);
-                                    fs.Write(ffs.dds[file_n].widht_in_dds, 0, ffs.dds[file_n].widht_in_dds.Length);
-                                    dataLength = BitConverter.GetBytes(ffs.dds[file_n].dds_content.Length);
-                                    Array.Copy(dataLength, 0, tex_format[2].sample, 0, dataLength.Length);
-                                    fs.Write(tex_format[2].sample, 0, tex_format[2].sample.Length);
-                                }
-                                fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                                break;
-
-                            case 0x00: //8888 PowerVR
-                                if (iOS)
-                                {
-                                    byte[] header = tex_format[3].sample;
-                                    Array.Copy(ffs.dds[file_n].widht_in_dds, 0, header, 28, ffs.dds[file_n].widht_in_dds.Length);
-                                    Array.Copy(ffs.dds[file_n].height_in_dds, 0, header, 24, ffs.dds[file_n].height_in_dds.Length);
-                                    fs.Write(header, 0, header.Length);
-                                }
-                                else
-                                {
-                                    fs.Write(dds_head, 0, dds_head.Length);
-                                    fs.Write(ffs.dds[file_n].height_in_dds, 0, ffs.dds[file_n].height_in_dds.Length);
-                                    fs.Write(ffs.dds[file_n].widht_in_dds, 0, ffs.dds[file_n].widht_in_dds.Length);
-                                    dataLength = BitConverter.GetBytes(ffs.dds[file_n].dds_content.Length);
-                                    Array.Copy(dataLength, 0, tex_format[1].sample, 0, dataLength.Length);
-                                    fs.Write(tex_format[1].sample, 0, tex_format[1].sample.Length);
-                                }
-                                fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                                break;
-                    }*/
                 }
                 fs.Close();
             }
@@ -2167,73 +2078,6 @@ namespace TTG_Tools
                             size_in_font2 = 31;
                             break;
                     }
-
-                    #region Старый код (временно закомментирован. Возможно, его позже удалю)
-                    /*for (int i = 0; i < MainMenu.texture_header.Count; i++)
-                    {
-                        int pos = 80; //Для DDS-текстур
-                        int check_length = 28;
-                        int sample_piece_length = 28;
-
-                        if (iOS)
-                        {
-                            pos = 8; //Для PVR текстур
-                            check_length = 8;
-                            sample_piece_length = 8;
-                        }
-
-                        byte[] check_header = new byte[check_length]; //Готовится тестовый заголовок
-                        byte[] sample_piece = new byte[sample_piece_length]; //Кусочек из образца
-
-
-                        Array.Copy(temp, pos, check_header, 0, check_length); //Копируется в него часть заголовка из DDS текстуры
-
-                        if ((!iOS) && MainMenu.texture_header[i].sample.Length > 52) pos = 80;
-                        else pos = 8;
-
-                        Array.Copy(MainMenu.texture_header[i].sample, pos, sample_piece, 0, sample_piece_length);
-
-                        if (CompareArray(check_header, sample_piece) == true) //Если кусок заголовка совпадает с образцом заголовка
-                        {
-                            ffs.dds[file_n].pn2dds_head[num] = BitConverter.GetBytes(MainMenu.texture_header[i].code); //Запишем код текстуры
-                            if (iOS) //А дальше идёт процесс копирования текстуры, вырезая заголовок текстуры
-                            {
-                                ffs.dds[file_n].height_in_dds = new byte[4];
-                                Array.Copy(temp, 24, ffs.dds[file_n].height_in_dds, 0, 4);
-                                ffs.dds[file_n].widht_in_dds = new byte[4];
-                                Array.Copy(temp, 28, ffs.dds[file_n].widht_in_dds, 0, 4);
-
-                                byte[] Binmeta_size = new byte[4];
-                                Array.Copy(temp, 48, Binmeta_size, 0, 4);
-                                meta_size = BitConverter.ToInt32(Binmeta_size, 0);
-
-                                ffs.dds[file_n].dds_content = new byte[temp.Length - MainMenu.texture_header[i].sample.Length - meta_size];
-                                Array.Copy(temp, MainMenu.texture_header[i].sample.Length + meta_size, ffs.dds[file_n].dds_content, 0, temp.Length - MainMenu.texture_header[i].sample.Length - meta_size);
-                            }
-                            else
-                            {
-                                ffs.dds[file_n].height_in_dds = new byte[4];
-                                Array.Copy(temp, 12, ffs.dds[file_n].height_in_dds, 0, 4);
-                                ffs.dds[file_n].widht_in_dds = new byte[4];
-                                Array.Copy(temp, 16, ffs.dds[file_n].widht_in_dds, 0, 4);
-
-                                ffs.dds[file_n].dds_content = new byte[temp.Length - MainMenu.texture_header[i].sample.Length];
-                                Array.Copy(temp, MainMenu.texture_header[i].sample.Length, ffs.dds[file_n].dds_content, 0, temp.Length - MainMenu.texture_header[i].sample.Length);
-                            }
-                            //int kratnost = Methods.get_kratnost(BitConverter.ToInt32(ffs.dds[file_n].widht_in_dds, 0), BitConverter.ToInt32(ffs.dds[file_n].height_in_dds, 0), MainMenu.texture_header[i].code);
-                            int kratnostPos = size_in_font2 + 1;
-                            //ffs.dds[file_n].pn2dds_head[kratnostPos] = BitConverter.GetBytes(kratnost);
-                            
-                            break;
-                        }
-
-                        if ((i >= MainMenu.texture_header.Count))
-                        {
-                            MessageBox.Show("Unknown texture format. Try another or write me about this.", "Error");
-                            goto endingprocess;
-                        }
-                    }*/
-#endregion
 
                     byte[] code = new byte[4];
                     byte[] dds_size = new byte[4];
@@ -2561,8 +2405,6 @@ namespace TTG_Tools
                                 for (int o = 0; o < dataGridViewWithCoord.RowCount; o++)
                                 {
                                     int t = (int)dataGridViewWithCoord[0, o].Value;//((char)Convert.ToInt32(dataGridViewWithCoord[0, o].Value)).ToString();
-                                    //(charN >= 1040 && charN <= 1279) || charN == 1025 || charN == 1105
-                                    //MessageBox.Show(t);
 
                                     if (charN == t)
                                     {
@@ -2621,10 +2463,6 @@ namespace TTG_Tools
                             string c = ((char)charN).ToString();
                             byte[] q = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(c.ToString());
                             string w = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(q);
-                            //if (w == c)
-                            //{
-                            //    MessageBox.Show("1"+w + c);
-                            //}
 
                             byte[] b = BitConverter.GetBytes(charN);
 
@@ -2642,12 +2480,11 @@ namespace TTG_Tools
                                 for (int o = 0; o < dataGridViewWithCoord.RowCount; o++)
                                 {
                                     string t = dataGridViewWithCoord[1, o].Value.ToString();//((char)Convert.ToInt32(dataGridViewWithCoord[0, o].Value)).ToString();
-                                    //MessageBox.Show(t);
+                                    
                                     if (c == t[0].ToString())
                                     {
                                         i = o;
                                         break;
-                                        //MessageBox.Show(c);
                                     }
                                 }
                                 if (version_used >= 9)
@@ -2664,23 +2501,9 @@ namespace TTG_Tools
                                         ffs.coord[i].symbol[0] = q[0];
                                     }
                                 }
-                                //byte[] bTemp = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(tempCharUnicode);
-                                //string tempCharASCII = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(bTemp);
-                                //if (tempCharASCII == tempCharUnicode)
-                                //if (mas[bTemp[0], 6] == 0 || (charN >= 0x410 && charN <= 0x44F) || charN == 0x401 || charN == 0x451 || charN == 0x3f)
+                                
                                 if (i > -1)
                                 {
-                                    //MessageBox.Show(tempCharASCII + tempCharUnicode);
-                                    //int i = BitConverter.ToInt16(bTemp, 0);
-                                    //for (int s = 0; s < dataGridViewWithCoord.RowCount; s++)
-                                    //{
-                                    //    if (i == Convert.ToInt32(dataGridViewWithCoord[0, s].Value))
-                                    //    {
-                                    //        i = s;
-                                    //        break;
-                                    //    }
-                                    //}
-
                                     dataGridViewWithCoord[2, i].Value = xStart;
                                     dataGridViewWithCoord[3, i].Value = xEnd;
                                     dataGridViewWithCoord[4, i].Value = yStart;
@@ -2707,9 +2530,6 @@ namespace TTG_Tools
                                             dataGridViewWithCoord[12, i].Value = widht;
                                         }
                                     }
-                                    //str[3] str[7] str[5]
-
-
 
                                     for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
                                     {
@@ -2718,10 +2538,6 @@ namespace TTG_Tools
                                 }
                             }
                         }
-                        //catch
-                        //{                           
-                        //    MessageBox.Show("Error in XML!");
-                        //}
                     }
                 }
                 ///
@@ -2790,11 +2606,6 @@ namespace TTG_Tools
                                 q = BitConverter.GetBytes(charN);
                                 w = Encoding.Unicode.GetString(q);
                             }
-
-                            //if (w == c)
-                            //{
-                            //    MessageBox.Show("1"+w + c);
-                            //}
 
                             byte[] b = BitConverter.GetBytes(charN);
 
@@ -2870,23 +2681,9 @@ namespace TTG_Tools
                                         else ffs.coord[i].symbol[0] = q[0];
                                     }
                                 }
-                                //byte[] bTemp = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(tempCharUnicode);
-                                //string tempCharASCII = ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(bTemp);
-                                //if (tempCharASCII == tempCharUnicode)
-                                //if (mas[bTemp[0], 6] == 0 || (charN >= 0x410 && charN <= 0x44F) || charN == 0x401 || charN == 0x451 || charN == 0x3f)
+                                
                                 if (i > -1)
                                 {
-                                    //MessageBox.Show(tempCharASCII + tempCharUnicode);
-                                    //int i = BitConverter.ToInt16(bTemp, 0);
-                                    //for (int s = 0; s < dataGridViewWithCoord.RowCount; s++)
-                                    //{
-                                    //    if (i == Convert.ToInt32(dataGridViewWithCoord[0, s].Value))
-                                    //    {
-                                    //        i = s;
-                                    //        break;
-                                    //    }
-                                    //}
-
                                     dataGridViewWithCoord[2, i].Value = xStart;
                                     dataGridViewWithCoord[3, i].Value = xEnd;
                                     dataGridViewWithCoord[4, i].Value = yStart;
@@ -2913,8 +2710,6 @@ namespace TTG_Tools
                                             dataGridViewWithCoord[12, i].Value = widht;
                                         }
                                     }
-                                    //str[3] str[7] str[5]
-
 
 
                                     for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
@@ -2924,13 +2719,8 @@ namespace TTG_Tools
                                 
                             }
                         }
-                        //catch
-                        //{                           
-                        //    MessageBox.Show("Error in XML!");
-                        //}
                     }
                 }
-                ///
                 sr.Close();
                 edited = true; //Шрифт изменен
             }
@@ -3052,10 +2842,7 @@ namespace TTG_Tools
                                 }
 
                                 dataGridViewWithCoord.Rows.Add();
-                                index = dataGridViewWithCoord.RowCount - 1;
-
-                                //ffs.coord_count = BitConverter.GetBytes(index);
-                                //ffs.coord_lenght
+                                index = dataGridViewWithCoord.RowCount - 1;                                
 
                                 dataGridViewWithCoord[0, index].Value = Convert.ToInt32(ch_id);
                                 dataGridViewWithCoord[1, index].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(ch_id));

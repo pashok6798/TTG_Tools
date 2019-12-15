@@ -307,6 +307,11 @@ namespace TTG_Tools
                             ImportTXT(fi[i + offset2].FullName, ref all_text, false, MainMenu.settings.ASCII_N, "\r\n", ref error);
                             for (int q = 0; q < all_text.Count; q++)
                             {
+                                if(MainMenu.settings.importingOfName)
+                                {
+                                    database[all_text[q].number - 1].name = all_text[q].name;
+                                    database[all_text[q].number - 1].lenght_of_name = BitConverter.GetBytes(database[all_text[q].number - 1].name.Length);
+                                }
                                 if (BitConverter.ToInt32(database[all_text[q].number - 1].lenght_of_textblok, 0) != 8)
                                 {
                                     database[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");

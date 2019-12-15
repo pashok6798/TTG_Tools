@@ -289,8 +289,8 @@ namespace TTG_Tools
                     Methods.get_kratnost_and_size(BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), TTG_Tools.MainMenu.texture_header[index].code, ref length, ref kratnost);
                     byte[] bLength = new byte[4];
                     bLength = BitConverter.GetBytes(length);
-                    Array.Copy(width, 0, binContent, 12, 4);
-                    Array.Copy(height, 0, binContent, 16, 4);
+                    Array.Copy(height, 0, binContent, 12, 4);
+                    Array.Copy(width, 0, binContent, 16, 4);
                     Array.Copy(bLength, 0, binContent, 20, bLength.Length);
                     Array.Copy(mip, 0, binContent, 28, 1);
                     format = TTG_Tools.MainMenu.texture_header[index].tex_info;
@@ -306,8 +306,8 @@ namespace TTG_Tools
                 binContent = TTG_Tools.MainMenu.texture_header[index].sample;
                 byte[] bLength = new byte[4];
                 bLength = BitConverter.GetBytes(length);
-                Array.Copy(width, 0, binContent, 12, 4);
-                Array.Copy(height, 0, binContent, 16, 4);
+                Array.Copy(height, 0, binContent, 12, 4);
+                Array.Copy(width, 0, binContent, 16, 4);
                 Array.Copy(bLength, 0, binContent, 20, bLength.Length);
                 Array.Copy(mip, 0, binContent, 28, 1);
                 format = "Unknown format. Set default: " + TTG_Tools.MainMenu.texture_header[index].tex_info;

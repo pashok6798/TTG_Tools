@@ -130,6 +130,18 @@ Maybe some games doesn't work. Please contact with me if you will have problems.
 
 ===
 [Version history]
+
+v1.0.3 (14.12.19)
++ TTG Tools
+Minor update
+- Auto(De)Packer:
+Removed support newer games (WD season 4 and WD Definitive Series). This tool won't support
+anymore newest games.
+
+v.1.0.2 (03.12.19)
++ Auto(De)Packer:
+Поддержка The Walking Dead - The Definitive Series
+
 v.1.0.1 (27.10.18)
 +TTG Tools
 Changed design main menu

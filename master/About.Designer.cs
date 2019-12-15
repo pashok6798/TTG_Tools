@@ -46,7 +46,7 @@
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(14, 16);
+            this.richTextBox1.Location = new System.Drawing.Point(13, 16);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;

@@ -62,19 +62,6 @@
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripImportFNT = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridViewWithCoord = new System.Windows.Forms.DataGridView();
-            this.contextMenuStripExp_imp_Coord = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.exportCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.importCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.radioButtonXstart = new System.Windows.Forms.RadioButton();
-            this.radioButtonXend = new System.Windows.Forms.RadioButton();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.changeCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -88,6 +75,19 @@
             this.Column11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.contextMenuStripExp_imp_Coord = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.radioButton2 = new System.Windows.Forms.RadioButton();
+            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButtonXstart = new System.Windows.Forms.RadioButton();
+            this.radioButtonXend = new System.Windows.Forms.RadioButton();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewWithTextures)).BeginInit();
@@ -246,7 +246,7 @@
             this.saveAsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(40, 22);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(42, 22);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
@@ -254,7 +254,7 @@
             this.openToolStripMenuItem.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -263,7 +263,7 @@
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -271,14 +271,14 @@
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.saveAsToolStripMenuItem.Text = "Save As ...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -305,6 +305,7 @@
             this.dataGridViewWithTextures.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.dataGridViewWithTextures.Name = "dataGridViewWithTextures";
             this.dataGridViewWithTextures.ReadOnly = true;
+            this.dataGridViewWithTextures.RowHeadersWidth = 51;
             this.dataGridViewWithTextures.Size = new System.Drawing.Size(433, 119);
             this.dataGridViewWithTextures.TabIndex = 26;
             this.dataGridViewWithTextures.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewWithTextures_CellMouseClick);
@@ -313,6 +314,7 @@
             // N
             // 
             this.N.HeaderText = "№";
+            this.N.MinimumWidth = 6;
             this.N.Name = "N";
             this.N.ReadOnly = true;
             this.N.Width = 30;
@@ -320,6 +322,7 @@
             // Height
             // 
             this.Height.HeaderText = "Height";
+            this.Height.MinimumWidth = 6;
             this.Height.Name = "Height";
             this.Height.ReadOnly = true;
             this.Height.Width = 102;
@@ -327,6 +330,7 @@
             // Width
             // 
             this.Width.HeaderText = "Width";
+            this.Width.MinimumWidth = 6;
             this.Width.Name = "Width";
             this.Width.ReadOnly = true;
             this.Width.Width = 102;
@@ -334,6 +338,7 @@
             // Size
             // 
             this.Size.HeaderText = "Size";
+            this.Size.MinimumWidth = 6;
             this.Size.Name = "Size";
             this.Size.ReadOnly = true;
             this.Size.Width = 102;
@@ -349,14 +354,14 @@
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem,
             this.toolStripImportFNT});
             this.contextMenuStripExport_Import.Name = "contextMenuStripExport_Import";
-            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(510, 160);
+            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(504, 164);
             this.contextMenuStripExport_Import.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripExport_Import_Opening);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Enabled = false;
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(503, 22);
             this.exportToolStripMenuItem.Text = "Export texture";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
@@ -364,7 +369,7 @@
             // 
             this.importDDSToolStripMenuItem.Enabled = false;
             this.importDDSToolStripMenuItem.Name = "importDDSToolStripMenuItem";
-            this.importDDSToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
+            this.importDDSToolStripMenuItem.Size = new System.Drawing.Size(503, 22);
             this.importDDSToolStripMenuItem.Text = "Import texture";
             this.importDDSToolStripMenuItem.Click += new System.EventHandler(this.importDDSToolStripMenuItem_Click);
             // 
@@ -372,7 +377,7 @@
             // 
             this.exportCoordinatesToolStripMenuItem1.Enabled = false;
             this.exportCoordinatesToolStripMenuItem1.Name = "exportCoordinatesToolStripMenuItem1";
-            this.exportCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(509, 26);
+            this.exportCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(503, 22);
             this.exportCoordinatesToolStripMenuItem1.Text = "Export coordinates";
             this.exportCoordinatesToolStripMenuItem1.Click += new System.EventHandler(this.exportCoordinatesToolStripMenuItem1_Click);
             // 
@@ -380,21 +385,21 @@
             // 
             this.importCoordinatesToolStripMenuItem1.Enabled = false;
             this.importCoordinatesToolStripMenuItem1.Name = "importCoordinatesToolStripMenuItem1";
-            this.importCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(509, 26);
+            this.importCoordinatesToolStripMenuItem1.Size = new System.Drawing.Size(503, 22);
             this.importCoordinatesToolStripMenuItem1.Text = "Import coordinates";
             this.importCoordinatesToolStripMenuItem1.Click += new System.EventHandler(this.importCoordinatesToolStripMenuItem1_Click);
             // 
             // importCoordinatesFromFontStudioxmlToolStripMenuItem
             // 
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Name = "importCoordinatesFromFontStudioxmlToolStripMenuItem";
-            this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Size = new System.Drawing.Size(509, 26);
+            this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Size = new System.Drawing.Size(503, 22);
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Text = "Import coordinates from FontStudio (Data Exporters *.xml)";
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem.Click += new System.EventHandler(this.importCoordinatesFromFontStudioxmlToolStripMenuItem_Click);
             // 
             // toolStripImportFNT
             // 
             this.toolStripImportFNT.Name = "toolStripImportFNT";
-            this.toolStripImportFNT.Size = new System.Drawing.Size(509, 26);
+            this.toolStripImportFNT.Size = new System.Drawing.Size(503, 22);
             this.toolStripImportFNT.Text = "Import coordinates from Bitmap Font Generator (*.fnt типа xml)";
             this.toolStripImportFNT.Click += new System.EventHandler(this.toolStripImportFNT_Click);
             // 
@@ -431,11 +436,103 @@
             this.dataGridViewWithCoord.Location = new System.Drawing.Point(16, 160);
             this.dataGridViewWithCoord.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.dataGridViewWithCoord.Name = "dataGridViewWithCoord";
+            this.dataGridViewWithCoord.RowHeadersWidth = 51;
             this.dataGridViewWithCoord.Size = new System.Drawing.Size(1305, 464);
             this.dataGridViewWithCoord.TabIndex = 27;
             this.dataGridViewWithCoord.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridViewWithCoord_CellBeginEdit);
             this.dataGridViewWithCoord.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewWithCoord_CellEndEdit);
             this.dataGridViewWithCoord.CellMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewWithCoord_CellMouseClick);
+            // 
+            // Column1
+            // 
+            this.Column1.HeaderText = "№";
+            this.Column1.MinimumWidth = 6;
+            this.Column1.Name = "Column1";
+            this.Column1.Width = 40;
+            // 
+            // Column2
+            // 
+            this.Column2.HeaderText = "Char";
+            this.Column2.MinimumWidth = 6;
+            this.Column2.Name = "Column2";
+            this.Column2.Width = 40;
+            // 
+            // Column3
+            // 
+            this.Column3.HeaderText = "X start";
+            this.Column3.MinimumWidth = 6;
+            this.Column3.Name = "Column3";
+            this.Column3.Width = 60;
+            // 
+            // Column4
+            // 
+            this.Column4.HeaderText = "X end";
+            this.Column4.MinimumWidth = 6;
+            this.Column4.Name = "Column4";
+            this.Column4.Width = 60;
+            // 
+            // Column5
+            // 
+            this.Column5.HeaderText = "Y start";
+            this.Column5.MinimumWidth = 6;
+            this.Column5.Name = "Column5";
+            this.Column5.Width = 60;
+            // 
+            // Column6
+            // 
+            this.Column6.HeaderText = "Y end";
+            this.Column6.MinimumWidth = 6;
+            this.Column6.Name = "Column6";
+            this.Column6.Width = 60;
+            // 
+            // Column7
+            // 
+            this.Column7.HeaderText = "№ dds";
+            this.Column7.MinimumWidth = 6;
+            this.Column7.Name = "Column7";
+            this.Column7.Width = 65;
+            // 
+            // Column8
+            // 
+            this.Column8.HeaderText = "Widht";
+            this.Column8.MinimumWidth = 6;
+            this.Column8.Name = "Column8";
+            this.Column8.Width = 119;
+            // 
+            // Column9
+            // 
+            this.Column9.HeaderText = "Height";
+            this.Column9.MinimumWidth = 6;
+            this.Column9.Name = "Column9";
+            this.Column9.Width = 119;
+            // 
+            // Column10
+            // 
+            this.Column10.HeaderText = "Channel";
+            this.Column10.MinimumWidth = 6;
+            this.Column10.Name = "Column10";
+            this.Column10.Width = 119;
+            // 
+            // Column11
+            // 
+            this.Column11.HeaderText = "X offset";
+            this.Column11.MinimumWidth = 6;
+            this.Column11.Name = "Column11";
+            this.Column11.Width = 119;
+            // 
+            // Column12
+            // 
+            this.Column12.HeaderText = "Y offset";
+            this.Column12.MinimumWidth = 6;
+            this.Column12.Name = "Column12";
+            this.Column12.Width = 119;
+            // 
+            // Column13
+            // 
+            this.Column13.HeaderText = "X advanced";
+            this.Column13.MinimumWidth = 6;
+            this.Column13.Name = "Column13";
+            this.Column13.Width = 119;
             // 
             // contextMenuStripExp_imp_Coord
             // 
@@ -445,21 +542,28 @@
             this.importCoordinatesToolStripMenuItem,
             this.changeCoordinatesToolStripMenuItem});
             this.contextMenuStripExp_imp_Coord.Name = "contextMenuStripExp_imp_Coord";
-            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(211, 110);
+            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(205, 70);
             // 
             // exportCoordinatesToolStripMenuItem
             // 
             this.exportCoordinatesToolStripMenuItem.Name = "exportCoordinatesToolStripMenuItem";
-            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
             this.exportCoordinatesToolStripMenuItem.Text = "Export coordinates";
             this.exportCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.exportCoordinatesToolStripMenuItem_Click);
             // 
             // importCoordinatesToolStripMenuItem
             // 
             this.importCoordinatesToolStripMenuItem.Name = "importCoordinatesToolStripMenuItem";
-            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
             this.importCoordinatesToolStripMenuItem.Text = "Import coordinates";
             this.importCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.importCoordinatesToolStripMenuItem_Click);
+            // 
+            // changeCoordinatesToolStripMenuItem
+            // 
+            this.changeCoordinatesToolStripMenuItem.Name = "changeCoordinatesToolStripMenuItem";
+            this.changeCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.changeCoordinatesToolStripMenuItem.Text = "Change coordinates";
+            this.changeCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.changeCoordinatesToolStripMenuItem_Click);
             // 
             // groupBox2
             // 
@@ -567,91 +671,6 @@
             this.button1.Text = "Change";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // changeCoordinatesToolStripMenuItem
-            // 
-            this.changeCoordinatesToolStripMenuItem.Name = "changeCoordinatesToolStripMenuItem";
-            this.changeCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
-            this.changeCoordinatesToolStripMenuItem.Text = "Change coordinates";
-            this.changeCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.changeCoordinatesToolStripMenuItem_Click);
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "№";
-            this.Column1.Name = "Column1";
-            this.Column1.Width = 40;
-            // 
-            // Column2
-            // 
-            this.Column2.HeaderText = "Char";
-            this.Column2.Name = "Column2";
-            this.Column2.Width = 40;
-            // 
-            // Column3
-            // 
-            this.Column3.HeaderText = "X start";
-            this.Column3.Name = "Column3";
-            this.Column3.Width = 60;
-            // 
-            // Column4
-            // 
-            this.Column4.HeaderText = "X end";
-            this.Column4.Name = "Column4";
-            this.Column4.Width = 60;
-            // 
-            // Column5
-            // 
-            this.Column5.HeaderText = "Y start";
-            this.Column5.Name = "Column5";
-            this.Column5.Width = 60;
-            // 
-            // Column6
-            // 
-            this.Column6.HeaderText = "Y end";
-            this.Column6.Name = "Column6";
-            this.Column6.Width = 60;
-            // 
-            // Column7
-            // 
-            this.Column7.HeaderText = "№ dds";
-            this.Column7.Name = "Column7";
-            this.Column7.Width = 65;
-            // 
-            // Column8
-            // 
-            this.Column8.HeaderText = "Widht";
-            this.Column8.Name = "Column8";
-            this.Column8.Width = 119;
-            // 
-            // Column9
-            // 
-            this.Column9.HeaderText = "Height";
-            this.Column9.Name = "Column9";
-            this.Column9.Width = 119;
-            // 
-            // Column10
-            // 
-            this.Column10.HeaderText = "Channel";
-            this.Column10.Name = "Column10";
-            this.Column10.Width = 119;
-            // 
-            // Column11
-            // 
-            this.Column11.HeaderText = "X offset";
-            this.Column11.Name = "Column11";
-            this.Column11.Width = 119;
-            // 
-            // Column12
-            // 
-            this.Column12.HeaderText = "Y offset";
-            this.Column12.Name = "Column12";
-            this.Column12.Width = 119;
-            // 
-            // Column13
-            // 
-            this.Column13.HeaderText = "X advanced";
-            this.Column13.Name = "Column13";
-            this.Column13.Width = 119;
             // 
             // FontEditor
             // 

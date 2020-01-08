@@ -529,10 +529,15 @@ namespace TTG_Tools
 
                         poz = 140;
                     }
-                    else if(version_used == 13 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
+                    else if (version_used == 13 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
                     {
                         version_used++;
                         poz = 176;
+                    }
+                    else if(version_used == 14 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
+                    {
+                        version_used++;
+                        poz = 172;
                     }
                     else if (version_used == 9 && poz == 16)
                     {
@@ -1370,14 +1375,6 @@ namespace TTG_Tools
 
                                 if (wrong) goto stop_it;
 
-                                /*tmp = new byte[4];
-                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                temp_poz += BitConverter.ToInt32(tmp, 0) + 4;
-
-                                tmp = new byte[4];
-                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                temp_poz += BitConverter.ToInt32(tmp, 0);*/
-
                                 poz = temp_poz;
                             }
 
@@ -1607,14 +1604,9 @@ namespace TTG_Tools
                 {
                     byte[] ddsOffset, ddsLenght = new byte[4];
                     int offset = ffs.header_of_file.Length - 128 + dataGridViewWithCoord.Rows.Count * 12 * 4 + 8 + 8;
-                    if (version_used >= 12 && version_used < 14) offset -= 12;
-                    //временное решение
-                    else if (version_used == 14) offset -= 13;
-                    //else if (version_used == 14) offset -= (12 + 36);
+                    if (version_used == 14) offset -= (24 + 11); //Batman 1, WD3
 
-                    //MessageBox.Show(Convert.ToString(offset));
-                    
-                     if (version_used >= 11)
+                    if (version_used >= 11)
                      {
                          offset++;
                      }
@@ -1625,7 +1617,6 @@ namespace TTG_Tools
                         offset += ffs.dds[i].header.Length;
                         lenght += ffs.dds[i].dds_content.Length;
 
-                        //Временное решение
                         if (version_used < 14)
                         {
                             for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
@@ -1642,7 +1633,7 @@ namespace TTG_Tools
                             offset += ffs.dds[ffs.dds.Count - 1].pn2dds_head[j].Length;
                         }
 
-                        offset += 4 + 8 + 8 + 3;
+                        //offset += 4 + 8 + 8 + 3;
                     }
 
                     ddsOffset = BitConverter.GetBytes(offset);
@@ -1727,7 +1718,6 @@ namespace TTG_Tools
                 {
                     for (int i = 0; i < ffs.dds.Count; i++)
                     {
-                        //Временное решение
                         fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
 
                         if (version_used < 14)
@@ -1739,7 +1729,7 @@ namespace TTG_Tools
                         }
                     }
 
-                    if(version_used == 14)
+                    if (version_used == 14)
                     {
                         for (int j = 0; j < ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count; j++)
                         {
@@ -1748,20 +1738,8 @@ namespace TTG_Tools
                     }
 
                     byte[] z = { 0x30 };
-                    if (version_used == 14) z = Encoding.ASCII.GetBytes("000");
 
                     fs.Write(z, 0, z.Length);
-
-                    //Временное решение
-                    if(version_used == 14)
-                    {
-                        z = BitConverter.GetBytes(8);
-                        fs.Write(z, 0, z.Length);
-                        z = Encoding.ASCII.GetBytes("\x00\x00\x00\x00\x00\x00\x00\x00");
-                        fs.Write(z, 0, z.Length);
-                        z = Encoding.ASCII.GetBytes("\x08\x00\x00\x00\x00\x00\x00\x00");
-                        fs.Write(z, 0, z.Length);
-                    }
 
                     for (int i = 0; i < ffs.dds.Count; i++)
                     {
@@ -2064,6 +2042,9 @@ namespace TTG_Tools
                             size_in_font2 = 28;
                             break;
                         case 12:
+                            num = 5;
+                            height_num = 4;
+                            width_num = 3;
                             size_in_font1 = 24;
                             size_in_font2 = 28;
                             break;
@@ -2073,7 +2054,8 @@ namespace TTG_Tools
                             size_in_font2 = 33;
                             break;
                         case 14:
-                            num = 4;
+                            width_num = 0;
+                            height_num = 1;
                             size_in_font1 = 27;
                             size_in_font2 = 31;
                             break;

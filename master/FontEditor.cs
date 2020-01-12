@@ -1604,7 +1604,13 @@ namespace TTG_Tools
                 {
                     byte[] ddsOffset, ddsLenght = new byte[4];
                     int offset = ffs.header_of_file.Length - 128 + dataGridViewWithCoord.Rows.Count * 12 * 4 + 8 + 8;
-                    if (version_used == 14) offset -= (24 + 11); //Batman 1, WD3
+                    if (version_used == 14)
+                    {
+                        byte[] tmp = new byte[4];
+                        Array.Copy(ffs.header_of_file, 16, tmp, 0, tmp.Length);
+                        if (BitConverter.ToInt32(tmp, 0) == 13) offset -= 36; //Guardians of the Galaxy
+                        offset -= (24 + 11); //Batman 1, WD3
+                    }
 
                     if (version_used >= 11)
                     {
@@ -1622,6 +1628,8 @@ namespace TTG_Tools
                             offset += ffs.dds[i].pn2dds_head[j].Length;
                         }
                     }
+
+                   
 
                     if (version_used == 14) offset += 4 + 8 + 8 + 3;
 

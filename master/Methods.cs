@@ -57,12 +57,14 @@ namespace TTG_Tools
                 case 0x53: //pvrtc 4bpp
                 case 0x51: //pvrtc 4bpp
                 case 0x40: //DXT1
+                case 0x43: //BC4
                 case 0x70: //ETC1
                     ddsContentLength /= 2;
                     kratnost = kratnost * 2 / height;
                     break;
 
                 case 0x42: //DXT5
+                case 0x44: //BC5
                     kratnost = kratnost * 4 / height;
                     break;
             }

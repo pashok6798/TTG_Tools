@@ -346,7 +346,7 @@ namespace TTG_Tools
 
             string result = null;
 
-            if (((Encoding.ASCII.GetString(check_header) != "5VSM") && BitConverter.ToInt32(check_ver, 0) < 6))
+            if ((((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "6VSM")) && BitConverter.ToInt32(check_ver, 0) < 6))
             {
                 pvr = false;
                 byte[] BinContent = TextureWorker.extract_old_textures(d3dtx, ref result, ref pvr);
@@ -367,7 +367,7 @@ namespace TTG_Tools
                     return message;
                     //listBox1.Items.Add(message);
                 }
-                else return "Unknown error in file " + fi[i].Name + ". Please write me about it.";//listBox1.Items.Add("Unknown error in file " + fi[i].Name + ". Please write me about it.");
+                else return "Unknown error in file " + fi[i].Name + ". Please write me about it.";
             }
 
             if ((BitConverter.ToInt32(check_ver, 0) == 6) && (Encoding.ASCII.GetString(check_header)) == "ERTM")

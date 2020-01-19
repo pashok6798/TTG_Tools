@@ -131,6 +131,13 @@ Maybe some games doesn't work. Please contact with me if you will have problems.
 ===
 [Version history]
 
+v1.0.4 RC1 (19.01.19)
++ Auto(De)Packer:
+Return support latest games.
+Add support BC4 and BC5 formats (need photoshop plugin Intel Texture Works: https://software.intel.com/en-us/articles/intel-texture-works-plugin)
++ Font Editor:
+Fix import/export fonts until latest game (Walking Dead: The Definitive Series).
+
 v1.0.3 (14.12.19)
 + TTG Tools
 Minor update

@@ -524,13 +524,35 @@ namespace TTG_Tools
                     if ((version_used == 10 && poz == 16))
                     {
                         version_used += version_of_font.Count;
-                        if (Encoding.ASCII.GetString(header) == "6VSM") version_used++;
+                        if (Encoding.ASCII.GetString(header) == "6VSM")
+                        {
+                            version_used++;
+
+                            //Terrible fix for support Walking Dead: The Definitive Series
+                            byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
+                            byte[] header_in_file = new byte[check_block.Length];
+                            Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
+                            if (CompareArray(header_in_file, check_block))
+                            {
+                                version_used = 15;
+                            }
+                        }
 
                         poz = 140;
                     }
                     else if (version_used == 13 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
                     {
                         version_used++;
+
+                        //Terrible fix for support Walking Dead: The Definitive Series
+                        byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
+                        byte[] header_in_file = new byte[check_block.Length];
+                        Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
+                        if (CompareArray(header_in_file, check_block))
+                        {
+                            version_used = 15;
+                        }
+
                         poz = 176;
                     }
                     else if (version_used == 14 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
@@ -648,6 +670,11 @@ namespace TTG_Tools
                         Array.Copy(binContent, check_poz, check_length, 0, 4);
                         if (BitConverter.ToInt32(check_length, 0) != 256) poz += 9;
                         else poz += 5;
+                    }
+                    else if(version_used == 15)
+                    {
+                        //Fix for Walking Dead: The definitive series
+                        poz += 9;
                     }
                     else
                     {
@@ -1234,8 +1261,8 @@ namespace TTG_Tools
                         #endregion
 
 
-                        #region //Версия 14
-                        if (version_used == 14)
+                        #region //Версия 14 и 15
+                        if (version_used == 14 || version_used == 15)
                         {
                             int temp_poz = poz;
 
@@ -1604,7 +1631,7 @@ namespace TTG_Tools
                 {
                     byte[] ddsOffset, ddsLenght = new byte[4];
                     int offset = ffs.header_of_file.Length - 128 + dataGridViewWithCoord.Rows.Count * 12 * 4 + 8 + 8;
-                    if (version_used == 14)
+                    if (version_used == 14 || version_used == 15)
                     {
                         byte[] tmp = new byte[4];
                         Array.Copy(ffs.header_of_file, 16, tmp, 0, tmp.Length);
@@ -1631,7 +1658,7 @@ namespace TTG_Tools
 
                    
 
-                    if (version_used == 14) offset += 4 + 8 + 8 + 3;
+                    if (version_used == 14 || version_used == 15) offset += 4 + 8 + 8 + 3;
 
                     ddsOffset = BitConverter.GetBytes(offset);
 
@@ -1677,7 +1704,7 @@ namespace TTG_Tools
                     lenghtDds += ffs.dds[i].header.Length + ffs.dds[i].pn2dds_head.Count * 4;
                 }
 
-                if (version_used == 14) lenghtDds += ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count * 4;
+                if (version_used == 14 || version_used == 15) lenghtDds += ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count * 4;
 
                 byte[] lenghtDdsByte = new byte[4];
                 lenghtDdsByte = BitConverter.GetBytes(lenghtDds);
@@ -2040,6 +2067,7 @@ namespace TTG_Tools
                             size_in_font2 = 33;
                             break;
                         case 14:
+                        case 15:
                             width_num = 0;
                             height_num = 1;
                             size_in_font1 = 27;

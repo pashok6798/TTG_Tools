@@ -41,6 +41,3 @@ It supports some games (at least I tested only these games):
 - Minecraft: Story Mode — Season 2
 - Batman: The Enemy Within
 - The Walking Dead: The Final Season
-
-I'm not sure for support another platform because I don't have it and I don't want to research Telltale's games anymore.
-But if you can code and you want translate Telltale's games then use this source code for making own tool.

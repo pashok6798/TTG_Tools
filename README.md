@@ -35,8 +35,9 @@ It supports some games (at least I tested only these games):
 - Game of Thrones
 - Minecraft: Story Mode
 - The Walking Dead: Michonne
-- Batman: The Telltale Series (Not complete)
-- The Walking Dead: A New Frontier (Not complete too)
-
-I'm not sure for support another platform because I don't have it and I don't want to research Telltale's games anymore.
-But if you can code and you want translate Telltale's games then use this source code for making own tool.
+- Batman: The Telltale Series
+- The Walking Dead: A New Frontier
+- Marvel’s Guardians of the Galaxy: The Telltale Series
+- Minecraft: Story Mode — Season 2
+- Batman: The Enemy Within
+- The Walking Dead: The Final Season

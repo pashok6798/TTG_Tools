@@ -502,7 +502,17 @@ namespace TTG_Tools
             }
             else if (BitConverter.ToInt32(check_ver, 0) >= 8 && (Encoding.ASCII.GetString(new_header) == "6VSM"))
             {
-                versionOfGame = "Batman";
+                switch(BitConverter.ToInt32(check_ver, 0))
+                {
+                    case 8:
+                        versionOfGame = "Batman";
+                        break;
+
+                    case 9:
+                        versionOfGame = "WDDS";
+                        break;
+                }
+                
             }
 
             fs = new FileStream(fileDestination[j].FullName, FileMode.Open);

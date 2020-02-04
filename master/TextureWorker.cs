@@ -391,7 +391,17 @@ namespace TTG_Tools
             }
             else if (BitConverter.ToInt32(check_ver, 0) >= 8 && (Encoding.ASCII.GetString(check_header) == "6VSM"))
             {
-                versionOfGame = "Batman";
+                switch(BitConverter.ToInt32(check_ver, 0))
+                {
+                    case 8:
+                        versionOfGame = "Batman";
+                        break;
+
+                    case 9:
+                        versionOfGame = "WDDS"; //Walking Dead: The Definitive Series
+                        break;
+                }
+                
             }
 
             if (versionOfGame != " ")
@@ -435,6 +445,7 @@ namespace TTG_Tools
                             add_mips = 8;
                             break;
                         case "Batman":
+                        case "WDDS":
                             platform_pos = offset + 16;//0x78;
                                                        //num = 8;
                                                        //num_width = 5;
@@ -489,11 +500,11 @@ namespace TTG_Tools
                     Array.Copy(d3dtx, poz, mips, 0, mips.Length);
 
                     poz += 4;
-                    //Array.Copy(d3dtx, poz, width, 0, width.Length);
-                    Array.Copy(d3dtx, poz, height, 0, width.Length);
+                    if (versionOfGame == "WDDS") Array.Copy(d3dtx, poz, width, 0, width.Length);
+                    else Array.Copy(d3dtx, poz, height, 0, height.Length);
                     poz += 4;
-                    //Array.Copy(d3dtx, poz, height, 0, height.Length);
-                    Array.Copy(d3dtx, poz, width, 0, height.Length);
+                    if (versionOfGame == "WDDS") Array.Copy(d3dtx, poz, height, 0, height.Length);
+                    else Array.Copy(d3dtx, poz, width, 0, width.Length);
                     poz += code_pos;
                     byte[] temp = new byte[4];
                     Array.Copy(d3dtx, poz, temp, 0, temp.Length);
@@ -504,7 +515,7 @@ namespace TTG_Tools
                     Array.Copy(width, 0, tmp, 0, width.Length);
                     Array.Copy(height, 0, width, 0, height.Length);
                     Array.Copy(tmp, 0, height, 0, tmp.Length);*/
-                    
+
 
                     List<AutoPacker.chapterOfDDS> chDDS = new List<AutoPacker.chapterOfDDS>();
                     List<byte[]> temp_mas = new List<byte[]>();
@@ -513,14 +524,14 @@ namespace TTG_Tools
                     bool need_skip = false;
                     //for (int t = 0; t < BitConverter.ToInt32(mips, 0); t++)
                     int t = 0;
-                    while(t < BitConverter.ToInt32(mips, 0))
+                    while (t < BitConverter.ToInt32(mips, 0))
                     {
                         byte[] some_shit = new byte[4];
                         poz += 8;
-                        if (versionOfGame == "PN2" || versionOfGame == "Batman") poz -= 8; //было -4
+                        if (versionOfGame == "PN2" || versionOfGame == "Batman" || versionOfGame == "WDDS") poz -= 8; //было -4
                         Array.Copy(d3dtx, poz, some_shit, 0, some_shit.Length);
 
-                        if (versionOfGame == "Batman") //Terrible way to fix that problem
+                        if (versionOfGame == "Batman" || versionOfGame == "WDDS") //Terrible way to fix that problem
                         {
                             if (BitConverter.ToInt32(some_shit, 0) == check_mips)
                             {
@@ -562,12 +573,12 @@ namespace TTG_Tools
                         }
                     }
 
-                    if (versionOfGame == "Batman" && need_skip)
+                    if ((versionOfGame == "Batman" || versionOfGame == "WDDS") && need_skip)
                     {
                         poz += 0x78; //I'll see later
                     }
 
-                    if (versionOfGame == "WDM" || versionOfGame == "Batman") poz += 4;
+                    if (versionOfGame == "WDM" || versionOfGame == "Batman" || versionOfGame == "WDDS") poz += 4;
 
                     for (t = 0; t < temp_mas.Count; t++)
                     {
@@ -604,17 +615,17 @@ namespace TTG_Tools
                         fs.Write(Content, 0, Content.Length);
                         fs.Close();
 
-                        if (pvr) return "Exported pvr from: " + fi[i].Name + ", " + AdditionalInfo; //listBox1.Items.Add("Exported pvr from: " + fi[i].Name + ", " + AdditionalInfo);
-                        else return "Exported dds from: " + fi[i].Name + ", " + AdditionalInfo; //listBox1.Items.Add("Exported dds from: " + fi[i].Name + ", " + AdditionalInfo);
+                        if (pvr) return "Exported pvr from: " + fi[i].Name + ", " + AdditionalInfo;
+                        else return "Exported dds from: " + fi[i].Name + ", " + AdditionalInfo;
                     }
                     else
                     {
-                        return "Unknown error in file " + fi[i].Name + ". Code of Texture: " + tex_code + ". Please write me about it."; //listBox1.Items.Add("Unknown error in file " + fi[i].Name + ". Code of Texture: " + tex_code + ". Please write me about it.");
+                        return "Unknown error in file " + fi[i].Name + ". Code of Texture: " + tex_code + ". Please write me about it.";
                     }
                 }
                 catch
                 {
-                    return "Something is wrong. Please, contact with me.";//listBox1.Items.Add("Something is wrong. Please, contact with me.");
+                    return "Something is wrong. Please, contact with me.";
                 }
             }
 
@@ -889,11 +900,13 @@ namespace TTG_Tools
                 if (BitConverter.ToInt32(mip, 0) == 0) mip = BitConverter.GetBytes(1);
                 Array.Copy(mip, 0, d3dtxContent, poz, mip.Length); //и заменяем тут
                 poz += 4;
-                Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
+                if(VersionOfGame == "WDDS") Array.Copy(height, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
+                else Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
                 poz += 4;
-                Array.Copy(height, 0, d3dtxContent, poz, 4); //тут высоту
+                if (VersionOfGame == "WDDS") Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
+                else Array.Copy(height, 0, d3dtxContent, poz, 4); //тут высоту
                 poz += 4;
-                if (VersionOfGame == "Batman") poz += 8;
+                if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 8;
                 Array.Copy(tex_type, 0, d3dtxContent, poz, 4); //также меняем тип текстуры, если он отличается.
 
                 //делаем дальше смещение
@@ -901,7 +914,7 @@ namespace TTG_Tools
                 else if (VersionOfGame == "WAU") poz += 56;
                 else if (VersionOfGame == "TFTB") poz += 68;
                 else if (VersionOfGame == "WDM") poz += 72;
-                else if (VersionOfGame == "Batman") poz += 84;
+                else if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 84;
 
                 Array.Copy(mip, 0, d3dtxContent, poz, 4);
                 poz += 8;
@@ -915,14 +928,14 @@ namespace TTG_Tools
                 if (VersionOfGame != "PN2") Array.Copy(ddsContentLengthBin, 0, d3dtxContent, 12, 4); //Если не покер 2, меняем ещё и в начале размер данных текстуры
                 poz += 4;
 
-                if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman") poz += 4;
+                if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 4;
                 int mipmapTable = 0;
 
                 //задаём размер блока с данными о мип-мапах и их размерах
                 if (VersionOfGame == "PN2") mipmapTable = 12 * BitConverter.ToInt32(mip, 0);
                 else if (VersionOfGame == "WAU") mipmapTable = 16 * BitConverter.ToInt32(mip, 0);
                 else if (VersionOfGame == "TFTB" || VersionOfGame == "WDM") mipmapTable = 20 * BitConverter.ToInt32(mip, 0) - 4;
-                else if (VersionOfGame == "Batman") mipmapTable = 24 * BitConverter.ToInt32(mip, 0) - 4;
+                else if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") mipmapTable = 24 * BitConverter.ToInt32(mip, 0) - 4;
 
                 byte[] newD3dtxHeader = new byte[poz + mipmapTable];
                 Array.Copy(d3dtxContent, 0, newD3dtxHeader, 0, poz);
@@ -962,13 +975,13 @@ namespace TTG_Tools
                         Array.Copy(ddsKratnostBin, 0, newD3dtxHeader, poz, 4);
                         poz += 4;
 
-                        if (VersionOfGame == "Batman")
+                        if (VersionOfGame == "Batman" || VersionOfGame == "WDDS")
                         {
                             Array.Copy(ddsContentLengthBin, 0, newD3dtxHeader, poz, 4);
                             poz += 4;
                         }
 
-                        if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman")
+                        if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS")
                         { //Странный метод в борде. Идут сначала какие-то 00 00 00 00 байта, а в конце тупо кратностью заканчивается
                             if (x != 0)
                             {
@@ -990,6 +1003,7 @@ namespace TTG_Tools
                             break;
                         case "WDM":
                         case "Batman":
+                        case "WDDS":
                             plat_pos = 0x78;
                             break;
                     }
@@ -1001,7 +1015,7 @@ namespace TTG_Tools
                 if (VersionOfGame != "PN2")
                 {
                     ulong blockSize = (ulong)newD3dtxHeader.Length - 92;
-                    if (VersionOfGame == "WDM" || VersionOfGame == "Batman") blockSize -= 12;
+                    if (VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS") blockSize -= 12;
 
                     byte[] binBlockSize = new byte[4];
                     binBlockSize = BitConverter.GetBytes(blockSize);

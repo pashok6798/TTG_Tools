@@ -500,11 +500,9 @@ namespace TTG_Tools
                     Array.Copy(d3dtx, poz, mips, 0, mips.Length);
 
                     poz += 4;
-                    if (versionOfGame == "WDDS") Array.Copy(d3dtx, poz, width, 0, width.Length);
-                    else Array.Copy(d3dtx, poz, height, 0, height.Length);
+                    Array.Copy(d3dtx, poz, width, 0, width.Length);
                     poz += 4;
-                    if (versionOfGame == "WDDS") Array.Copy(d3dtx, poz, height, 0, height.Length);
-                    else Array.Copy(d3dtx, poz, width, 0, width.Length);
+                    Array.Copy(d3dtx, poz, height, 0, height.Length);
                     poz += code_pos;
                     byte[] temp = new byte[4];
                     Array.Copy(d3dtx, poz, temp, 0, temp.Length);
@@ -900,11 +898,9 @@ namespace TTG_Tools
                 if (BitConverter.ToInt32(mip, 0) == 0) mip = BitConverter.GetBytes(1);
                 Array.Copy(mip, 0, d3dtxContent, poz, mip.Length); //и заменяем тут
                 poz += 4;
-                if(VersionOfGame == "WDDS") Array.Copy(height, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
-                else Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
+                Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
                 poz += 4;
-                if (VersionOfGame == "WDDS") Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
-                else Array.Copy(height, 0, d3dtxContent, poz, 4); //тут высоту
+                Array.Copy(height, 0, d3dtxContent, poz, 4); //тут высоту
                 poz += 4;
                 if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 8;
                 Array.Copy(tex_type, 0, d3dtxContent, poz, 4); //также меняем тип текстуры, если он отличается.

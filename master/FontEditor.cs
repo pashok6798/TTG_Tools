@@ -462,9 +462,9 @@ namespace TTG_Tools
 
             //try
             //{
-            ofd.Filter = "Файл шрифта (*.font)|*.font";
+            ofd.Filter = "Font files (*.font)|*.font";
             ofd.RestoreDirectory = true;
-            ofd.Title = "Открытие файла шрифта";
+            ofd.Title = "Open font file";
             ofd.DereferenceLinks = false;
             byte[] binContent = new byte[0];
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -481,7 +481,7 @@ namespace TTG_Tools
                 }
                 catch
                 {
-                    MessageBox.Show("Файл занят другим процессом!", "Error!");
+                    MessageBox.Show("File is busing by another process!", "Error!");
                     saveToolStripMenuItem.Enabled = false;
                     saveAsToolStripMenuItem.Enabled = false;
                 }
@@ -1119,22 +1119,20 @@ namespace TTG_Tools
                                 ffs.dds[j].pn2dds_head = head;
 
 
+                                ffs.dds[j].widht_in_font = new byte[4];
+                                Array.Copy(head[2], 0, ffs.dds[j].widht_in_font, 0, 4);
 
                                 ffs.dds[j].height_in_font = new byte[4];
                                 Array.Copy(head[3], 0, ffs.dds[j].height_in_font, 0, 4);
 
-                                ffs.dds[j].widht_in_font = new byte[4];
-                                Array.Copy(head[2], 0, ffs.dds[j].widht_in_font, 0, 4);
-
                                 ffs.dds[j].size_in_font = new byte[4];
                                 Array.Copy(head[23], 0, ffs.dds[j].size_in_font, 0, 4);
 
-                                ffs.dds[j].height_in_dds = new byte[4];
-                                Array.Copy(head[3], 0, ffs.dds[j].height_in_dds, 0, 4);
                                 ffs.dds[j].widht_in_dds = new byte[4];
                                 Array.Copy(head[2], 0, ffs.dds[j].widht_in_dds, 0, 4);
 
-
+                                ffs.dds[j].height_in_dds = new byte[4];
+                                Array.Copy(head[3], 0, ffs.dds[j].height_in_dds, 0, 4);
                             }
                             //poz += 1;
 
@@ -1402,6 +1400,13 @@ namespace TTG_Tools
 
                                 if (wrong) goto stop_it;
 
+                                tmp = new byte[22];
+                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
+                                if(ASCIIEncoding.ASCII.GetString(tmp) == "00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00")
+                                {
+                                    temp_poz += 22;
+                                }
+
                                 poz = temp_poz;
                             }
 
@@ -1603,8 +1608,8 @@ namespace TTG_Tools
                     {
                         int position = ffs.dds[i].hz_data_after_sizes.Length;
                         Array.Copy(ffs.dds[i].size_in_font, 0, ffs.dds[i].hz_data_after_sizes, position - 48, ffs.dds[i].size_in_font.Length);
-                        Array.Copy(ffs.dds[i].height_in_dds, 0, ffs.dds[i].hz_data_after_sizes, position - 40, ffs.dds[i].height_in_dds.Length);
                         Array.Copy(ffs.dds[i].widht_in_dds, 0, ffs.dds[i].hz_data_after_sizes, position - 36, ffs.dds[i].widht_in_dds.Length);
+                        Array.Copy(ffs.dds[i].height_in_dds, 0, ffs.dds[i].hz_data_after_sizes, position - 40, ffs.dds[i].height_in_dds.Length);
                         byte[] Binmeta = new byte[4];
                         Array.Copy(ffs.dds[i].dds_content, 48, Binmeta, 0, 4);
                         int meta_size = BitConverter.ToInt32(Binmeta, 0);

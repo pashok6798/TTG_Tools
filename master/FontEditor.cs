@@ -2882,5 +2882,21 @@ namespace TTG_Tools
                 fs.Close();
             }
         }
+
+        private void removeDuplicatesCharsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(ffs != null && ffs.coord.Count > 0)
+            {
+                var tmp_array = ffs.coord.ToArray();
+                Array.Sort(tmp_array, (tmp_ar1, tmp_ar2) => BitConverter.ToInt32(tmp_ar1.symbol, 0).CompareTo(BitConverter.ToInt32(tmp_ar2.symbol, 0)));
+                ffs.coord = tmp_array.OfType<Coordinates>().ToList();
+
+                ffs.coord = ffs.coord.GroupBy(i => BitConverter.ToInt32(i.symbol, 0)).Select(g => g.Last()).ToList();
+                tmp_array = null;
+                GC.Collect();
+                fillTableOfCoordinates();
+                if(!edited) edited = true;
+            }
+        }
     }
 }

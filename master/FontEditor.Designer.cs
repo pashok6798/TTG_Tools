@@ -88,6 +88,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.removeDuplicatesCharsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewWithTextures)).BeginInit();
@@ -254,7 +255,7 @@
             this.openToolStripMenuItem.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -263,7 +264,7 @@
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -271,14 +272,14 @@
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             this.saveAsToolStripMenuItem.Text = "Save As ...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -354,7 +355,7 @@
             this.importCoordinatesFromFontStudioxmlToolStripMenuItem,
             this.toolStripImportFNT});
             this.contextMenuStripExport_Import.Name = "contextMenuStripExport_Import";
-            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(504, 164);
+            this.contextMenuStripExport_Import.Size = new System.Drawing.Size(504, 136);
             this.contextMenuStripExport_Import.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripExport_Import_Opening);
             // 
             // exportToolStripMenuItem
@@ -540,28 +541,29 @@
             this.contextMenuStripExp_imp_Coord.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.exportCoordinatesToolStripMenuItem,
             this.importCoordinatesToolStripMenuItem,
-            this.changeCoordinatesToolStripMenuItem});
+            this.changeCoordinatesToolStripMenuItem,
+            this.removeDuplicatesCharsToolStripMenuItem});
             this.contextMenuStripExp_imp_Coord.Name = "contextMenuStripExp_imp_Coord";
-            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(205, 70);
+            this.contextMenuStripExp_imp_Coord.Size = new System.Drawing.Size(239, 120);
             // 
             // exportCoordinatesToolStripMenuItem
             // 
             this.exportCoordinatesToolStripMenuItem.Name = "exportCoordinatesToolStripMenuItem";
-            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.exportCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.exportCoordinatesToolStripMenuItem.Text = "Export coordinates";
             this.exportCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.exportCoordinatesToolStripMenuItem_Click);
             // 
             // importCoordinatesToolStripMenuItem
             // 
             this.importCoordinatesToolStripMenuItem.Name = "importCoordinatesToolStripMenuItem";
-            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.importCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.importCoordinatesToolStripMenuItem.Text = "Import coordinates";
             this.importCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.importCoordinatesToolStripMenuItem_Click);
             // 
             // changeCoordinatesToolStripMenuItem
             // 
             this.changeCoordinatesToolStripMenuItem.Name = "changeCoordinatesToolStripMenuItem";
-            this.changeCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(204, 22);
+            this.changeCoordinatesToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
             this.changeCoordinatesToolStripMenuItem.Text = "Change coordinates";
             this.changeCoordinatesToolStripMenuItem.Click += new System.EventHandler(this.changeCoordinatesToolStripMenuItem_Click);
             // 
@@ -672,6 +674,13 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // removeDuplicatesCharsToolStripMenuItem
+            // 
+            this.removeDuplicatesCharsToolStripMenuItem.Name = "removeDuplicatesCharsToolStripMenuItem";
+            this.removeDuplicatesCharsToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.removeDuplicatesCharsToolStripMenuItem.Text = "Remove duplicates chars";
+            this.removeDuplicatesCharsToolStripMenuItem.Click += new System.EventHandler(this.removeDuplicatesCharsToolStripMenuItem_Click);
+            // 
             // FontEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -767,5 +776,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column11;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column12;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column13;
+        private System.Windows.Forms.ToolStripMenuItem removeDuplicatesCharsToolStripMenuItem;
     }
 }

@@ -41,3 +41,4 @@ It supports some games (at least I tested only these games):
 - Minecraft: Story Mode — Season 2
 - Batman: The Enemy Within
 - The Walking Dead: The Final Season
+- The Walking Dead : The Telltale Definitive Series

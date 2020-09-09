@@ -2512,7 +2512,7 @@ namespace TTG_Tools
                     }
                 default:
                     {
-                        MessageBox.Show("Ошибка в выборе версии игры!", "Ошибка!");
+                        MessageBox.Show("Error select game version. Please send me a file.", "Error");
                         return null;
                     }
 

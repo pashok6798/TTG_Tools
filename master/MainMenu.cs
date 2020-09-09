@@ -73,7 +73,7 @@ namespace TTG_Tools
 
                 if (settings.additionalChar == "")
                 {
-                    DialogResult status = MessageBox.Show("В файле настроек не найдена информация по набору символов (TftB, GotT), требующих дополнительную обработку. Открыть настройки?", "Перейти в настройки?", MessageBoxButtons.YesNo);
+                    DialogResult status = MessageBox.Show("TTG Tools didn't find additional characters for Tales From the Borderlands\r\nand Game of Thrones for correct showing text in game. Open settings form?", "Open settings form?", MessageBoxButtons.YesNo);
                     if (status == DialogResult.Yes)
                     {
                         Form formSettings = new FormSettings();
@@ -81,8 +81,8 @@ namespace TTG_Tools
                     }
                 }
 
-                #region Загрузка заголовков
-                //Для фотошопа nvidia tex tool
+                #region tex headers
+                //Photoshop's plugin nvidia tex tool
                 byte[] ps_dxt1 = { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x0A, 0x00, 0x00,
                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
                                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -219,7 +219,7 @@ namespace TTG_Tools
                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
                 texture_header.Add(new TextureWorker.TexData(ps_32f32f32f32f, 0x25, "uncompressed 32f.32f.32f.32f ARGB", 2, false, false));
 
-                //Для PVR Textool
+                //For PVR Textool
                 byte[] pvr_4444 = { 0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x72, 0x67, 0x62, 0x61, 0x04, 0x04, 0x04, 0x04,
                                     0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                     0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -302,7 +302,7 @@ namespace TTG_Tools
                 //Остальные добавлю потом
                 #endregion
 
-                #region Загрузка blowfish-ключей
+                #region Adding blowfish encryption keys
                 byte[] TelltaleTexasHoldEm = { 0x8f, 0xd8, 0x98, 0x99, 0x96, 0xbc, 0xa2, 0xae, 0xd7, 0xde, 0xc5, 0xd3, 0x9d, 0xca, 0xc5, 0xa7, 0xd8, 0x95, 0x92, 0xe9, 0x8d, 0xe4, 0xa1, 0xd4, 0xd7, 0x71, 0xde, 0xc0, 0x9e, 0xde, 0xb1, 0xa3, 0xca, 0xaa, 0xa4, 0x9f, 0xd0, 0xce, 0x9e, 0xde, 0xc5, 0xe3, 0xe3, 0xd1, 0xa9, 0x82, 0xc1, 0xda, 0xaa, 0xd5, 0x76, 0xa2, 0xdb, 0xd7, 0xb1 };
                 gamelist.Add(new keysEncryption(TelltaleTexasHoldEm, "Telltale Texas Holdem"));
 
@@ -595,12 +595,12 @@ namespace TTG_Tools
                 }
             }
             catch
-            { MessageBox.Show("Ошибка в файле глоссарии!"); }
+            { MessageBox.Show("Glossary has errors in txt file!"); }
 
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Файлы с титрами (*.txt)|*.txt";
+            ofd.Filter = "Subtitles file (*.txt)|*.txt";
             ofd.RestoreDirectory = true;
-            ofd.Title = "Открытие файла с титрами";
+            ofd.Title = "Open titles file";
             ofd.DereferenceLinks = false;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -612,9 +612,9 @@ namespace TTG_Tools
                 }
                 strReader.Close();
                 SaveFileDialog sfd = new SaveFileDialog();
-                sfd.Filter = "Файлы с титрами (*.txt)|*.txt";
+                sfd.Filter = "Subtitles file (*.txt)|*.txt";
                 sfd.RestoreDirectory = true;
-                sfd.Title = "Сохранение переработанного файла с титрами";
+                sfd.Title = "Save converted subtitles file";
                 sfd.DereferenceLinks = false;
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
@@ -679,19 +679,19 @@ namespace TTG_Tools
         private void button4_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog fbd = new FolderBrowserDialog();
-            MessageBox.Show("Укажите папку с dds");
+            MessageBox.Show("Please select a folder with DDS files.");
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 DirectoryInfo di = new DirectoryInfo(fbd.SelectedPath);
                 FileInfo[] fi = di.GetFiles("*.dds");
                 FolderBrowserDialog fbd3 = new FolderBrowserDialog();
                 fbd3.SelectedPath = fbd.SelectedPath;
-                MessageBox.Show("Укажите папку, куда поместить найденное. ПАПКА ДОЛЖНА БЫТЬ ПУСТА!!!");
+                MessageBox.Show("Please select an EMPTY folder to replace found DDS textures.");
                 if (fbd3.ShowDialog() == DialogResult.OK)
                 {
                     FolderBrowserDialog fbd2 = new FolderBrowserDialog();
                     fbd2.SelectedPath = fbd3.SelectedPath;
-                    MessageBox.Show("Укажите папку с текстурами (файлы dds и d3dtx) от всего эпизода!");
+                    MessageBox.Show("Please select a folder both D3DTX & DDS textures from game.");
                     if (fbd2.ShowDialog() == DialogResult.OK)
                     {
                         for (int i = 0; i < fi.Count(); i++)

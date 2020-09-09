@@ -2031,7 +2031,7 @@ namespace TTG_Tools
 
                                 break;
                             default:
-                                MessageBox.Show("hz");
+                                MessageBox.Show("I don't know. Please send me a file if you see this error.");
                                 break;
                         }
                     }

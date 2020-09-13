@@ -49,6 +49,7 @@ namespace TTG_Tools
 
             return num;
         }
+        
         private bool CheckDll(string filePath)
         {
             if (File.Exists(filePath) == true)
@@ -57,6 +58,7 @@ namespace TTG_Tools
                 {
                     byte[] testBlock = { 0x43, 0x48, 0x45, 0x43, 0x4B, 0x20, 0x54, 0x45, 0x53, 0x54, 0x20, 0x42, 0x4C, 0x4F, 0x43, 0x4B };
                     testBlock = ZlibCompressor(testBlock);
+                    
                     return true;
                 }
                 catch
@@ -98,7 +100,7 @@ namespace TTG_Tools
             byte[] retVal;
             using (MemoryStream compressedMemoryStream = new MemoryStream())
             {
-                DeflateStream compressStream = new DeflateStream(compressedMemoryStream, CompressionMode.Compress, true);
+                System.IO.Compression.DeflateStream compressStream = new System.IO.Compression.DeflateStream(compressedMemoryStream, System.IO.Compression.CompressionMode.Compress, true);
                 compressStream.Write(bytes, 0, bytes.Length);
                 compressStream.Close();
                 retVal = new byte[compressedMemoryStream.Length];
@@ -350,8 +352,8 @@ namespace TTG_Tools
 
         public void builder_ttarch(string input_folder, string output_path, byte[] key, bool compression, int version_archive, bool encryptCheck, bool DontEncLua) //Функция сборки
         {
-            if ((CheckDll(Application.StartupPath + "\\zlib.net.dll") == false)
-                && (version_archive > 2 && version_archive < 8)) compression = false; //Проверка на наличие библиотеки для сжатия старых архивов
+           // if ((CheckDll(Application.StartupPath + "\\zlib.net.dll") == false)
+           //     && (version_archive > 2 && version_archive < 8)) compression = false; //Проверка на наличие библиотеки для сжатия старых архивов
 
             DirectoryInfo di = new DirectoryInfo(input_folder);
             MemoryStream ms = new MemoryStream(); //Для создания заголовка
@@ -633,6 +635,7 @@ namespace TTG_Tools
                         int sct = 0; //start compressed table
 
                         byte[] binCompressedTS = new byte[4];
+
 
                         if (version_archive >= 7)
                         {

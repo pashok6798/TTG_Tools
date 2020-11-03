@@ -32,7 +32,7 @@ namespace TTG_Tools
 
 
         //Всё для экспорта текстур
-        public static byte[] extract_old_textures(byte[] binContent, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
+        public static byte[] extract_old_textures(byte[] binContent, byte[] key, int version, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
         {
             byte[] check_header = new byte[4];
             Array.Copy(binContent, 0, check_header, 0, 4);
@@ -43,24 +43,49 @@ namespace TTG_Tools
                ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
                && (Encoding.ASCII.GetString(check_header) != "NIBM"))) //Предполагается, что файл зашифрован
             {
-                result = Methods.FindingDecrytKey(binContent, "texture");
-                if (result != null)
+                int index = Methods.meta_find_encrypted(binContent, "DDS |", 0, key, version);
+
+                if (index == -1)
                 {
-                    string temp = "File was decrypted! " + result;
-                    result = temp;
-                    pvr = false;
+                    result = Methods.FindingDecrytKey(binContent, "texture");
+                    if (result != null)
+                    {
+                        string temp = "File was decrypted! " + result;
+                        result = temp;
+                        pvr = false;
+                    }
+                }
+                else
+                {
+                    Methods.meta_crypt(binContent, key, version, true);
                 }
             }
             else if(((BitConverter.ToInt32(GetVers, 0) > 0) && (BitConverter.ToInt32(GetVers, 0) < 6)) //Если файл не зашифрован, но зашифрован заголовок текстуры
                 && (Methods.FindStartOfStringSomething(binContent, 0, "DDS") > binContent.Length - 100
                 && Methods.FindStartOfStringSomething(binContent, 0, "PVR!") > binContent.Length - 100))
             {
-                result = Methods.FindingDecrytKey(binContent, "texture");
-                if (result != null)
+                int index = Methods.meta_find_encrypted(binContent, "DDS |", 0, key, version);
+
+                if (index == -1)
                 {
-                    string temp = "File was decrypted! " + result;
-                    result = temp;
-                    pvr = false;
+                    result = Methods.FindingDecrytKey(binContent, "texture");
+                    if (result != null)
+                    {
+                        string temp = "File was decrypted! " + result;
+                        result = temp;
+                        pvr = false;
+                    }
+                }
+                else
+                {
+                    byte[] tempHeader = new byte[2048];
+                    if (tempHeader.Length > binContent.Length - index) tempHeader = new byte[binContent.Length - index];
+
+                    Array.Copy(binContent, index, tempHeader, 0, tempHeader.Length);
+
+                    BlowFishCS.BlowFish dec = new BlowFishCS.BlowFish(key, version);
+                    tempHeader = dec.Crypt_ECB(tempHeader, version, true);
+                    Array.Copy(tempHeader, 0, binContent, index, tempHeader.Length);
                 }
             }
 
@@ -316,7 +341,7 @@ namespace TTG_Tools
             return binContent;
         }
 
-        public static string ExportTexture(FileInfo[] fi, int i, int selected_index, string versionOfGame, bool pvr)
+        public static string ExportTexture(FileInfo[] fi, int i, int selected_index, byte[] key, int version_arc, string versionOfGame, bool pvr)
         {
             //try
             //{
@@ -349,7 +374,7 @@ namespace TTG_Tools
             if ((((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "6VSM")) && BitConverter.ToInt32(check_ver, 0) < 6))
             {
                 pvr = false;
-                byte[] BinContent = TextureWorker.extract_old_textures(d3dtx, ref result, ref pvr);
+                byte[] BinContent = TextureWorker.extract_old_textures(d3dtx, key, version_arc, ref result, ref pvr);
                 if (BinContent != null)
                 {
                     string message = "File " + fi[i].Name + " exported in dds file. " + result;

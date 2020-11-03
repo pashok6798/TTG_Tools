@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.InteropServices;
+using BlowFishCS;
 
 namespace TTG_Tools
 {
@@ -225,6 +227,122 @@ namespace TTG_Tools
                     fs.Close();
 
                     listBox1.Items.Add("File " + fi[i].Name + " successfully imported!");
+                }
+                else if (fi[i].Extension == ".vox") //Experiments with vox files in old Telltale games.
+                {
+                    //Test on Sam & Max Season One
+                    FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
+                    BinaryReader br = new BinaryReader(fs);
+                    int version_enc = 2; //version of decryption
+                    if (comboBox2.SelectedIndex == 1) version_enc = 7;
+
+                    byte[] keyEncryption = MainMenu.gamelist[comboBox1.SelectedIndex].key; //Get key of encryption                    
+
+                    if (custKey)
+                    {
+                        customKey = textBox1.Text;
+                        keyEncryption = Methods.stringToKey(customKey);
+                    }
+
+                    int fileLength;
+                    float time; //Playing time sound
+                    int[] chunkOffs;
+                    int[] chunksSizes; //Chunk sizes
+                    int chunkCount;
+                    int blockLength; //length block with count of chunks and it sizes
+                    int tmp; //for skipping some parameters
+                    byte[] header = br.ReadBytes(4);
+                    tmp = br.ReadInt32(); //First read count datas
+                    int c = tmp;
+                    int smpRate; //Sample rate
+                    int channels; //No channels
+                    int bitRate; //Bit rate (need divide by 10?)
+
+                    byte[] b_tmp = null;
+
+                    for (int l = 0; l < c; l++)
+                    {
+                        tmp = br.ReadInt32();
+                        b_tmp = br.ReadBytes(tmp);
+                        tmp = br.ReadInt32();
+                    }
+
+                    byte one = br.ReadByte();
+
+                    time = br.ReadSingle();
+                    fileLength = br.ReadInt32();
+                    bitRate = br.ReadInt32();
+                    smpRate = br.ReadInt32();
+
+                    int WavSmpRate = 16000;
+
+                    switch (smpRate)
+                    {
+                        case 32000:
+                            WavSmpRate = 16000;
+                            break;
+
+                        case 44100:
+                            WavSmpRate = 22050;
+                            break;
+
+                        case 22050:
+                            WavSmpRate = 11025;
+                            break;
+                    }
+
+                    channels = br.ReadInt32();
+                    blockLength = br.ReadInt32();
+                    chunkCount = br.ReadInt32();
+                    chunkOffs = new int[chunkCount];
+                    chunksSizes = new int[chunkCount];
+
+                    for (int l = 0; l < chunkCount; l++)
+                    {
+                        chunkOffs[l] = br.ReadInt32();
+                    }
+
+                    for (int l = 0; l < chunkCount - 1; l++)
+                    {
+                        chunksSizes[l] = chunkOffs[l + 1] - chunkOffs[l];
+                    }
+
+                    chunksSizes[chunkCount - 1] = fileLength - chunkOffs[chunkCount - 1];
+
+                    int pose = (int)br.BaseStream.Position;
+
+                    byte[] block = br.ReadBytes(fileLength);
+
+                    int offset = 0;
+
+                    for (int l = 0; l < chunkCount; l++)
+                    {
+                        if ((l == 0) || (l % 64 == 0))
+                        {
+                            b_tmp = new byte[chunksSizes[l]];
+                            Array.Copy(block, offset, b_tmp, 0, b_tmp.Length);
+                            BlowFish blow = new BlowFish(keyEncryption, version_enc);
+                            b_tmp = blow.Crypt_ECB(b_tmp, version_enc, false);
+                            Array.Copy(b_tmp, 0, block, offset, b_tmp.Length);
+                        }
+
+                        offset += chunksSizes[l];
+                    }
+
+                    br.BaseStream.Seek(0, SeekOrigin.Begin);
+                    byte[] head_block = br.ReadBytes(pose);
+
+                    br.Close();
+                    fs.Close();
+
+                    if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
+
+                    fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.OpenOrCreate);
+                    fs.Write(head_block, 0, head_block.Length);
+                    fs.Write(block, 0, block.Length);
+                    fs.Close();
+
+                    listBox1.Items.Add("VOX has successfully encrypted from file " + fi[i].Name);
                 }
                 else if (fi[i].Extension == ".font")
                 {
@@ -665,6 +783,9 @@ namespace TTG_Tools
             }
             else encKey = MainMenu.gamelist[comboBox1.SelectedIndex].key;
 
+            int arc_version = 2;
+            if (comboBox2.SelectedIndex == 1) arc_version = 7;
+
             Methods.DeleteCurrentFile("\\del.me");
             try
             {
@@ -683,6 +804,9 @@ namespace TTG_Tools
             parametresLANGDB.Add(MainMenu.settings.pathForInputFolder);
             parametresLANGDB.Add(MainMenu.settings.pathForOutputFolder);
             parametresLANGDB.Add(versionOfGame);
+            parametresLANGDB.Add(BitConverter.ToString(encKey).Replace("-", ""));
+            parametresLANGDB.Add(Convert.ToString(arc_version));
+
             var threadLANGDB = new Thread(new ParameterizedThreadStart(processLANGDB.DoExportEncoding));
             threadLANGDB.Start(parametresLANGDB);
 
@@ -898,9 +1022,167 @@ namespace TTG_Tools
                         listBox1.Items.Add("File " + fi[i].Name + " is EMPTY!");
                     }
                 }
-                else if (fi[i].Extension == ".d3dtx")
+                else if (fi[i].Extension == ".block")
                 {
-                    
+                    byte[] exe = File.ReadAllBytes("C:\\Program Files (x86)\\R.G. Mechanics\\Sam & Max - Save the World\\Sam And Max Episode 2\\sammax102.exe");
+
+                    byte[] raw = File.ReadAllBytes(fi[i].FullName);
+
+                    int len = 0x37;
+
+                    int offset = 0;
+
+                    byte[] key = null;
+
+                    byte[] check = null;
+
+                    while (offset < exe.Length)
+                    {
+                        if (offset + len >= exe.Length) break;
+
+                        check = new byte[raw.Length];
+                        Array.Copy(raw, 0, check, 0, check.Length);
+
+                        byte[] tmp = new byte[len];
+                        Array.Copy(exe, offset, tmp, 0, tmp.Length);
+
+                        BlowFishCS.BlowFish blow = new BlowFish(tmp, 7);
+                        check = blow.Crypt_ECB(check, 7, true);
+
+                        if (Encoding.ASCII.GetString(check).ToLower().Contains("speex"))
+                        {
+                            key = new byte[tmp.Length];
+                            Array.Copy(tmp, 0, key, 0, key.Length);
+                            FileStream fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\raw.block", FileMode.OpenOrCreate);
+                            fs.Write(check, 0, check.Length);
+                            fs.Write(key, 0, key.Length);
+                            fs.Close();
+
+                            AddNewReport("Нашёл ключ!");
+
+                            break;
+                        }
+
+                        if(offset % 1024 == 0) AddNewReport("Offset: " + offset);
+
+                        offset++;
+                    }
+                }
+                else if (fi[i].Extension == ".vox") //Experiments with vox files in old Telltale games.
+                {
+                    //Test on Sam & Max Season One
+                    FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
+                    BinaryReader br = new BinaryReader(fs);
+                    int version_enc = 2; //version of decryption
+                    if (comboBox2.SelectedIndex == 1) version_enc = 7;
+
+                    byte[] keyEncryption = MainMenu.gamelist[comboBox1.SelectedIndex].key; //Get key of encryption                    
+
+                    if (custKey)
+                    {
+                        customKey = textBox1.Text;
+                        keyEncryption = Methods.stringToKey(customKey);
+                    }
+
+                    int fileLength;
+                    float time; //Playing time sound
+                    int[] chunkOffs;
+                    int[] chunksSizes; //Chunk sizes
+                    int chunkCount;
+                    int blockLength; //length block with count of chunks and it sizes
+                    int tmp; //for skipping some parameters
+                    byte[] header = br.ReadBytes(4);
+                    tmp = br.ReadInt32(); //First read count datas
+                    int c = tmp;
+                    int smpRate; //Sample rate
+                    int channels; //No channels
+                    int bitRate; //Bit rate (need divide by 10?)
+
+                    byte[] b_tmp = null;
+
+                    for (int l = 0; l < c; l++)
+                    {
+                        tmp = br.ReadInt32();
+                        b_tmp = br.ReadBytes(tmp);
+                        tmp = br.ReadInt32();
+                    }
+
+                    byte one = br.ReadByte();
+
+                    time = br.ReadSingle();
+                    fileLength = br.ReadInt32();
+                    bitRate = br.ReadInt32();
+                    smpRate = br.ReadInt32();
+
+                    int WavSmpRate = 16000;
+
+                    switch(smpRate)
+                    {
+                        case 32000:
+                            WavSmpRate = 16000;
+                            break;
+
+                        case 44100:
+                            WavSmpRate = 22050;
+                            break;
+
+                        case 22050:
+                            WavSmpRate = 11025;
+                            break;
+                    }
+
+                    channels = br.ReadInt32();
+                    blockLength = br.ReadInt32();
+                    chunkCount = br.ReadInt32();
+                    chunkOffs = new int[chunkCount];
+                    chunksSizes = new int[chunkCount];
+
+                    for(int l = 0; l < chunkCount; l++)
+                    {
+                        chunkOffs[l] = br.ReadInt32();
+                    }
+
+                    for(int l = 0; l < chunkCount - 1; l++)
+                    {
+                        chunksSizes[l] = chunkOffs[l + 1] - chunkOffs[l];
+                    }
+
+                    chunksSizes[chunkCount - 1] = fileLength - chunkOffs[chunkCount - 1];
+
+                    int pose = (int)br.BaseStream.Position;
+
+                    byte[] block = br.ReadBytes(fileLength);
+
+                    int offset = 0;
+
+                    for(int l = 0; l < chunkCount; l++)
+                    {
+                        if((l == 0) || (l % 64 == 0))
+                        {
+                            b_tmp = new byte[chunksSizes[l]];
+                            Array.Copy(block, offset, b_tmp, 0, b_tmp.Length);
+                            BlowFish blow = new BlowFish(keyEncryption, version_enc);
+                            b_tmp = blow.Crypt_ECB(b_tmp, version_enc, true);
+                            Array.Copy(b_tmp, 0, block, offset, b_tmp.Length);
+                        }
+
+                        offset += chunksSizes[l];
+                    }
+
+                    br.BaseStream.Seek(0, SeekOrigin.Begin);
+                    byte[] head_block = br.ReadBytes(pose);
+
+                    br.Close();
+                    fs.Close();
+
+                    if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
+
+                    fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.OpenOrCreate);
+                    fs.Write(head_block, 0, head_block.Length);
+                    fs.Write(block, 0, block.Length);
+                    fs.Close();
+
+                    listBox1.Items.Add("VOX has successfully decrypted from file " + fi[i].Name);
                 }
                 else if(fi[i].Extension == ".font") //Может, доработать чуть позже авторасшифровку в Font Editor и удалить отсюда этот код?
                 {

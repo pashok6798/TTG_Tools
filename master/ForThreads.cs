@@ -803,6 +803,8 @@ namespace TTG_Tools
             string pathInput = param[0];
             string pathOutput = param[1];
             string versionOfGame = param[2];
+            byte[] key = Methods.stringToKey(param[3]);
+            int version = Convert.ToInt32(param[4]);
 
             if (Directory.Exists(pathInput) && Directory.Exists(pathOutput))
             {
@@ -831,10 +833,9 @@ namespace TTG_Tools
                                     }
                                 case ".d3dtx":
                                     {
-                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, versionOfGame, AutoPacker.pvr);
+                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, AutoPacker.pvr);
                                         if (message != "") ReportForWork(message);
                                         else ReportForWork("Unknown error. Please send me file.");
-                                        //AutoPacker.ExportDDSfromD3DTX(inputFiles, i, pathOutput, fileName);
                                         break;
                                     }
                                 default:

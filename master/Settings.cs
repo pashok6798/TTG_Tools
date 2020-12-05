@@ -9,6 +9,18 @@ namespace TTG_Tools
     [Serializable()]
     public class Settings
     {
+        public static void SaveConfig(Settings settings)
+        {
+            string xmlPath = System.AppDomain.CurrentDomain.BaseDirectory + "config.xml";
+            XmlSerializer xmlS = new XmlSerializer(typeof(Settings));
+            System.IO.TextWriter xmlW = new System.IO.StreamWriter(xmlPath);
+            xmlS.Serialize(xmlW, settings);
+
+            xmlW.Flush();
+            xmlW.Close();
+        }
+
+
         private string _pathForInputFolder;
         private string _pathForOutputFolder;
         private int _ASCII_N;
@@ -22,6 +34,13 @@ namespace TTG_Tools
 
         private bool _encLangdb;
         private bool _encDDSonly;
+        private bool _encNewLua;
+        private bool _iOSsupport; //for PVR textures
+        private bool _customKey;
+        private bool _tsvFormat;
+        private int _encKeyIndex;
+        private int _versionEnc;
+        private string _encCustomKey;
 
         [XmlAttribute("pathForInputFolder")]
         public string pathForInputFolder
@@ -150,6 +169,123 @@ namespace TTG_Tools
             }
         }
 
+        [XmlAttribute("encLangdb")]
+        public bool encLangdb
+        {
+            get
+            {
+                return _encLangdb;
+            }
+            set
+            {
+                _encLangdb = value;
+            }
+        }
+
+        [XmlAttribute("encDDSonly")]
+        public bool encDDSonly
+        {
+            get
+            {
+                return _encDDSonly;
+            }
+            set
+            {
+                _encDDSonly = value;
+            }
+        }
+
+        [XmlAttribute("encNewLua")]
+        public bool encNewLua
+        {
+            get
+            {
+                return _encNewLua;
+            }
+            set
+            {
+                _encNewLua = value;
+            }
+        }
+
+        [XmlAttribute("iOSsupport")]
+        public bool iOSsupport
+        {
+            get
+            {
+                return _iOSsupport;
+            }
+            set
+            {
+                _iOSsupport = value;
+            }
+        }
+
+        [XmlAttribute("customKey")]
+        public bool customKey
+        {
+            get
+            {
+                return _customKey;
+            }
+            set
+            {
+                _customKey = value;
+            }
+        }
+        
+        [XmlAttribute("tsvFormat")]
+        public bool tsvFormat
+        {
+            get
+            {
+                return _tsvFormat;
+            }
+            set
+            {
+                _tsvFormat = value;
+            }
+        }
+
+        [XmlAttribute("encKeyIndex")]
+        public int encKeyIndex
+        {
+            get
+            {
+                return _encKeyIndex;
+            }
+            set
+            {
+                _encKeyIndex = value;
+            }
+        }
+
+        [XmlAttribute("versionEnc")]
+        public int versionEnc
+        {
+            get
+            {
+                return _versionEnc;
+            }
+            set
+            {
+                _versionEnc = value;
+            }
+        }
+
+        [XmlAttribute("encCustomKey")]
+        public string encCustomKey
+        {
+            get
+            {
+                return _encCustomKey;
+            }
+            set
+            {
+                _encCustomKey = value;
+            }
+        }
+
         public Settings(
             string _pathForInputFolder,
             string _pathForOutputFolder,
@@ -160,7 +296,16 @@ namespace TTG_Tools
             bool _importingOfName,
             bool _sortSameString,
             bool _exportRealID,
-            int _unicodeSettings)
+            int _unicodeSettings,
+            bool _encLangdb,
+            bool _encDDSonly,
+            bool _encNewLua,
+            bool _iOSsupport,
+            bool _customKey,
+            bool _tsvFormat,
+            int _encKeyIndex,
+            int _versionEnc,
+            string _encCustomKey)
         {
             this.ASCII_N = _ASCII_N;
             this.pathForInputFolder = _pathForInputFolder;
@@ -172,6 +317,15 @@ namespace TTG_Tools
             this.sortSameString = _sortSameString;
             this.exportRealID = _exportRealID;
             this.unicodeSettings = _unicodeSettings;
+            this.encLangdb = _encLangdb;
+            this.encDDSonly = _encDDSonly;
+            this.encNewLua = _encNewLua;
+            this.iOSsupport = _iOSsupport;
+            this.customKey = _customKey;
+            this.tsvFormat = _tsvFormat;
+            this.encKeyIndex = _encKeyIndex;
+            this.versionEnc = _versionEnc;
+            this.encCustomKey = _encCustomKey;
         }
 
         public Settings()

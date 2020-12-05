@@ -132,7 +132,10 @@ Maybe some games doesn't work. Please contact with me if you will have problems.
 [Version history]
 
 v.1.0.6 (xx.12.2020)
-+ Archive Packer
++TTG Tools:
+Add support "Sam &amp; Max save the World Remastered"
+
++ Archive Packer:
 Now progress bar doesn't freeze when tool packs archive.
 
 v.1.0.5 (13.09.20)

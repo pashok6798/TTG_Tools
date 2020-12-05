@@ -378,7 +378,7 @@ namespace TTG_Tools
                 {
                     List<TextCollector.TXT_collection> all_text = new List<TextCollector.TXT_collection>();
                     string error = string.Empty;
-                    if (fileDestination[j].Extension == ".tsv" && AutoPacker.tsvFile == true) AutoPacker.ImportTSV(fileDestination[j].FullName, ref all_text, "\\n", ref error);
+                    if (fileDestination[j].Extension == ".tsv" && MainMenu.settings.tsvFormat == true) AutoPacker.ImportTSV(fileDestination[j].FullName, ref all_text, "\\n", ref error);
                     else AutoPacker.ImportTXT(fileDestination[j].FullName, ref all_text, false, MainMenu.settings.ASCII_N, "\r\n", ref error);
 
                     if (error == string.Empty)
@@ -533,7 +533,7 @@ namespace TTG_Tools
                         {
                             byte[] new_d3dtx = d3dtxContent;
 
-                            if (AutoPacker.encDDSonly == true && AutoPacker.encLangdb == false)
+                            if (MainMenu.settings.encDDSonly == true && MainMenu.settings.encLangdb == false)
                             {
                                 int pos = Methods.FindStartOfStringSomething(new_d3dtx, 8, "DDS");
 
@@ -542,9 +542,9 @@ namespace TTG_Tools
                                 if (enc_block.Length > new_d3dtx.Length - pos) enc_block = new byte[new_d3dtx.Length - pos]; //Если текстура будет меньше 2048 байт
                                 Array.Copy(new_d3dtx, pos, enc_block, 0, enc_block.Length);
 
-                                if (AutoPacker.custKey)
+                                if (MainMenu.settings.customKey)
                                 {
-                                    byte[] key = Methods.stringToKey(AutoPacker.customKey);
+                                    byte[] key = Methods.stringToKey(MainMenu.settings.encCustomKey);
 
                                     if (key != null)
                                     {
@@ -584,7 +584,7 @@ namespace TTG_Tools
                                     ReportForWork("Packed and encrypted DDS-header only: " + inputFiles[i].Name);
                                 }
                             }
-                            else if (AutoPacker.encLangdb == true)
+                            else if (MainMenu.settings.encLangdb)
                             {
 
                                 int pos = Methods.FindStartOfStringSomething(new_d3dtx, 8, "DDS");
@@ -594,9 +594,9 @@ namespace TTG_Tools
                                 if (enc_block.Length > new_d3dtx.Length - pos) enc_block = new byte[new_d3dtx.Length - pos]; //Если текстура будет меньше 2048 байт
                                 Array.Copy(new_d3dtx, pos, enc_block, 0, enc_block.Length);
 
-                                if (AutoPacker.custKey)
+                                if (MainMenu.settings.customKey)
                                 {
-                                    byte[] key = Methods.stringToKey(AutoPacker.customKey);
+                                    byte[] key = Methods.stringToKey(MainMenu.settings.encCustomKey);
 
                                     if (key != null)
                                     {
@@ -659,7 +659,7 @@ namespace TTG_Tools
                 else if (versionOfGame != " ")
                 {
                     bool isPVR = false;
-                    d3dtxContent = TextureWorker.import_new_textures(d3dtxContent, ddsContent, versionOfGame, ref isPVR, TTG_Tools.AutoPacker.isIOS);
+                    d3dtxContent = TextureWorker.import_new_textures(d3dtxContent, ddsContent, versionOfGame, ref isPVR, MainMenu.settings.iOSsupport);
                     
                     if (d3dtxContent != null)
                     {
@@ -739,8 +739,8 @@ namespace TTG_Tools
                 List<TextCollector.TXT_collection> all_text = new List<TextCollector.TXT_collection>();
                 string error = string.Empty;
                 string pathForFinalFile = MainMenu.settings.pathForOutputFolder + "\\" + inputFiles[i].Name;
-                if ((AutoPacker.tsvFile == false) && fileDestination[j].Extension == ".txt") AutoPacker.ImportTXT(fileDestination[j].FullName, ref all_text, false, MainMenu.settings.ASCII_N, "\n", ref error);
-                else if ((AutoPacker.tsvFile == true) && (fileDestination[j].Extension == ".tsv")) AutoPacker.ImportTSV(fileDestination[j].FullName, ref all_text, "\\n", ref error);
+                if ((MainMenu.settings.tsvFormat == false) && fileDestination[j].Extension == ".txt") AutoPacker.ImportTXT(fileDestination[j].FullName, ref all_text, false, MainMenu.settings.ASCII_N, "\n", ref error);
+                else if ((MainMenu.settings.tsvFormat == true) && (fileDestination[j].Extension == ".tsv")) AutoPacker.ImportTSV(fileDestination[j].FullName, ref all_text, "\\n", ref error);
 
                 if (error == string.Empty)
                 {
@@ -752,7 +752,7 @@ namespace TTG_Tools
                                 database[all_text[q].number - 1].lenght_of_name = BitConverter.GetBytes(database[all_text[q].number - 1].name.Length);
                             }
 
-                            if(AutoPacker.tsvFile == false) database[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
+                            if(MainMenu.settings.tsvFormat == false) database[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
                             else database[all_text[q].number - 1].text = all_text[q].text;
                             database[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(database[all_text[q].number - 1].text.Length);
                     }
@@ -760,10 +760,10 @@ namespace TTG_Tools
                     AutoPacker.CreateLangdb(database, version, pathForFinalFile);
                     ReportForWork("File: " + fileDestination[j].Name + " imported in " + inputFiles[i].Name);
 
-                    if ((versionOfGame == " ") && AutoPacker.encLangdb == true)
+                    if ((versionOfGame == " ") && MainMenu.settings.encLangdb == true)
                     {
                         byte[] encKey;
-                        if (AutoPacker.custKey) encKey = Methods.stringToKey(AutoPacker.customKey);
+                        if (MainMenu.settings.customKey) encKey = Methods.stringToKey(MainMenu.settings.encCustomKey);
                         else encKey = MainMenu.gamelist[TTG_Tools.AutoPacker.numKey].key;
 
                         fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + inputFiles[i].Name, FileMode.Open);
@@ -827,13 +827,13 @@ namespace TTG_Tools
                                     {
                                         int lenghtOfExtension = inputFiles[i].Extension.Length;
                                         string fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".txt";
-                                        if (AutoPacker.tsvFile) fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".tsv";
+                                        if (MainMenu.settings.tsvFormat) fileName = inputFiles[i].Name.Remove(inputFiles[i].Name.Length - lenghtOfExtension, lenghtOfExtension) + ".tsv";
                                         ExportTXTfromLANGDB(inputFiles, i, pathOutput, fileName, versionOfGame);
                                         break;
                                     }
                                 case ".d3dtx":
                                     {
-                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, AutoPacker.pvr);
+                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, MainMenu.settings.iOSsupport);
                                         if (message != "") ReportForWork(message);
                                         else ReportForWork("Unknown error. Please send me file.");
                                         break;
@@ -939,7 +939,7 @@ namespace TTG_Tools
                     FileStream MyExportStream = new FileStream(pathOutput + "\\" + fileName, FileMode.OpenOrCreate);
                     int w = 0;
 
-                    if (AutoPacker.tsvFile == false)
+                    if (!MainMenu.settings.tsvFormat)
                     {
                         while (w < allTextForExport.Count)
                         {

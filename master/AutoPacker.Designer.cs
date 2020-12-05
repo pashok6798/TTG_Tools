@@ -71,6 +71,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(436, 24);
             this.comboBox1.TabIndex = 0;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // button1
             // 
@@ -135,6 +136,7 @@
             this.checkIOS.TabIndex = 14;
             this.checkIOS.Text = "iOS (for new games)";
             this.checkIOS.UseVisualStyleBackColor = true;
+            this.checkIOS.CheckedChanged += new System.EventHandler(this.checkIOS_CheckedChanged);
             // 
             // CheckNewEngine
             // 
@@ -145,6 +147,7 @@
             this.CheckNewEngine.TabIndex = 13;
             this.CheckNewEngine.Text = "Lua scripts for new engine";
             this.CheckNewEngine.UseVisualStyleBackColor = true;
+            this.CheckNewEngine.CheckedChanged += new System.EventHandler(this.CheckNewEngine_CheckedChanged);
             // 
             // checkEncDDS
             // 
@@ -155,6 +158,7 @@
             this.checkEncDDS.TabIndex = 12;
             this.checkEncDDS.Text = "Encrypt DDS header only";
             this.checkEncDDS.UseVisualStyleBackColor = true;
+            this.checkEncDDS.CheckedChanged += new System.EventHandler(this.checkEncDDS_CheckedChanged);
             // 
             // checkUnicode
             // 
@@ -165,6 +169,7 @@
             this.checkUnicode.TabIndex = 11;
             this.checkUnicode.Text = "Unicode support is on.";
             this.checkUnicode.UseVisualStyleBackColor = true;
+            this.checkUnicode.CheckedChanged += new System.EventHandler(this.checkUnicode_CheckedChanged);
             // 
             // comboBox2
             // 
@@ -176,6 +181,7 @@
             this.comboBox2.Name = "comboBox2";
             this.comboBox2.Size = new System.Drawing.Size(143, 24);
             this.comboBox2.TabIndex = 9;
+            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -195,6 +201,7 @@
             this.checkEncLangdb.TabIndex = 7;
             this.checkEncLangdb.Text = "Encrypt langdb/d3dtx (fully encrypt d3dtx file)";
             this.checkEncLangdb.UseVisualStyleBackColor = true;
+            this.checkEncLangdb.CheckedChanged += new System.EventHandler(this.checkEncLangdb_CheckedChanged);
             // 
             // label1
             // 
@@ -214,6 +221,7 @@
             this.checkCustomKey.TabIndex = 12;
             this.checkCustomKey.Text = "Set custom key:";
             this.checkCustomKey.UseVisualStyleBackColor = true;
+            this.checkCustomKey.CheckedChanged += new System.EventHandler(this.checkCustomKey_CheckedChanged);
             // 
             // textBox1
             // 
@@ -221,6 +229,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(317, 22);
             this.textBox1.TabIndex = 13;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // groupBox3
             // 

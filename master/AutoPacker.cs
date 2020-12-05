@@ -32,16 +32,9 @@ namespace TTG_Tools
         public static FileInfo[] fi_temp;
         //public static List<TextureWorker.Texture_format> tex_format = new List<TextureWorker.Texture_format>(); //Список с форматами текстур
 
-        public static string customKey;
         public static int numKey;
         public static int selected_index;
         public static int EncVersion;
-        public static bool encLangdb;
-        public static bool encDDSonly;
-        public static bool custKey;
-        public static bool tsvFile;
-        public static bool isIOS;
-        public static bool pvr;
 
         public struct langdb
         {
@@ -91,20 +84,11 @@ namespace TTG_Tools
                 goto end2; 
             }
 
-            encLangdb = checkEncLangdb.Checked;
-            encDDSonly = checkEncDDS.Checked;
-            custKey = checkCustomKey.Checked;
-
             if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
             else MainMenu.settings.unicodeSettings = 1;
-
-            tsvFile = tsvFilesRB.Checked;
             
             EncVersion = 2;
             if (comboBox2.SelectedIndex == 1) EncVersion = 7;
-            
-            customKey = textBox1.Text;
-            isIOS = checkIOS.Checked;
 
             string versionOfGame = " ";
             numKey = comboBox1.SelectedIndex;
@@ -131,10 +115,9 @@ namespace TTG_Tools
                 {
                     byte[] encKey;
 
-                    if (custKey)
+                    if (MainMenu.settings.customKey)
                     {
-                        customKey = textBox1.Text;
-                        encKey = Methods.stringToKey(customKey);
+                        encKey = Methods.stringToKey(MainMenu.settings.encCustomKey);
 
                         if (encKey == null)
                         {
@@ -238,10 +221,9 @@ namespace TTG_Tools
 
                     byte[] keyEncryption = MainMenu.gamelist[comboBox1.SelectedIndex].key; //Get key of encryption                    
 
-                    if (custKey)
+                    if (MainMenu.settings.customKey)
                     {
-                        customKey = textBox1.Text;
-                        keyEncryption = Methods.stringToKey(customKey);
+                        keyEncryption = Methods.stringToKey(MainMenu.settings.encCustomKey);
                     }
 
                     int fileLength;
@@ -763,23 +745,13 @@ namespace TTG_Tools
             numKey = comboBox1.SelectedIndex;
             selected_index = comboBox2.SelectedIndex;
 
-            if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
-            else MainMenu.settings.unicodeSettings = 1;
-
-            pvr = checkIOS.Checked;
-
-            tsvFile = tsvFilesRB.Checked;
-
-            custKey = checkCustomKey.Checked;
-
             byte[] encKey;
 
             string debug = null;
 
-            if (custKey)
+            if (MainMenu.settings.customKey)
             {
-                customKey = textBox1.Text;
-                encKey = Methods.stringToKey(customKey);
+                encKey = Methods.stringToKey(MainMenu.settings.encCustomKey);
             }
             else encKey = MainMenu.gamelist[comboBox1.SelectedIndex].key;
 
@@ -939,13 +911,13 @@ namespace TTG_Tools
                             }
                             else
                             {
-                                if (tsvFile) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
+                                if (MainMenu.settings.tsvFormat) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
                                 else path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
                             }
                         }
                         else
                         {
-                            if (tsvFile) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
+                            if (MainMenu.settings.tsvFormat) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
                             else path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
                         }
                         Methods.DeleteCurrentFile(path);
@@ -958,7 +930,7 @@ namespace TTG_Tools
                                 byte[] name_of_file = new byte[4];
                                 Array.Copy(landb[all_text_for_export[w].number - 1].hz_data, 0, name_of_file, 0, 4);
                                 int qwer = BitConverter.ToInt32(name_of_file, 0);
-                                if (!tsvFile) all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\r\n");
+                                if (!MainMenu.settings.tsvFormat) all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\r\n");
                                 else all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\\n");
 
                                 //тут добавил
@@ -979,7 +951,7 @@ namespace TTG_Tools
                                         all_text_for_export[w].text = UnicodeEncoding.UTF8.GetString(temp_string);
                                     }
                                 }
-                                if (tsvFile)
+                                if (MainMenu.settings.tsvFormat)
                                 {
                                     string tsv_str = all_text_for_export[w].number + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
                                     if(MainMenu.settings.exportRealID) tsv_str = all_text_for_export[w].realId + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
@@ -1006,66 +978,20 @@ namespace TTG_Tools
                             else
                             {
                                 //listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
-                                if (tsvFile) listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
+                                if (MainMenu.settings.tsvFormat) listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
                                 else listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
                             }
                         }
                         else
                         {
                             //listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
-                            if (tsvFile) listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
+                            if (MainMenu.settings.tsvFormat) listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
                             else listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
                         }
                     }
                     else
                     {
                         listBox1.Items.Add("File " + fi[i].Name + " is EMPTY!");
-                    }
-                }
-                else if (fi[i].Extension == ".block")
-                {
-                    byte[] exe = File.ReadAllBytes("C:\\Program Files (x86)\\R.G. Mechanics\\Sam & Max - Save the World\\Sam And Max Episode 2\\sammax102.exe");
-
-                    byte[] raw = File.ReadAllBytes(fi[i].FullName);
-
-                    int len = 0x37;
-
-                    int offset = 0;
-
-                    byte[] key = null;
-
-                    byte[] check = null;
-
-                    while (offset < exe.Length)
-                    {
-                        if (offset + len >= exe.Length) break;
-
-                        check = new byte[raw.Length];
-                        Array.Copy(raw, 0, check, 0, check.Length);
-
-                        byte[] tmp = new byte[len];
-                        Array.Copy(exe, offset, tmp, 0, tmp.Length);
-
-                        BlowFishCS.BlowFish blow = new BlowFish(tmp, 7);
-                        check = blow.Crypt_ECB(check, 7, true);
-
-                        if (Encoding.ASCII.GetString(check).ToLower().Contains("speex"))
-                        {
-                            key = new byte[tmp.Length];
-                            Array.Copy(tmp, 0, key, 0, key.Length);
-                            FileStream fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\raw.block", FileMode.OpenOrCreate);
-                            fs.Write(check, 0, check.Length);
-                            fs.Write(key, 0, key.Length);
-                            fs.Close();
-
-                            AddNewReport("Нашёл ключ!");
-
-                            break;
-                        }
-
-                        if(offset % 1024 == 0) AddNewReport("Offset: " + offset);
-
-                        offset++;
                     }
                 }
                 else if (fi[i].Extension == ".vox") //Experiments with vox files in old Telltale games.
@@ -1078,10 +1004,9 @@ namespace TTG_Tools
 
                     byte[] keyEncryption = MainMenu.gamelist[comboBox1.SelectedIndex].key; //Get key of encryption                    
 
-                    if (custKey)
+                    if (MainMenu.settings.customKey)
                     {
-                        customKey = textBox1.Text;
-                        keyEncryption = Methods.stringToKey(customKey);
+                        keyEncryption = Methods.stringToKey(MainMenu.settings.encCustomKey);
                     }
 
                     int fileLength;
@@ -2818,10 +2743,19 @@ namespace TTG_Tools
 
             #endregion
 
-            comboBox1.SelectedIndex = 0;
-            comboBox2.SelectedIndex = 1; //Для работы с ttarch2 архивами
-            if (MainMenu.settings.unicodeSettings == 0) checkUnicode.Checked = true;
+            comboBox1.SelectedIndex = MainMenu.settings.encKeyIndex;
+            comboBox2.SelectedIndex = MainMenu.settings.versionEnc;
+            checkUnicode.Checked = (MainMenu.settings.unicodeSettings == 0);
             txtFilesRB.Checked = true;
+            checkEncDDS.Checked = MainMenu.settings.encDDSonly;
+            checkIOS.Checked = MainMenu.settings.iOSsupport;
+            checkEncLangdb.Checked = MainMenu.settings.encLangdb;
+            CheckNewEngine.Checked = MainMenu.settings.encNewLua;
+            if (MainMenu.settings.customKey && Methods.stringToKey(MainMenu.settings.encCustomKey) != null)
+            {
+                checkCustomKey.Checked = MainMenu.settings.customKey;
+                textBox1.Text = MainMenu.settings.encCustomKey;
+            }
         }
 
         private void AutoPacker_FormClosing(object sender, FormClosingEventArgs e)
@@ -2831,6 +2765,65 @@ namespace TTG_Tools
         private void groupBox1_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void CheckNewEngine_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encNewLua = CheckNewEngine.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkEncDDS_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encDDSonly = checkEncDDS.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkEncLangdb_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encLangdb = checkEncLangdb.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkIOS_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.iOSsupport = checkIOS.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkUnicode_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.unicodeSettings = 1;
+            if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkCustomKey_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.customKey = checkCustomKey.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encKeyIndex = comboBox1.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.versionEnc = comboBox2.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if(checkCustomKey.Checked && Methods.stringToKey(textBox1.Text) != null)
+            {
+                MainMenu.settings.customKey = checkCustomKey.Checked;
+                MainMenu.settings.encCustomKey = textBox1.Text;
+                Settings.SaveConfig(MainMenu.settings);
+            }
         }
     }
 }

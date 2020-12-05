@@ -20,6 +20,9 @@ namespace TTG_Tools
         private bool _exportRealID;
         private int _unicodeSettings;
 
+        private bool _encLangdb;
+        private bool _encDDSonly;
+
         [XmlAttribute("pathForInputFolder")]
         public string pathForInputFolder
         {

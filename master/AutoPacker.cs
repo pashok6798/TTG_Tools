@@ -1863,7 +1863,7 @@ namespace TTG_Tools
                         }
                     }
                     else
-                    { MessageBox.Show("Версия " + vers.ToString()); }
+                    { MessageBox.Show("Version " + vers.ToString()); }
 
                     byte[] tempC = new byte[4];
                     Array.Copy(binContent, poz, tempC, 0, 4);
@@ -2103,7 +2103,7 @@ namespace TTG_Tools
                             poz += 4;
                         }
                     }
-                    else { MessageBox.Show("Версия 8"); }
+                    else { MessageBox.Show("Version 8"); }
 
                     byte[] tempC = new byte[4];
                     Array.Copy(binContent, poz, tempC, 0, 4);
@@ -2822,7 +2822,6 @@ namespace TTG_Tools
             comboBox2.SelectedIndex = 1; //Для работы с ttarch2 архивами
             if (MainMenu.settings.unicodeSettings == 0) checkUnicode.Checked = true;
             txtFilesRB.Checked = true;
-            
         }
 
         private void AutoPacker_FormClosing(object sender, FormClosingEventArgs e)

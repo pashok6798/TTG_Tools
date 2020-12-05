@@ -65,12 +65,12 @@ namespace TTG_Tools
             if (rbNormalUnicode.Checked == true) MainMenu.settings.unicodeSettings = 0;
             else if (rbNonNormalUnicode.Checked == true) MainMenu.settings.unicodeSettings = 1;
 
-
             //MainMenu.settings.unicodeSupport = checkUnicode.Checked;
             string xmlPath = Application.StartupPath + "\\config.xml";
             XmlSerializer xmlS = new XmlSerializer(typeof(Settings));
             TextWriter xmlW = new StreamWriter(xmlPath);
             xmlS.Serialize(xmlW, MainMenu.settings);
+
             xmlW.Flush();
             xmlW.Close();
         }

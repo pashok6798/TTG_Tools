@@ -32,7 +32,18 @@ namespace TTG_Tools
             InitializeComponent();
         }
 
-        
+        void Progress(int i)
+        {
+            if (progressBar1.InvokeRequired)
+            {
+                progressBar1.Invoke(new ProgressHandler(Progress), i);
+            }
+            else
+            {
+                progressBar1.Value = i;
+            }
+        }
+
 
         public static UInt64 pad_it(UInt64 num, UInt64 pad)
         {
@@ -203,11 +214,10 @@ namespace TTG_Tools
             UInt32 tmp;
             UInt64 file_offset = 0;
 
-            progressBar1.Maximum = fi.Length - 1;
+            progressBar1.Maximum = fi.Length;
             
             for (int k = 0; k < fi.Length; k++) //создаю заголовок с данными о файлах
             {
-
                 byte[] crc64_hash = new byte[8]; //хеш-сумма названия файла
                 crc64_hash = BitConverter.GetBytes(name_crc[k]);
                 Array.Copy(crc64_hash, 0, info_table, Convert.ToInt64(offset), 8);
@@ -234,8 +244,8 @@ namespace TTG_Tools
                 ns += Convert.ToUInt32(name[k].Length);
                 file_offset += Convert.ToUInt32(fi[k].Length);
 
-                progressBar1.Value = k;
-            }
+                Progress(k + 1);
+            } 
 
             string format = ".ttarch2";
             if (output_path.IndexOf(".obb") > 0) format = ".obb";
@@ -256,7 +266,7 @@ namespace TTG_Tools
             fs.Write(info_table, 0, Convert.ToInt32(info_size));
             fs.Write(names_table, 0, Convert.ToInt32(name_size));
 
-            progressBar1.Maximum = fi.Length - 1;
+            progressBar1.Maximum = fi.Length;
 
             for (int l = 0; l < fi.Length; l++)
             {
@@ -271,7 +281,7 @@ namespace TTG_Tools
 
                 fs.Write(file, 0, file.Length);
                 fr.Close();
-                progressBar1.Value = l;
+                Progress(l + 1);
             }
             fs.Close();
 
@@ -317,7 +327,7 @@ namespace TTG_Tools
                 FileStream temp_fr = new FileStream(temp_path, FileMode.Open);
                 temp_fr.Seek(12, SeekOrigin.Begin);
 
-                progressBar1.Maximum = (int)blocks_count - 1;
+                progressBar1.Maximum = (int)blocks_count;
 
                 for (int i = 0; i < blocks_count; i++) //Идёт считывание блоками в 64КБ и сжимаются
                 {
@@ -337,7 +347,7 @@ namespace TTG_Tools
                     offset_table += 8;
                     fs.Write(compressed_block, 0, compressed_block.Length);
 
-                    progressBar1.Value = i;
+                    Progress(i + 1);
                 }
                 fs.Seek(12, SeekOrigin.Begin); //переходим в начало, откуда начинается таблица со смещением сжатых блоков
                 fs.Write(chunk_table, 0, chunk_table.Length); //и запиываем туда.
@@ -591,7 +601,7 @@ namespace TTG_Tools
             fs.Write(table_files, 0, table_files.Length);
             pos_header += table_files.Length;
 
-            progressBar1.Maximum = fi.Length - 1;
+            progressBar1.Maximum = fi.Length;
 
             for (int j = 0; j < fi.Length; j++) //Запись самих файлов
             {
@@ -610,7 +620,7 @@ namespace TTG_Tools
 
                 fs.Write(file, 0, file.Length);
                 fr.Close();
-                progressBar1.Value = j;
+                Progress(j + 1);
             }
             fs.Close();
             
@@ -626,7 +636,7 @@ namespace TTG_Tools
                 }
                 else //Иначе будет сжимать архив
                 {
-                    progressBar1.Maximum = fi.Length - 1;
+                    progressBar1.Maximum = fi.Length;
 
                         int hz3 = 2;
                         hz2 = BitConverter.GetBytes(hz3); //Меняю неведомую хрень с 1 на 2
@@ -732,7 +742,7 @@ namespace TTG_Tools
                         else fa.Write(table_files, 0, table_files.Length);
 
 
-                        progressBar1.Maximum = blocks - 1;
+                        progressBar1.Maximum = blocks;
                         file_reader.Seek(pos_header, SeekOrigin.Begin);
 
                         for (int j = 0; j < blocks; j++)
@@ -760,7 +770,7 @@ namespace TTG_Tools
                             binSize = BitConverter.GetBytes(cbs);
                             Array.Copy(binSize, 0, compressed_blocks_header, poz, 4);
                             poz += 4;
-                            progressBar1.Value = j;
+                            Progress(j + 1);
                         }
 
                         byte[] binCASize = new byte[4];

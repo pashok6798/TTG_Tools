@@ -42,6 +42,15 @@ namespace TTG_Tools
         private int _versionEnc;
         private string _encCustomKey;
 
+        private string _inputDirPath; //For Archive Packer
+        private string _archivePath;
+        private bool _encryptLuaInArchive;
+        private bool _compressArchive;
+        private bool _oldXmode;
+        private bool _encArchive;
+        private int _archiveFormat;
+        private int _versionArchiveIndex;
+
         [XmlAttribute("pathForInputFolder")]
         public string pathForInputFolder
         {
@@ -286,6 +295,110 @@ namespace TTG_Tools
             }
         }
 
+        [XmlAttribute("inputDirPath")] //For Archive Packer
+        public string inputDirPath
+        {
+            get
+            {
+                return _inputDirPath;
+            }
+            set
+            {
+                _inputDirPath = value;
+            }
+        }
+
+        [XmlAttribute("archivePath")]
+        public string archivePath
+        {
+            get
+            {
+                return _archivePath;
+            }
+            set
+            {
+                _archivePath = value;
+            }
+        }
+
+        [XmlAttribute("encArchive")]
+        public bool encArchive
+        {
+            get
+            {
+                return _encArchive;
+            }
+            set
+            {
+                _encArchive = value;
+            }
+        }
+
+        [XmlAttribute("encryptLuaInArchive")] //Need for mobile versions
+        public bool encryptLuaInArchive
+        {
+            get
+            {
+                return _encryptLuaInArchive;
+            }
+            set
+            {
+                _encryptLuaInArchive = value;
+            }
+        }
+
+        [XmlAttribute("compressArchive")]
+        public bool compressArchive
+        {
+            get
+            {
+                return _compressArchive;
+            }
+            set
+            {
+                _compressArchive = value;
+            }
+        }
+
+        [XmlAttribute("oldXmode")] //For very old Telltale games
+        public bool oldXmode
+        {
+            get
+            {
+                return _oldXmode;
+            }
+            set
+            {
+                _oldXmode = value;
+            }
+        }
+
+        [XmlAttribute("archiveFormat")] //TTARCH (0) or TTARCH2 (1)
+        public int archiveFormat
+        {
+            get
+            {
+                return _archiveFormat;
+            }
+            set
+            {
+                _archiveFormat = value;
+            }
+        }
+
+        [XmlAttribute("versionArchiveIndex")]
+        public int versionArchiveIndex
+        {
+            get
+            {
+                return _versionArchiveIndex;
+            }
+            set
+            {
+                _versionArchiveIndex = value;
+            }
+        }
+
         public Settings(
             string _pathForInputFolder,
             string _pathForOutputFolder,
@@ -305,7 +418,15 @@ namespace TTG_Tools
             bool _tsvFormat,
             int _encKeyIndex,
             int _versionEnc,
-            string _encCustomKey)
+            string _encCustomKey,
+            string _inputDirPath,
+            string _archivePath,
+            bool _encArchive,
+            bool _encryptLuaInArchive,
+            bool _compressArchive,
+            bool _oldXmode,
+            int archiveFormat,
+            int _versionArchiveIndex)
         {
             this.ASCII_N = _ASCII_N;
             this.pathForInputFolder = _pathForInputFolder;
@@ -326,6 +447,13 @@ namespace TTG_Tools
             this.encKeyIndex = _encKeyIndex;
             this.versionEnc = _versionEnc;
             this.encCustomKey = _encCustomKey;
+            this.inputDirPath = _inputDirPath;
+            this.archivePath = _archivePath;
+            this.encArchive = _encArchive;
+            this.encryptLuaInArchive = _encryptLuaInArchive;
+            this.compressArchive = _compressArchive;
+            this.oldXmode = _oldXmode;
+            this.archiveFormat = _archiveFormat;
         }
 
         public Settings()

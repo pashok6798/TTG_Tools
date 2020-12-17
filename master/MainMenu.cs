@@ -15,7 +15,7 @@ namespace TTG_Tools
 {
     public partial class MainMenu : Form
     {
-        public static Settings settings = new Settings("", "", "ГЁЙЦУКЕНШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮгёйцукеншщзхъфывапролджэячсмитьбю", 1251, false, false, false, true, false, 0, false, false, false, false, false, false, 0, 0, "");
+        public static Settings settings = new Settings("", "", "ГЁЙЦУКЕНШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮгёйцукеншщзхъфывапролджэячсмитьбю", 1251, false, false, false, true, false, 0, false, false, false, false, false, false, 0, 0, "", "", "", false, false, false, false, 0, 0);
 
         [DllImport("kernel32.dll")]
         public static extern void SetProcessWorkingSetSize(IntPtr hWnd, int i, int j);

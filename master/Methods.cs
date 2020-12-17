@@ -85,8 +85,7 @@ namespace TTG_Tools
                 {
                     if (key[i] == ' ')
                     {
-                        result = null;
-                        goto ending;
+                        return null;
                     }
                 }
 
@@ -98,14 +97,12 @@ namespace TTG_Tools
 
                     if (remake == false) //Если что-то пошло не так, то очистим массив байт и вернём null
                     {
-                        result = null;
-                        goto ending;
+                        return null;
                     }
                 }
 
             }
             
-            ending:
             return result;
         }
 

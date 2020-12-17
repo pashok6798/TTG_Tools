@@ -125,15 +125,17 @@ Source code on github: https://github.com/pashok6798/TTG_Tools
 (Original developer's e-mail: d3n123@rambler.ru)
 
 List of supported games:
-Tales of Monkey Island, Sam and Max: Season Two, Wallace and Gromit's Grand Adventures, CSI: Deadly Intent, Sam and Max: The Devil's Playhouse, Puzzle Agent, CSI: Fatal Conspiracy, Poker Night at the Inventory, Back to the Future: The Game, Strong Bad, Hector: The Badge of Carnage, Puzzle Agent 2, Jurassic Park: The Game, The Walking Dead, Poker Night 2, Wolf Among Us, The Walking Dead Season Two, Tales from the Borderlands, Game of Thrones, Minecraft: Story Mode (Seasons one and two), Walking Dead: Michonne, Batman (Seasons one and two), The Walking Dead: The Final Season, The Walking Dead : The Telltale Definitive Series.
+Tales of Monkey Island, Sam and Max: Season Two, Wallace and Gromit's Grand Adventures, CSI: Deadly Intent, Sam and Max: The Devil's Playhouse, Puzzle Agent, CSI: Fatal Conspiracy, Poker Night at the Inventory, Back to the Future: The Game, Strong Bad, Hector: The Badge of Carnage, Puzzle Agent 2, Jurassic Park: The Game, The Walking Dead, Poker Night 2, Wolf Among Us, The Walking Dead Season Two, Tales from the Borderlands, Game of Thrones, Minecraft: Story Mode (Seasons one and two), Walking Dead: Michonne, Batman (Seasons one and two), The Walking Dead: The Final Season, The Walking Dead : The Telltale Definitive Series, Sam &amp; Max Save the World Remastered.
 Maybe some games doesn't work. Please contact with me if you will have problems.
 
 ===
 [Version history]
 
-v.1.0.6 (xx.12.2020)
+v.1.0.6 beta (17.12.2020)
 +TTG Tools:
 Add support "Sam &amp; Max save the World Remastered"
++Auto (De)Packer &amp; Archive Packer:
+Now it saves your selected options.
 
 + Archive Packer:
 Now progress bar doesn't freeze when tool packs archive.

@@ -18,13 +18,9 @@ namespace TTG_Tools
     {
         FolderBrowserDialog fbd = new FolderBrowserDialog(); //Для выбора папки
         SaveFileDialog sfd = new SaveFileDialog(); //Для сохранения архива
-        string inputFolder, outputArchive; //будущие пути для выбора папки и сохранения архива
-        bool compression; //проверка на сжатие архива
-        bool encryptArchive; //Для шифрования архива (заголовок архива или сжатый архив)
-        bool DontEncLua; //Для шифрования скриптов
-        bool NewVersionScripts; //Метод шифрования новых скриптов. Не придумал ничего лучше, как сделать так.
-        int archiveVersion; //Версия архива
+
         public static FileInfo[] fi; //Получение списка файлов
+        int archiveVersion;
         
 
         public ArchivePacker()
@@ -144,7 +140,7 @@ namespace TTG_Tools
             for (int i = 0; i < fi.Length; i++) //Запись CRC64 суммы названий файлов
             {
                 name[i] = null;
-                if ((fi[i].Extension == ".lua") && (DontEncLua == false))
+                if ((fi[i].Extension == ".lua") && (MainMenu.settings.encryptLuaInArchive == false))
                 {
                     if (!newEngine) name[i] = fi[i].Name.Replace(".lua", ".lenc");
                     else name[i] = fi[i].Name;
@@ -274,7 +270,7 @@ namespace TTG_Tools
                 byte[] file = new byte[fr.Length];
                 fr.Read(file, 0, file.Length);
 
-                if ((fi[l].Extension == ".lua") && (DontEncLua == false))
+                if ((fi[l].Extension == ".lua") && (MainMenu.settings.encryptLuaInArchive == false))
                 {
                     file = Methods.encryptLua(file, key, newEngine, 7);
                 }
@@ -316,7 +312,7 @@ namespace TTG_Tools
                 Array.Copy(bin_offset, 0, chunk_table, (uint)offset_table, 8);
                 offset_table += 8;
 
-                if (encryptArchive == true) fs.Write(enc_compressed_header, 0, enc_compressed_header.Length); //Если шифруется архив, пишется ECTT
+                if (MainMenu.settings.encArchive) fs.Write(enc_compressed_header, 0, enc_compressed_header.Length); //Если шифруется архив, пишется ECTT
                 else fs.Write(compressed_header, 0, 4); //а иначе ZCTT
 
 
@@ -335,7 +331,7 @@ namespace TTG_Tools
                     temp_fr.Read(temp, 0, temp.Length);
                     byte[] compressed_block = DeflateCompressor(temp);
 
-                    if (encryptArchive == true) //Если указали шифровать, то после сжатия они ещё и шифруются
+                    if (MainMenu.settings.encArchive) //Если указали шифровать, то после сжатия они ещё и шифруются
                     {
                         int num = comboGameList.SelectedIndex;
                         temp = encryptFunction(compressed_block, key, 7);
@@ -665,7 +661,7 @@ namespace TTG_Tools
                         if (version_archive == 7) block_sz = BitConverter.GetBytes(0x80);
                         else block_sz = BitConverter.GetBytes(0x40);
 
-                        FileStream fa = new FileStream(outputArchive, FileMode.Create);
+                        FileStream fa = new FileStream(MainMenu.settings.archivePath, FileMode.Create);
                         fa.Write(archive_version, 0, 4);
                         sct += 4;
                         fa.Write(encrypt, 0, 4);
@@ -791,20 +787,26 @@ namespace TTG_Tools
             {
                 comboGameList.Items.Add(i + ". " + MainMenu.gamelist[i].gamename);
             }
+            
+            newEngineLua.Checked = MainMenu.settings.encNewLua;
+            checkCompress.Checked = MainMenu.settings.compressArchive;
+            checkXmode.Checked = MainMenu.settings.oldXmode;
+            DontEncLuaCheck.Checked = MainMenu.settings.encryptLuaInArchive;
+            EncryptIt.Checked = MainMenu.settings.encArchive;
+            if (MainMenu.settings.inputDirPath != "") textBox1.Text = MainMenu.settings.inputDirPath;
+            if (MainMenu.settings.archivePath != "") textBox2.Text = MainMenu.settings.archivePath;
+            int encKeyIndex = MainMenu.settings.versionArchiveIndex;
+            if (MainMenu.settings.archiveFormat == 0) ttarchRB.Checked = true;
+            else ttarch2RB.Checked = true;
+            comboGameList.SelectedIndex = MainMenu.settings.encKeyIndex;
+            versionSelection.SelectedIndex = encKeyIndex;
 
-            ttarchRB.Checked = true;
 
-            versionSelection.Items.Clear();
-            versionSelection.Items.Add("2");
-            versionSelection.Items.Add("3");
-            versionSelection.Items.Add("4");
-            versionSelection.Items.Add("5");
-            versionSelection.Items.Add("6");
-            versionSelection.Items.Add("7");
-            versionSelection.Items.Add("8");
-            versionSelection.Items.Add("9");
-            versionSelection.SelectedIndex = 0;
-            comboGameList.SelectedIndex = 0;
+            if (MainMenu.settings.customKey && Methods.stringToKey(MainMenu.settings.encCustomKey) != null)
+            {
+                CheckCustomKey.Checked = MainMenu.settings.customKey;
+                textBox3.Text = MainMenu.settings.encCustomKey;
+            }
         }
 
         private void ttarchRB_CheckedChanged(object sender, EventArgs e)
@@ -821,6 +823,11 @@ namespace TTG_Tools
             versionSelection.SelectedIndex = 0;
 
             checkXmode.Visible = true;
+            checkXmode.Checked = MainMenu.settings.oldXmode;
+            
+            MainMenu.settings.archiveFormat = 0;
+            MainMenu.settings.versionArchiveIndex = versionSelection.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
         }
 
         private void ttarch2RB_CheckedChanged(object sender, EventArgs e)
@@ -828,21 +835,26 @@ namespace TTG_Tools
             versionSelection.Items.Clear();
             versionSelection.Items.Add("1");
             versionSelection.Items.Add("2");
-            versionSelection.SelectedItem = "1";
+            versionSelection.SelectedIndex = 0;
 
             checkXmode.Visible = false;
+
+            MainMenu.settings.archiveFormat = 1;
+            MainMenu.settings.versionArchiveIndex = versionSelection.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             if (fbd.ShowDialog() == DialogResult.OK)
             {
-                inputFolder = fbd.SelectedPath;
-                textBox1.Text = inputFolder;
+                textBox1.Text = fbd.SelectedPath;
+
+                MainMenu.settings.inputDirPath = textBox1.Text;
+                Settings.SaveConfig(MainMenu.settings);
             }
             else
             {
-                inputFolder = null;
                 textBox1.Clear();
             }
         }
@@ -854,12 +866,13 @@ namespace TTG_Tools
                 sfd.Filter = "TTARCH archive (*.ttarch) | *.ttarch";
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    outputArchive = sfd.FileName;
-                    textBox2.Text = outputArchive;
+                    textBox2.Text = sfd.FileName;
+                    
+                    MainMenu.settings.archivePath = textBox2.Text;
+                    Settings.SaveConfig(MainMenu.settings);
                 }
                 else
                 {
-                    outputArchive = null;
                     textBox2.Clear();
                 }
             }
@@ -868,12 +881,13 @@ namespace TTG_Tools
                 sfd.Filter = "TTARCH2 archive (*.ttarch2) | *.ttarch2| Android archive (*.obb) | *.obb";
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    outputArchive = sfd.FileName;
-                    textBox2.Text = outputArchive;
+                    textBox2.Text = sfd.FileName;
+
+                    MainMenu.settings.archivePath = textBox2.Text;
+                    Settings.SaveConfig(MainMenu.settings);
                 }
                 else
                 {
-                    outputArchive = null;
                     textBox2.Clear();
                 }
             }
@@ -881,17 +895,12 @@ namespace TTG_Tools
 
         private void buildButton_Click(object sender, EventArgs e)
         {
-            if ((inputFolder != null) && (outputArchive != null)) //Проверка на указанные пути
+            if ((MainMenu.settings.inputDirPath != "") && (MainMenu.settings.archivePath != "")) //Проверка на указанные пути
             {
-                DirectoryInfo checkDI = new DirectoryInfo(inputFolder); //Проверка на существование папки (проверка на всякий случай)
+                DirectoryInfo checkDI = new DirectoryInfo(MainMenu.settings.inputDirPath); //Проверка на существование папки (проверка на всякий случай)
                 if (checkDI.Exists)
                 {
                     string example = "96CA99A085CF988AE4DBE2CDA6968388C08B99E39ED89BB6D790DCBEAD9D9165B6A69EBBC2C69EB3E7E3E5D5AB6382A09CC4929FD1D5A4";
-                    
-                    compression = checkCompress.Checked;
-                    encryptArchive = EncryptIt.Checked;
-                    DontEncLua = DontEncLuaCheck.Checked;
-                    NewVersionScripts = newEngineLua.Checked;
                     
                     archiveVersion = Convert.ToInt32(versionSelection.SelectedItem);
 
@@ -899,32 +908,29 @@ namespace TTG_Tools
                     if(CheckCustomKey.Checked) keyEnc = Methods.stringToKey(textBox3.Text);
                     else keyEnc = MainMenu.gamelist[comboGameList.SelectedIndex].key;
                     
-                    if((keyEnc == null) && ((encryptArchive == true) || (DontEncLua == false)))
+                    if((keyEnc == null) && (MainMenu.settings.encArchive || (MainMenu.settings.encryptLuaInArchive == false)))
                     {
                         if (!CheckCustomKey.Checked)
                         {
-                            encryptArchive = false; //Если ключ шифрования окажется пустым, программа просто соберёт архив
-                            DontEncLua = true;      //и не зашифрует скрипты. Сделал на всякий случай
+                            MainMenu.settings.encArchive = false; //Если ключ шифрования окажется пустым, программа просто соберёт архив
+                            MainMenu.settings.encryptLuaInArchive = true;      //и не зашифрует скрипты. Сделал на всякий случай
                         }
                         else
                         {
                             MessageBox.Show("Check string for correctly. Here's example of encryption key:\r\n" + example, "Error");
-                            goto ending;
+                            return;
                         }
                     }
 
-                    if ((outputArchive.ToLower().IndexOf(".obb") > 0)) compression = false;
+                    if ((MainMenu.settings.archivePath.ToLower().IndexOf(".obb") > 0)) MainMenu.settings.compressArchive = false;
 
-                    if (ttarchRB.Checked == true) builder_ttarch(inputFolder, outputArchive, keyEnc, compression, archiveVersion, encryptArchive, DontEncLua);
-                    else builder_ttarch2(inputFolder, outputArchive, compression, keyEnc, DontEncLua, archiveVersion, NewVersionScripts);      
+                    if (ttarchRB.Checked == true) builder_ttarch(MainMenu.settings.inputDirPath, MainMenu.settings.archivePath, keyEnc, MainMenu.settings.compressArchive, archiveVersion, MainMenu.settings.encArchive, MainMenu.settings.encryptLuaInArchive);
+                    else builder_ttarch2(MainMenu.settings.inputDirPath, MainMenu.settings.archivePath, MainMenu.settings.compressArchive, keyEnc, MainMenu.settings.encryptLuaInArchive, archiveVersion, MainMenu.settings.encNewLua);      
                 }
                 else MessageBox.Show("This folder doesn't exist!", "Error");
                 
             }
             else MessageBox.Show("Check paths!", "Error");
-            
-        ending:
-            int end = 1;
         }
 
         private void ArchivePacker_FormClosing(object sender, FormClosingEventArgs e)
@@ -932,8 +938,62 @@ namespace TTG_Tools
             comboGameList.Items.Clear();
         }
 
+        private void comboGameList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encKeyIndex = comboGameList.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void newEngineLua_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encNewLua = newEngineLua.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void CheckCustomKey_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.customKey = CheckCustomKey.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+
+            if ((MainMenu.settings.customKey == true) &&
+               ((MainMenu.settings.encCustomKey != "") && (MainMenu.settings.encCustomKey != null)))
+            {
+                textBox3.Text = MainMenu.settings.encCustomKey;
+            }
+            else
+            {
+                textBox3.Text = "";
+            }
+        }
+
+        private void DontEncLuaCheck_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encryptLuaInArchive = DontEncLuaCheck.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void EncryptIt_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.encArchive = EncryptIt.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkCompress_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.compressArchive = checkCompress.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
+        private void checkXmode_CheckedChanged(object sender, EventArgs e)
+        {
+            MainMenu.settings.oldXmode = checkXmode.Checked;
+            Settings.SaveConfig(MainMenu.settings);
+        }
+
         private void versionSelection_SelectedIndexChanged(object sender, EventArgs e)
         {
+            MainMenu.settings.versionArchiveIndex = versionSelection.SelectedIndex;
+            Settings.SaveConfig(MainMenu.settings);
         }
     }
 }

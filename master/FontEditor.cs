@@ -512,7 +512,7 @@ namespace TTG_Tools
                     if (version_used == 1 && Encoding.ASCII.GetString(header) == "6VSM")
                     {
                         MessageBox.Show("This font is type of TrueType (vector font). You can try to extract it via Auto(De)Packer");
-                        goto stop_it;
+                        return;
                     }
 
                     //указывается позиция заголовка в файле
@@ -646,7 +646,7 @@ namespace TTG_Tools
                         }
                         //if (version_used <= 5 && version_used != -1) poz = version_of_font[version_used].header.Length + 16;
                     }
-                    if (poz == -1) goto stop_it;
+                    if (poz == -1) return;
 
                     byte[] nameLength = new byte[4];
                     Array.Copy(binContent, poz, nameLength, 0, 4);
@@ -943,7 +943,7 @@ namespace TTG_Tools
                                     catch (Exception ex)
                                     {
                                         MessageBox.Show("Something's wrong.\r\n" + ex.Message, "Unknown error");
-                                        goto stop_it;
+                                        return;
                                     }
                                 }
                                 if (binContent.Length == poz)
@@ -1378,7 +1378,7 @@ namespace TTG_Tools
                                         wrong = true;
                                     }
 
-                                    if (wrong) goto stop_it;
+                                    if (wrong) return;
 
                                     poz = temp_poz;
                                 }
@@ -1398,7 +1398,7 @@ namespace TTG_Tools
                                     wrong = true;
                                 }
 
-                                if (wrong) goto stop_it;
+                                if (wrong) return;
 
                                 tmp = new byte[22];
                                 Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
@@ -2110,14 +2110,11 @@ namespace TTG_Tools
                     else
                     {
                         MessageBox.Show("Unknown texture format. Please contact me.", "Error");
-                        goto endingprocess;
+                        return;
                     }
                 }
                 fillTableOfTextures();
                 edited = true; //Отмечаем, что шрифт изменился
-
-            endingprocess:
-                int nil = 0;
             }
         }
 

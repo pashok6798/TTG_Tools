@@ -81,7 +81,7 @@ namespace TTG_Tools
             catch
             {
                 MessageBox.Show("Open and close program or fix path in config.xml!", "Error!");
-                goto end2; 
+                return; 
             }
 
             if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
@@ -122,7 +122,7 @@ namespace TTG_Tools
                         if (encKey == null)
                         {
                             MessageBox.Show("You must enter key encryption!", "Error");
-                            goto end2;
+                            return;
                         }
                     }
                     else encKey = MainMenu.gamelist[comboBox1.SelectedIndex].key;
@@ -162,7 +162,7 @@ namespace TTG_Tools
                         GC.Collect();
 
                         listBox1.Items.Add("This file doesn't have vector fonts: " + fi[i].Name);
-                        goto end2;
+                        return;
                     }
 
                     byte[] beg_chunk; //Скопируется начальный шаблон
@@ -431,8 +431,6 @@ namespace TTG_Tools
                     }
                 }
             }
-            end2:
-            int konec = 0;
         }
 
         public static List<TextCollector.TXT_collection> ImportTSV(string path, ref List<TextCollector.TXT_collection> txt_collection, string enter, ref string error)
@@ -767,7 +765,7 @@ namespace TTG_Tools
             catch
             {
                 MessageBox.Show("Open and close program or fix path in config.xml!", "Error!");
-                goto end;
+                return;
             }
             //Создаем нить для экспорта текста из LANGDB
             var processLANGDB = new ForThreads();
@@ -1264,9 +1262,6 @@ namespace TTG_Tools
                 sw.Close();
                 listBox1.Items.Add("Bugs have been written in file " + MainMenu.settings.pathForOutputFolder + "\\Баги.txt");
             }
-
-        end:
-            int closing = 0;
         }
 
         //Made for Walking Dead season 1
@@ -1279,7 +1274,6 @@ namespace TTG_Tools
             Array.Copy(binContent, 4, vers_bytes, 0, vers_bytes.Length);
             int vers = BitConverter.ToInt32(vers_bytes, 0);
             int poz = 0;
-            int end = 0;
            
             if (vers == 3 && Encoding.ASCII.GetString(b_header) == "ERTM")
             {
@@ -1859,7 +1853,7 @@ namespace TTG_Tools
 
                 int vers = BitConverter.ToInt32(vers_bytes, 0);
                 int end = 0;
-                //int end2 = 0;
+                
                 if (vers == 8)
                 {
                     poz = 120;
@@ -2483,10 +2477,8 @@ namespace TTG_Tools
                 System.IO.File.Delete(path);
             }
             MyFileStream = new FileStream(path, FileMode.OpenOrCreate);
+
             //записываем заголовок
-
-
-            string etalon = "5VSM";
             if (ConvertHexToString(header[0], 0, 4) == "5VSM" || ConvertHexToString(header[0], 0, 4) == "6VSM")
             {
                 int sizeLangdb = 8;
@@ -2732,7 +2724,7 @@ namespace TTG_Tools
         private void AutoPacker_Load(object sender, EventArgs e)
         {
 
-            #region Грузим список blowfish ключей
+            #region Load blowfish key list
 
             comboBox1.Items.Clear();
 
@@ -2802,6 +2794,16 @@ namespace TTG_Tools
         {
             MainMenu.settings.customKey = checkCustomKey.Checked;
             Settings.SaveConfig(MainMenu.settings);
+
+            if((MainMenu.settings.customKey == true) && 
+                ((MainMenu.settings.encCustomKey != "") && (MainMenu.settings.encCustomKey != null)))
+            {
+                textBox1.Text = MainMenu.settings.encCustomKey;
+            }
+            else
+            {
+                textBox1.Text = "";
+            }
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)

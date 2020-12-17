@@ -398,7 +398,7 @@ namespace TTG_Tools
                                     if (all_text[q].text.IndexOf("\\0") > 0)
                                     {
                                         all_text[q].text = all_text[q].text.Replace("\\0", "\0");
-                                        goto skip_circle;
+                                        return;
                                     }
 
 
@@ -408,9 +408,6 @@ namespace TTG_Tools
                                     {
                                         all_text[q].text = all_text[q].text.Replace(alphabet[a].ToString(), ("Г" + alphabet[a]));
                                     }
-
-                                skip_circle:
-                                    int end = 0;
                                 }
                             }
 
@@ -721,7 +718,7 @@ namespace TTG_Tools
                 catch 
                 {
                     System.Windows.Forms.MessageBox.Show("ERROR! Unknown langdb.");
-                    goto lonec;
+                    return;
                 }
                 
                 
@@ -791,9 +788,6 @@ namespace TTG_Tools
             {
                 ReportForWork("File " + inputFiles[i].Name + " is EMPTY!");
             }
-
-        lonec:
-            int konec = 0;
         }
 
         //Экспорт
@@ -909,7 +903,7 @@ namespace TTG_Tools
                     catch
                     {
                         ReportForWork("ERROR! Unknown langdb.");
-                        goto error;
+                        return;
                     }
                 }
 
@@ -1018,9 +1012,6 @@ namespace TTG_Tools
             //{
             //    ReportForWork("Import in file: " + inputFiles[i].Name + " is incorrect!");
             //}
-
-            error:
-            int konez = 0;
         }
 
 

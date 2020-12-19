@@ -795,9 +795,11 @@ namespace TTG_Tools
             EncryptIt.Checked = MainMenu.settings.encArchive;
             if (MainMenu.settings.inputDirPath != "") textBox1.Text = MainMenu.settings.inputDirPath;
             if (MainMenu.settings.archivePath != "") textBox2.Text = MainMenu.settings.archivePath;
+
             int encKeyIndex = MainMenu.settings.versionArchiveIndex;
             if (MainMenu.settings.archiveFormat == 0) ttarchRB.Checked = true;
             else ttarch2RB.Checked = true;
+
             comboGameList.SelectedIndex = MainMenu.settings.encKeyIndex;
             versionSelection.SelectedIndex = encKeyIndex;
 

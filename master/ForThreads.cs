@@ -21,6 +21,218 @@ namespace TTG_Tools
         public event RefAllText BackAllText;
         public event RefAllText2 BackAllText2;
 
+        public void ExtractDlogFile(FileInfo[] fi, int i)
+        {
+            List<AutoPacker.Langdb> database = new List<AutoPacker.Langdb>();
+            FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
+            byte[] binContent = Methods.ReadFull(fs);
+            AutoPacker.ReadDlog(binContent, AutoPacker.first_database, database, 0);
+            fs.Close();
+            List<TextCollector.TXT_collection> all_text = new List<TextCollector.TXT_collection>();
+
+            for (int q = 0; q < database.Count; q++)
+            {
+                if (BitConverter.ToInt32(database[q].lenght_of_textblok, 0) != 8)
+                {
+                    if (database[q].text != "" && database[q].name != "" || (database[q].text != "" && database[q].name == ""))
+                    {
+                        all_text.Add(new TextCollector.TXT_collection((q + 1), 0, database[q].name, database[q].text, false));
+                    }
+                }
+            }
+            List<TextCollector.TXT_collection> all_text_for_export = new List<TextCollector.TXT_collection>();
+            TextCollector.CreateExportingTXTfromOneFile(all_text, ref all_text_for_export);
+
+            string path = "";
+            if (i > 0)
+            {
+                if (fi[i].Extension == ".dlog" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(AutoPacker.GetNameOnly(i - 1), "(", ")") == AutoPacker.GetNameOnly(i))
+                {
+                    path = MainMenu.settings.pathForOutputFolder + "\\" + fi[i - 1].Name;
+                }
+                else
+                {
+                    path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".dlog") + ".txt";
+                }
+            }
+            else
+            {
+                path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".dlog") + ".txt";
+            }
+            Methods.DeleteCurrentFile(path);
+
+            FileStream MyExportStream = new FileStream(path, FileMode.OpenOrCreate);
+            int w = 0;
+            while (w < all_text_for_export.Count)
+            {
+                all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\r\n");
+                TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.ASCII_N);
+                //TextCollector.SaveString(MyExportStream, (BitConverter.ToString(database[all_text_for_export[w].number-1].hz_data)+"\r\n"), MainMenu.settings.ASCII_N);
+                TextCollector.SaveString(MyExportStream, (all_text_for_export[w].text + "\r\n"), MainMenu.settings.ASCII_N);
+                w++;
+            }
+            MyExportStream.Close();
+            if (i > 0)
+            {
+                if (fi[i].Extension == ".dlog" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(AutoPacker.GetNameOnly(i - 1), "(", ")") == AutoPacker.GetNameOnly(i))
+                {
+                    ReportForWork("File " + fi[i].Name + " exported in " + fi[i - 1].Name);
+                }
+                else
+                {
+                    ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".dlog") + ".txt");
+                }
+            }
+            else
+            {
+                ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".dlog") + ".txt");
+            }
+        }
+
+        public void ExtractLandbFile(FileInfo[] fi, int i, string versionOfGame)
+        {
+            List<byte[]> header = new List<byte[]>();
+            byte[] lenght_of_all_text = new byte[4];
+
+            List<byte[]> end_of_file = new List<byte[]>();
+            List<AutoPacker.Langdb> landb = new List<AutoPacker.Langdb>();
+            FileStream fs = new FileStream(fi[i].FullName, FileMode.Open);
+            byte[] binContent = Methods.ReadFull(fs);
+            AutoPacker.ReadLandb(binContent, landb, ref header, ref lenght_of_all_text, ref end_of_file);
+            fs.Close();
+
+            byte[] new_header = new byte[4];
+            Array.Copy(binContent, 0, new_header, 0, 4);
+            if (Encoding.ASCII.GetString(new_header) == "5VSM")
+            {
+                byte[] vers = new byte[4];
+                Array.Copy(binContent, 16, vers, 0, 4);
+                switch (BitConverter.ToInt32(vers, 0))
+                {
+                    case 9:
+                        versionOfGame = "WAU";
+                        break;
+                    case 10:
+                        versionOfGame = "TFTB";
+                        break;
+                }
+            }
+            else if (Encoding.ASCII.GetString(new_header) == "6VSM")
+            {
+                byte[] vers = new byte[4];
+                Array.Copy(binContent, 16, vers, 0, 4);
+
+                if (BitConverter.ToInt32(vers, 0) == 10) versionOfGame = "Batman";
+            }
+
+            if (landb.Count > 0)
+            {
+                List<TextCollector.TXT_collection> all_text = new List<TextCollector.TXT_collection>();
+
+                for (int q = 0; q < landb.Count; q++)
+                {
+                    if (landb[q].text != "" && landb[q].name != "" || (landb[q].text != "" && landb[q].name == ""))
+                    {
+                        if (MainMenu.settings.exportRealID) all_text.Add(new TextCollector.TXT_collection((q + 1), BitConverter.ToUInt32(landb[q].realID, 0), landb[q].name, landb[q].text, false));
+                        else all_text.Add(new TextCollector.TXT_collection((q + 1), 0, landb[q].name, landb[q].text, false));
+                    }
+                }
+                List<TextCollector.TXT_collection> all_text_for_export = new List<TextCollector.TXT_collection>();
+                TextCollector.CreateExportingTXTfromOneFile(all_text, ref all_text_for_export);
+
+                string path = "";
+                if (i > 0)
+                {
+                    if (fi[i].Extension == ".landb" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(AutoPacker.GetNameOnly(i - 1), "(", ")") == AutoPacker.GetNameOnly(i))
+                    {
+                        path = MainMenu.settings.pathForOutputFolder + "\\" + fi[i - 1].Name;
+                    }
+                    else
+                    {
+                        if (MainMenu.settings.tsvFormat) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
+                        else path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
+                    }
+                }
+                else
+                {
+                    if (MainMenu.settings.tsvFormat) path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv";
+                    else path = MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt";
+                }
+                Methods.DeleteCurrentFile(path);
+
+
+                FileStream MyExportStream = new FileStream(path, FileMode.CreateNew);
+                int w = 0;
+                while (w < all_text_for_export.Count)
+                {
+                    byte[] name_of_file = new byte[4];
+                    Array.Copy(landb[all_text_for_export[w].number - 1].hz_data, 0, name_of_file, 0, 4);
+                    int qwer = BitConverter.ToInt32(name_of_file, 0);
+                    if (!MainMenu.settings.tsvFormat) all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\r\n");
+                    else all_text_for_export[w].text = all_text_for_export[w].text.Replace("\n", "\\n");
+
+                    //тут добавил
+                    if (versionOfGame != "TFTB")
+                    {
+                        byte[] temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].name);
+                        temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
+                        all_text_for_export[w].name = UnicodeEncoding.UTF8.GetString(temp_string);
+
+                        if (all_text_for_export[w].text.IndexOf("\0") > 0)
+                        {
+                            all_text_for_export[w].text = all_text_for_export[w].text.Replace("\0", "(ANSI)");
+                        }
+                        else
+                        {
+                            temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].text);
+                            temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
+                            all_text_for_export[w].text = UnicodeEncoding.UTF8.GetString(temp_string);
+                        }
+                    }
+                    if (MainMenu.settings.tsvFormat)
+                    {
+                        string tsv_str = all_text_for_export[w].number + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
+                        if (MainMenu.settings.exportRealID) tsv_str = all_text_for_export[w].realId + "\t" + all_text_for_export[w].name + "\t" + all_text_for_export[w].text + "\r\n";
+                        TextCollector.SaveString(MyExportStream, tsv_str, MainMenu.settings.unicodeSettings);
+                    }
+                    else
+                    {
+                        if (MainMenu.settings.exportRealID) TextCollector.SaveString(MyExportStream, (all_text_for_export[w].realId + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.unicodeSettings);
+                        else TextCollector.SaveString(MyExportStream, (all_text_for_export[w].number + ") " + all_text_for_export[w].name + "\r\n"), MainMenu.settings.unicodeSettings); //+ qwer.ToString() +  "\r\n"), MainMenu.settings.ASCII_N);
+                        TextCollector.SaveString(MyExportStream, (all_text_for_export[w].text + "\r\n"), MainMenu.settings.unicodeSettings);
+                    }
+                    w++;
+
+                }
+                MyExportStream.Close();
+
+                if (i > 0)
+                {
+                    if (fi[i].Extension == ".landb" && fi[i - 1].Extension == ".txt" && Methods.DeleteCommentary(AutoPacker.GetNameOnly(i - 1), "(", ")") == AutoPacker.GetNameOnly(i))
+                    {
+                        //listBox1.Items.Add("File " + fi[i].Name + " exported in " + fi[i - 1].Name);
+                        ReportForWork("File " + fi[i].Name + " exported in " + fi[i - 1].Name);
+                    }
+                    else
+                    {
+                        //listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
+                        if (MainMenu.settings.tsvFormat) ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
+                        else ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
+                    }
+                }
+                else
+                {
+                    //listBox1.Items.Add("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
+                    if (MainMenu.settings.tsvFormat) ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".tsv");
+                    else ReportForWork("File " + fi[i].Name + " exported in " + Methods.GetNameOfFileOnly(fi[i].Name, ".landb") + ".txt");
+                }
+            }
+            else
+            {
+                ReportForWork("File " + fi[i].Name + " is EMPTY!");
+            }
+        }
+
         public void CreateExportingTXTfromAllTextN(ref List<TextEditor.AllText> allText)
         {
             for (int i = 0; i < allText.Count; i++)
@@ -805,6 +1017,8 @@ namespace TTG_Tools
                 List<string> destinationForExportList = new List<string>();
                 destinationForExportList.Add(".langdb");
                 destinationForExportList.Add(".d3dtx");
+                destinationForExportList.Add(".landb");
+                destinationForExportList.Add(".dlog");
 
                 foreach (string destinationForExport in destinationForExportList)
                 {
@@ -832,6 +1046,12 @@ namespace TTG_Tools
                                         else ReportForWork("Unknown error. Please send me file.");
                                         break;
                                     }
+                                case ".landb":
+                                    ExtractLandbFile(inputFiles, i, versionOfGame);
+                                    break;
+                                case ".dlog":
+                                    ExtractDlogFile(inputFiles, i);
+                                    break;
                                 default:
                                     {
                                         System.Windows.Forms.MessageBox.Show("Error in Switch!");

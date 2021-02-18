@@ -310,6 +310,11 @@ namespace TTG_Tools
             //byte[] b = new byte[1];
             //b[0] = 0;
 
+            if(version_used < 9)
+            {
+                dataGridViewWithCoord.ColumnCount = 7;
+            }
+
             //выводим в дата грид всю инфу
             for (int i = 0; i < ffs.coord.Count; i++)
             {
@@ -346,14 +351,14 @@ namespace TTG_Tools
                 {
                     byte[] ch = BitConverter.GetBytes(i);
                     dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(ch).ToString();
-                    dataGridViewWithCoord.Columns[7].Visible = false;
+                    /*dataGridViewWithCoord.Columns[7].Visible = false;
                     dataGridViewWithCoord.Columns[8].Visible = false;
                     dataGridViewWithCoord.Columns[9].Visible = false;
                     dataGridViewWithCoord.Columns[10].Visible = false;
                     dataGridViewWithCoord.Columns[11].Visible = false;
-                    dataGridViewWithCoord.Columns[12].Visible = false;
+                    dataGridViewWithCoord.Columns[12].Visible = false;*/
                 }
-                else //А иначе они будут грузиться
+                /*else //А иначе они будут грузиться
                 {
                     dataGridViewWithCoord.Columns[7].Visible = true;
                     dataGridViewWithCoord.Columns[8].Visible = true;
@@ -361,20 +366,20 @@ namespace TTG_Tools
                     dataGridViewWithCoord.Columns[10].Visible = true;
                     dataGridViewWithCoord.Columns[11].Visible = true;
                     dataGridViewWithCoord.Columns[12].Visible = true;
-                }
+                }*/
 
                 if (version_used != -1 && version_used >= 6)
                 {
-                    dataGridViewWithCoord.Columns[7].Visible = true;
-                    dataGridViewWithCoord.Columns[8].Visible = true;
+                    //dataGridViewWithCoord.Columns[7].Visible = true;
+                    //dataGridViewWithCoord.Columns[8].Visible = true;
                     dataGridViewWithCoord[7, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].widht, 0));
                     dataGridViewWithCoord[8, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].height, 0));
                 }
-                else
+                /*else
                 {
                     dataGridViewWithCoord.Columns[7].Visible = false;
                     dataGridViewWithCoord.Columns[8].Visible = false;
-                }
+                }*/
 
                 if (version_used >= 9)
                 {
@@ -405,21 +410,8 @@ namespace TTG_Tools
                     dataGridViewWithCoord[12, i].Value = BitConverter.ToSingle(ffs.coord[i].widht_with_kern, 0);
                 }
 
-                //ffs.coord[i].symbol = new byte[4];
-                //ffs.coord[i].n_texture = new byte[4];
-                //ffs.coord[i].w_start = new byte[4];
-                //ffs.coord[i].w_end = new byte[4];
-                //ffs.coord[i].h_start = new byte[4];
-                //ffs.coord[i].h_end = new byte[4];
-                //ffs.coord[i].widht = new byte[4];
-                //ffs.coord[i].height = new byte[4];
-                //ffs.coord[i].HZ = new byte[4];
-                //ffs.coord[i].kern_left_side = new byte[4];
-                //ffs.coord[i].to_top = new byte[4];
-                //ffs.coord[i].widht_with_kern = new byte[4];
-
                 //b[0]++;
-                for (int j = 0; j < 13; j++)
+                for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
                 {
                     dataGridViewWithCoord[j, i].Style.BackColor = System.Drawing.Color.White;
                 }
@@ -530,11 +522,20 @@ namespace TTG_Tools
 
                             //Terrible fix for support Walking Dead: The Definitive Series
                             byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
+
+                            //Another terrible fix for support new version Tales From the Borderlands
+                            byte[] an_check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0xE8, 0xDE, 0x8F, 0xF2 };
+
                             byte[] header_in_file = new byte[check_block.Length];
                             Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
                             if (CompareArray(header_in_file, check_block))
                             {
                                 version_used = 15;
+                            }
+
+                            if (CompareArray(header_in_file, an_check_block))
+                            {
+                                version_used = 16;
                             }
                         }
 
@@ -546,11 +547,19 @@ namespace TTG_Tools
 
                         //Terrible fix for support Walking Dead: The Definitive Series
                         byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
+
+                        //Another terrible fix for support new version Tales From the Borderlands
+                        byte[] an_check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0xE8, 0xDE, 0x8F, 0xF2 };
                         byte[] header_in_file = new byte[check_block.Length];
                         Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
                         if (CompareArray(header_in_file, check_block))
                         {
                             version_used = 15;
+                        }
+
+                        if (CompareArray(header_in_file, an_check_block))
+                        {
+                            version_used = 16;
                         }
 
                         poz = 176;
@@ -1339,27 +1348,53 @@ namespace TTG_Tools
                                 string s_temp = "";
                                 List<byte[]> head = new List<byte[]>();
 
-                                for (int m = 0; m < 34; m++)//было 25
+                                if (version_used == 14 || version_used == 15)
                                 {
-                                    byte[] temp = new byte[4];
-                                    Array.Copy(binContent, temp_poz, temp, 0, 4);
-                                    head.Add(temp);
-                                    temp_poz += 4;
-                                    s_temp += m.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
+                                    for (int m = 0; m < 34; m++)//было 25
+                                    {
+                                        byte[] temp = new byte[4];
+                                        Array.Copy(binContent, temp_poz, temp, 0, 4);
+                                        head.Add(temp);
+                                        temp_poz += 4;
+                                        s_temp += m.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
+                                    }
+
+                                    ffs.dds[k].pn2dds_head = head;
+
+                                    ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
+                                    ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
+
+                                    ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
+                                    ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
+
+                                    ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[31];
+                                    ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[31];
+                                }
+                                else
+                                {
+                                    for (int m = 0; m < 29; m++)//было 25
+                                    {
+                                        byte[] temp = new byte[4];
+                                        Array.Copy(binContent, temp_poz, temp, 0, 4);
+                                        head.Add(temp);
+                                        temp_poz += 4;
+                                        s_temp += m.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
+                                    }
+
+                                    ffs.dds[k].pn2dds_head = head;
+
+                                    ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
+                                    ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
+
+                                    ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
+                                    ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
+
+                                    ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[28];
+                                    ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[28];
                                 }
 
-                                ffs.dds[k].pn2dds_head = head;
-
-                                ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
-                                ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
-
-                                ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
-                                ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
-
-                                ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[31];
-                                ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[31];
-
                                 poz = temp_poz;
+
                             }
 
                             if (BitConverter.ToInt32(version, 0) > 10)
@@ -2276,7 +2311,7 @@ namespace TTG_Tools
                 while ((curLine = sr.ReadLine()) != null)
                 {
                     string[] ch = curLine.Split(' ');
-                    if (Methods.IsNumeric(ch[0]) && ch.Length >= 8)
+                    if (Methods.IsNumeric(ch[0]) && ch.Length >= 6)//8)
                     {
                         //int i = Convert.ToInt32(ch[0]);
                         int k;
@@ -2287,33 +2322,35 @@ namespace TTG_Tools
                                 k = Convert.ToInt32(ch[0]);
                                 if (k >= dataGridViewWithCoord.RowCount) k = i;
                                 dataGridViewWithCoord[0, k].Value = ch[0];      //для импорта координат со старых шрифтов
-                                dataGridViewWithCoord[2, k].Value = ch[2];
-                                dataGridViewWithCoord[3, k].Value = ch[3];
-                                dataGridViewWithCoord[4, k].Value = ch[4];
-                                dataGridViewWithCoord[5, k].Value = ch[5];
-                                dataGridViewWithCoord[6, k].Value = ch[6];
+                                dataGridViewWithCoord[2, k].Value = ch[1];
+                                dataGridViewWithCoord[3, k].Value = ch[2];
+                                dataGridViewWithCoord[4, k].Value = ch[3];
+                                dataGridViewWithCoord[5, k].Value = ch[4];
 
-                                if (version_used >= 9)
+                                if (dataGridViewWithCoord.ColumnCount >= 7)
                                 {
-                                    dataGridViewWithCoord[10, k].Value = 0;
-                                    dataGridViewWithCoord[11, k].Value = 0;
-                                    dataGridViewWithCoord[12, k].Value = Convert.ToInt32(ch[3]) - Convert.ToInt32(ch[2]);
+                                    dataGridViewWithCoord[6, k].Value = ch[5];
+
+                                    if (version_used >= 9)
+                                    {
+                                        dataGridViewWithCoord[10, k].Value = 0;
+                                        dataGridViewWithCoord[11, k].Value = 0;
+                                        dataGridViewWithCoord[12, k].Value = Convert.ToInt32(ch[3]) - Convert.ToInt32(ch[2]);
+                                    }
+
+                                    if (version_used != -1 && dataGridViewWithCoord.ColumnCount > 7)
+                                    {
+                                        dataGridViewWithCoord[7, k].Value = Convert.ToInt32(ch[3]) - Convert.ToInt32(ch[2]);
+                                        dataGridViewWithCoord[8, k].Value = Convert.ToInt32(ch[5]) - Convert.ToInt32(ch[4]);
+                                    }
                                 }
 
-                                if (version_used != -1)
-                                {
-                                    dataGridViewWithCoord[7, k].Value = Convert.ToInt32(ch[3]) - Convert.ToInt32(ch[2]);
-                                    dataGridViewWithCoord[8, k].Value = Convert.ToInt32(ch[5]) - Convert.ToInt32(ch[4]);
-                                }
-
-                                for (int j = 0; j < 13; j++)
+                                for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
                                 {
                                     dataGridViewWithCoord[j, k].Style.BackColor = System.Drawing.Color.Beige;
                                 }
                             }
                         }
-
-
                         //dataGridViewWithCoord[1, i].Value = ch[1];
 
                     }

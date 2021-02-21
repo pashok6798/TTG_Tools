@@ -709,10 +709,14 @@ namespace TTG_Tools
                         break;
                 }
             }
-            else if (BitConverter.ToInt32(check_ver, 0) >= 8 && (Encoding.ASCII.GetString(new_header) == "6VSM"))
+            else if (BitConverter.ToInt32(check_ver, 0) >= 7 && (Encoding.ASCII.GetString(new_header) == "6VSM"))
             {
                 switch(BitConverter.ToInt32(check_ver, 0))
                 {
+                    case 7:
+                        versionOfGame = "TftBR";
+                        break;
+
                     case 8:
                         versionOfGame = "Batman";
                         break;
@@ -863,7 +867,6 @@ namespace TTG_Tools
                         else ReportForWork("Something is wrong with file " + inputFiles[i].Name + ". Please, contact with me.");
                         
                     } 
-                    
                 }
                 else if (versionOfGame != " ")
                 {

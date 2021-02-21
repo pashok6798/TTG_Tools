@@ -953,11 +953,31 @@ namespace TTG_Tools
                 Array.Copy(tex_type, 0, d3dtxContent, poz, 4); //также меняем тип текстуры, если он отличается.
 
                 //делаем дальше смещение
-                if (VersionOfGame == "PN2") poz += 52;
-                else if (VersionOfGame == "WAU") poz += 56;
-                else if (VersionOfGame == "TFTB") poz += 68;
-                else if (VersionOfGame == "WDM") poz += 72;
-                else if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 84;
+                switch (VersionOfGame)
+                {
+                    case "PN2":
+                        poz += 52;
+                        break;
+
+                    case "WAU":
+                        poz += 56;
+                        break;
+
+                    case "TFTB":
+                        poz += 68;
+                        break;
+
+                    case "WDM":
+                    case "TftBR": //New version Tales from the Borderlands
+                        poz += 72;
+                        break;
+
+                    case "Batman":
+                    case "WDDS":
+                        poz += 84;
+                        break;
+                }
+
 
                 Array.Copy(mip, 0, d3dtxContent, poz, 4);
                 poz += 8;
@@ -971,14 +991,25 @@ namespace TTG_Tools
                 if (VersionOfGame != "PN2") Array.Copy(ddsContentLengthBin, 0, d3dtxContent, 12, 4); //Если не покер 2, меняем ещё и в начале размер данных текстуры
                 poz += 4;
 
-                if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS") poz += 4;
+                switch (VersionOfGame)
+                {
+                    case "TFTB":
+                    case "TftBR":
+                    case "WDM":
+                    case "Batman":
+                    case "WDDS":
+                        poz += 4;
+                        break;
+                }
+
+
                 int mipmapTable = 0;
 
-                //задаём размер блока с данными о мип-мапах и их размерах
+                //set a block size for mip maps and texture sizes
                 if (VersionOfGame == "PN2") mipmapTable = 12 * BitConverter.ToInt32(mip, 0);
                 else if (VersionOfGame == "WAU") mipmapTable = 16 * BitConverter.ToInt32(mip, 0);
-                else if (VersionOfGame == "TFTB" || VersionOfGame == "WDM") mipmapTable = 20 * BitConverter.ToInt32(mip, 0) - 4;
-                else if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") mipmapTable = 24 * BitConverter.ToInt32(mip, 0) - 4;
+                else if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "TftBR") mipmapTable = (20 * BitConverter.ToInt32(mip, 0)) - 4;
+                else if (VersionOfGame == "Batman" || VersionOfGame == "WDDS") mipmapTable = (24 * BitConverter.ToInt32(mip, 0)) - 4;
 
                 byte[] newD3dtxHeader = new byte[poz + mipmapTable];
                 Array.Copy(d3dtxContent, 0, newD3dtxHeader, 0, poz);
@@ -1024,7 +1055,7 @@ namespace TTG_Tools
                             poz += 4;
                         }
 
-                        if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS")
+                        if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS" || VersionOfGame == "TftBR")
                         { //Странный метод в борде. Идут сначала какие-то 00 00 00 00 байта, а в конце тупо кратностью заканчивается
                             if (x != 0)
                             {
@@ -1047,6 +1078,7 @@ namespace TTG_Tools
                         case "WDM":
                         case "Batman":
                         case "WDDS":
+                        case "TftBR":
                             plat_pos = 0x78;
                             break;
                     }
@@ -1058,21 +1090,21 @@ namespace TTG_Tools
                 if (VersionOfGame != "PN2")
                 {
                     ulong blockSize = (ulong)newD3dtxHeader.Length - 92;
-                    if (VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS") blockSize -= 12;
+                    if (VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS" || VersionOfGame == "TftBR") blockSize -= 12;
 
                     byte[] binBlockSize = new byte[4];
                     binBlockSize = BitConverter.GetBytes(blockSize);
                     Array.Copy(binBlockSize, 0, newD3dtxHeader, 4, 4);
                 }
+
                 d3dtxContent = new byte[newD3dtxHeader.Length + (binContent.Length - header_length)];
                 Array.Copy(newD3dtxHeader, 0, d3dtxContent, 0, newD3dtxHeader.Length);
-                //fs.Write(newD3dtxHeader, 0, newD3dtxHeader.Length); //Записываем получившийся заголовок.
+                
                 poz = newD3dtxHeader.Length;
-                //newD3dtxHeader = new byte[ddsContentLength]; //и подготавливаем для записи данных текстуры
 
-                int pozFromEnd = binContent.Length; //начинаем считывать снизу
+                int pozFromEnd = binContent.Length; //begin reading from end of file
 
-                for (int y = BitConverter.ToInt32(mip, 0) - 1; y >= 0; y--) //далее идёт запись по твоему методу
+                for (int y = BitConverter.ToInt32(mip, 0) - 1; y >= 0; y--)
                 {
                     pozFromEnd -= contentChpater[y];
 

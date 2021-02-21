@@ -170,7 +170,7 @@ namespace TTG_Tools
         public List<byte[]> head = new List<byte[]>();
 
 
-        string start_version = "ЃS7cћJ:љ"; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
+        byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
 
         public class texture_format //класс для формата текстур
         {
@@ -508,9 +508,7 @@ namespace TTG_Tools
                     }
 
                     //указывается позиция заголовка в файле
-                    int head_poz = Methods.FindStartOfStringSomething(binContent, 0, start_version) + start_version.Length;
-
-                    byte[] temp_ = new byte[10];
+                    int head_poz = Methods.FindStartOfBinarySomething(binContent, 0, start_version) + start_version.Length;
 
                     //находим начало блока с координатами
                     if ((version_used == 10 && poz == 16))

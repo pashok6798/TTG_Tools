@@ -414,10 +414,14 @@ namespace TTG_Tools
                         break;
                 }
             }
-            else if (BitConverter.ToInt32(check_ver, 0) >= 8 && (Encoding.ASCII.GetString(check_header) == "6VSM"))
+            else if (BitConverter.ToInt32(check_ver, 0) >= 7 && (Encoding.ASCII.GetString(check_header) == "6VSM"))
             {
                 switch(BitConverter.ToInt32(check_ver, 0))
                 {
+                    case 7:
+                        versionOfGame = "TftBR"; //New version Tales from the Borderlands
+                        break;
+
                     case 8:
                         versionOfGame = "Batman";
                         break;
@@ -480,6 +484,14 @@ namespace TTG_Tools
                             mips_pos = 0x64;
                             mips_pos2 = 8;
                             add_mips = 8;
+                            break;
+
+                        case "TftBR":
+                            platform_pos = 0x78;
+                            code_pos = 4;
+                            mips_pos = 0x58;
+                            mips_pos2 = 8;
+                            add_mips = 4;
                             break;
                     }
 
@@ -551,7 +563,17 @@ namespace TTG_Tools
                     {
                         byte[] some_shit = new byte[4];
                         poz += 8;
-                        if (versionOfGame == "PN2" || versionOfGame == "Batman" || versionOfGame == "WDDS") poz -= 8; //было -4
+                        //if (versionOfGame == "PN2" || versionOfGame == "Batman" || versionOfGame == "WDDS") poz -= 8; //было -4
+
+                        switch (versionOfGame)
+                        {
+                            case "PN2":
+                            case "Batman":
+                            case "WDDS":
+                                poz -= 8;
+                                break;
+                        }
+
                         Array.Copy(d3dtx, poz, some_shit, 0, some_shit.Length);
 
                         if (versionOfGame == "Batman" || versionOfGame == "WDDS") //Terrible way to fix that problem

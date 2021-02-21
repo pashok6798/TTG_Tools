@@ -1159,8 +1159,8 @@ namespace TTG_Tools
                         }
                         #endregion
 
-                        #region //Версия 11 - 13
-                        else if (version_used >= 11 && version_used <= 13)
+                        #region //Версия 11 - 13 и 16
+                        else if ((version_used >= 11 && version_used <= 13) || (version_used == 16))
                         {
                             int countTextures = BitConverter.ToInt32(ffs.count_dds, 0);
                             for (int j = 0; j < countTextures; j++)
@@ -1182,15 +1182,12 @@ namespace TTG_Tools
                                 Array.Copy(binContent, temp_poz, countName, 0, 4);//прибавлеяем дубл. имя
                                 temp_poz += BitConverter.ToInt32(countName, 0);
 
-                                int end_of_header_dds = temp_poz + 1;//FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                //int end_of_header_dds = FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                //if (end_of_header_dds < binContent.Length)
-                                //{
+                                int end_of_header_dds = temp_poz + 1;
+                                if (version_used == 16) end_of_header_dds += 4;
+                                
                                 byte[] nil2 = new byte[1];
 
                                 ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                //копируем содержимое от конца блока координат до данных записанных в 5C байт
 
                                 //в начале 4 байта - это количество байт до конца (заголовок + текстура(ы)).
                                 int dlinna_header_of_dds = end_of_header_dds - poz;
@@ -1200,6 +1197,7 @@ namespace TTG_Tools
 
                                 int count = 30;
                                 if (version_used == 13) count = 36;
+                                if (version_used == 16) count = 29;
 
                                 //теперь разбираем по группам из 4 байт
                                 string s_temp = "";
@@ -1234,6 +1232,12 @@ namespace TTG_Tools
                                     height_num = 3;
                                     width_num = 2;
                                     length_tex_num = 29;
+                                }
+                                if (version_used == 16)
+                                {
+                                    height_num = 2;
+                                    width_num = 1;
+                                    length_tex_num = 27;
                                 }
 
                                 ffs.dds[j].height_in_font = new byte[4];
@@ -1699,6 +1703,7 @@ namespace TTG_Tools
                    
 
                     if (version_used == 14 || version_used == 15) offset += 4 + 8 + 8 + 3;
+                    if (version_used == 16) offset -= 12; //Tales from the Borderlands Redux
 
                     ddsOffset = BitConverter.GetBytes(offset);
 
@@ -1919,19 +1924,24 @@ namespace TTG_Tools
 
         private void contextMenuStripExport_Import_Opening(object sender, CancelEventArgs e)
         {
-            if (dataGridViewWithTextures.SelectedCells[0].RowIndex >= 0)
+            if (dataGridViewWithTextures.Rows.Count > 0)
             {
-                exportToolStripMenuItem.Enabled = true;
-                importDDSToolStripMenuItem.Enabled = true;
-                //exportCoordinatesToolStripMenuItem1.Enabled = true;
-                importCoordinatesToolStripMenuItem1.Enabled = true;
-            }
-            else
-            {
-                exportToolStripMenuItem.Enabled = false;
-                importDDSToolStripMenuItem.Enabled = false;
-                exportCoordinatesToolStripMenuItem1.Enabled = false;
-                importCoordinatesToolStripMenuItem1.Enabled = false;
+                if (dataGridViewWithTextures.SelectedCells[0].RowIndex >= 0)
+                {
+                    exportToolStripMenuItem.Enabled = true;
+                    importDDSToolStripMenuItem.Enabled = true;
+                    //exportCoordinatesToolStripMenuItem1.Enabled = true;
+                    importCoordinatesToolStripMenuItem1.Enabled = true;
+                }
+                else
+                {
+                    exportToolStripMenuItem.Enabled = false;
+                    importDDSToolStripMenuItem.Enabled = false;
+                    exportCoordinatesToolStripMenuItem1.Enabled = false;
+                    importCoordinatesToolStripMenuItem1.Enabled = false;
+                    importCoordinatesFromFontStudioxmlToolStripMenuItem.Enabled = false;
+                    toolStripImportFNT.Enabled = false;
+                }
             }
         }
 
@@ -1989,6 +1999,7 @@ namespace TTG_Tools
                     if (version_used == 11 || version_used == 12) num = 5;
                     else if (version_used == 13) num = 6;
                     else if (version_used == 14) num = 4;
+                    else if (version_used == 16) num = 3; //Tales from the borderlands redux
 
                     byte[] mip = new byte[4];
                     mip = BitConverter.GetBytes(1);
@@ -2112,6 +2123,13 @@ namespace TTG_Tools
                             height_num = 1;
                             size_in_font1 = 27;
                             size_in_font2 = 31;
+                            break;
+                        case 16:
+                            width_num = 1;
+                            height_num = 2;
+                            num = 3;
+                            size_in_font1 = 23;
+                            size_in_font2 = 27;
                             break;
                     }
 

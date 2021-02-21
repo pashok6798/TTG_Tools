@@ -31,7 +31,7 @@ It supports some games (at least I tested only these games):
 - Poker Night 2
 - The Wolf Among Us
 - The Walking Dead: Season Two
-- Tales from the Borderlands
+- Tales from the Borderlands (2015 & 2021 versions)
 - Game of Thrones
 - Minecraft: Story Mode
 - The Walking Dead: Michonne
@@ -42,4 +42,4 @@ It supports some games (at least I tested only these games):
 - Batman: The Enemy Within
 - The Walking Dead: The Final Season
 - The Walking Dead: The Telltale Definitive Series
-- Sam and Max Save the World Remastered (v 1.0.6)
+- Sam and Max Save the World Remastered

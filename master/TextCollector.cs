@@ -238,7 +238,11 @@ namespace TTG_Tools
                         }
                         hexData = (byte[])UnicodeEncoding.UTF8.GetBytes(data);
                         break;
-
+                    case 2:
+                        hexData = (byte[])Encoding.UTF8.GetBytes(data);
+                        hexData = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(1252), hexData);
+                        hexData = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, hexData);
+                        break;
                     default:
                         hexData = (byte[])UnicodeEncoding.UTF8.GetBytes(data);
                         break;

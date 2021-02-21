@@ -1479,10 +1479,10 @@ namespace TTG_Tools
         public int FindStartOfStringSomething(byte[] array, int offset, string string_something)
         {
             int poz = offset;
-            while (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, false) != string_something)
+            while (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, 1) != string_something)
             {
                 poz++;
-                if (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, false) == string_something)
+                if (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, 1) == string_something)
                 {
                     return poz;
                 }

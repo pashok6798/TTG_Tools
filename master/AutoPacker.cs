@@ -85,7 +85,7 @@ namespace TTG_Tools
             }
 
             if (checkUnicode.Checked) MainMenu.settings.unicodeSettings = 0;
-            else MainMenu.settings.unicodeSettings = 1;
+            else MainMenu.settings.unicodeSettings = 2;
             
             EncVersion = 2;
             if (comboBox2.SelectedIndex == 1) EncVersion = 7;
@@ -1313,7 +1313,7 @@ namespace TTG_Tools
                 int len_text = BitConverter.ToInt32(first_database[0].lenght_of_name_langdb_minus_4, 0);
                 byte[] hex_text = new byte[len_text];
                 //получаем имя базы
-                first_database[number].name_of_langdb = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, false);
+                first_database[number].name_of_langdb = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, 1);
                 poz += len_text;
 
                 poz_add = 20;//0x14
@@ -1363,7 +1363,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем анимацию
                         int len_animation = BitConverter.ToInt32(lenght_of_animation, 0);
-                        string animation = Methods.ConvertHexToString(first_database[0].langdb, poz, len_animation, MainMenu.settings.ASCII_N, false);
+                        string animation = Methods.ConvertHexToString(first_database[0].langdb, poz, len_animation, MainMenu.settings.ASCII_N, 1);
                         poz += len_animation;
 
                         poz += 4;
@@ -1372,7 +1372,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем озвучки
                         int len_waw = BitConverter.ToInt32(lenght_of_waw, 0);
-                        string waw = Methods.ConvertHexToString(first_database[0].langdb, poz, len_waw, MainMenu.settings.ASCII_N, false);
+                        string waw = Methods.ConvertHexToString(first_database[0].langdb, poz, len_waw, MainMenu.settings.ASCII_N, 1);
                         poz += len_waw;
 
 
@@ -1407,7 +1407,7 @@ namespace TTG_Tools
                             poz += 4;
                             //получаем текст
                             len_text = BitConverter.ToInt32(lenght_of_text, 0);
-                            string text = Methods.ConvertHexToString(first_database[0].langdb, poz, len_text, MainMenu.settings.ASCII_N, false);
+                            string text = Methods.ConvertHexToString(first_database[0].langdb, poz, len_text, MainMenu.settings.ASCII_N, 1);
                             //MessageBox.Show(database[number].text);
                             poz += len_text;
 
@@ -1446,7 +1446,7 @@ namespace TTG_Tools
                                 poz += 4;
                                 //получаем текст
                                 len_text = BitConverter.ToInt32(lenght_of_text, 0);
-                                text = Methods.ConvertHexToString(first_database[0].langdb, poz, len_text, MainMenu.settings.ASCII_N, false);
+                                text = Methods.ConvertHexToString(first_database[0].langdb, poz, len_text, MainMenu.settings.ASCII_N, 1);
                                 //MessageBox.Show(database[number].text);
                                 poz += len_text;
 
@@ -1506,7 +1506,7 @@ namespace TTG_Tools
 
             int poz = 0;
 
-            bool UnicodeSupport = false;
+            int UnicodeSupport = 1;
             byte[] ERTM = new byte[4];//первые 4 байта - версия
             Array.Copy(binContent, 0, ERTM, 0, 4);
             header.Add(ERTM);
@@ -1555,7 +1555,7 @@ namespace TTG_Tools
                                 {
                                     lenghtForHeaderForVersion = 120;
                                     len_magic = 20;
-                                    if (MainMenu.settings.unicodeSettings == 0) UnicodeSupport = true;
+                                    if (MainMenu.settings.unicodeSettings != 1) UnicodeSupport = 0;
                                     break;
                                 }
                         }
@@ -1711,7 +1711,7 @@ namespace TTG_Tools
 
                         //получаем анимацию
                         int len_animation = BitConverter.ToInt32(lenght_of_animation, 0);
-                        string animation = Methods.ConvertHexToString(binContent, poz, len_animation, MainMenu.settings.ASCII_N, false);
+                        string animation = Methods.ConvertHexToString(binContent, poz, len_animation, MainMenu.settings.ASCII_N, 1);
                         poz += len_animation;
 
                         poz += 4;
@@ -1720,7 +1720,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем озвучки
                         int len_waw = BitConverter.ToInt32(lenght_of_waw, 0);
-                        string waw = Methods.ConvertHexToString(binContent, poz, len_waw, MainMenu.settings.ASCII_N, false);
+                        string waw = Methods.ConvertHexToString(binContent, poz, len_waw, MainMenu.settings.ASCII_N, 1);
                         poz += len_waw;
 
                         byte[] count_text = new byte[12];
@@ -1739,7 +1739,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем имя
                         int len_name = BitConverter.ToInt32(lenght_of_name, 0);
-                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, false);
+                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, 1);
                         poz += len_name;
 
                         poz += 4;
@@ -1748,7 +1748,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем текст
                         int len_text = BitConverter.ToInt32(lenght_of_text, 0);
-                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, false);
+                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, 1);
                         //MessageBox.Show(database[number].text);
                         poz += len_text;
 
@@ -1844,7 +1844,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем имя
                         int len_name = BitConverter.ToInt32(lenght_of_name, 0);
-                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, true);
+                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, 0);
                         poz += len_name;
 
                         poz += 4;
@@ -1853,7 +1853,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем текст
                         int len_text = BitConverter.ToInt32(lenght_of_text, 0);
-                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, true);
+                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, 0);
                         //MessageBox.Show(database[number].text);
                         poz += len_text;
 
@@ -1953,7 +1953,7 @@ namespace TTG_Tools
 
                         //получаем анимацию
                         int len_animation = BitConverter.ToInt32(lenght_of_animation, 0);
-                        string animation = Methods.ConvertHexToString(binContent, poz, len_animation, MainMenu.settings.ASCII_N, true);
+                        string animation = Methods.ConvertHexToString(binContent, poz, len_animation, MainMenu.settings.ASCII_N, 0);
                         poz += len_animation;
 
                         poz += 4;
@@ -1962,7 +1962,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем озвучки
                         int len_waw = BitConverter.ToInt32(lenght_of_waw, 0);
-                        string waw = Methods.ConvertHexToString(binContent, poz, len_waw, MainMenu.settings.ASCII_N, true);
+                        string waw = Methods.ConvertHexToString(binContent, poz, len_waw, MainMenu.settings.ASCII_N, 0);
                         poz += len_waw;
 
                         byte[] count_text = new byte[12];
@@ -1981,7 +1981,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем имя
                         int len_name = BitConverter.ToInt32(lenght_of_name, 0);
-                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, true);
+                        string name = Methods.ConvertHexToString(binContent, poz, len_name, MainMenu.settings.ASCII_N, 0);
                         poz += len_name;
 
                         poz += 4;
@@ -1990,7 +1990,7 @@ namespace TTG_Tools
                         poz += 4;
                         //получаем текст
                         int len_text = BitConverter.ToInt32(lenght_of_text, 0);
-                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, true);
+                        string text = Methods.ConvertHexToString(binContent, poz, len_text, MainMenu.settings.ASCII_N, 0);
                         //MessageBox.Show(database[number].text);
                         poz += len_text;
 
@@ -2174,7 +2174,7 @@ namespace TTG_Tools
             //SaveHexInfo(MyFileStream, first_database[0].langdb);
 
             MyFileStream.Write(first_database[0].head, 0, first_database[0].head.Length);
-            SaveStringInfo(MyFileStream, first_database[0].name_of_langdb, MainMenu.settings.ASCII_N, false);
+            SaveStringInfo(MyFileStream, first_database[0].name_of_langdb, MainMenu.settings.ASCII_N, 1);
             MyFileStream.Write(first_database[0].hlam, 0, first_database[0].hlam.Length);
             //сохраняем всю длинну langdb
             temp = BitConverter.GetBytes(sizeLangdb1);
@@ -2201,9 +2201,9 @@ namespace TTG_Tools
                     MyFileStream.Write(database[numb].hz_data, 0, database[numb].hz_data.Length);
                 }
                 //анимация
-                SaveStringInfo(MyFileStream, database[numb].animation, MainMenu.settings.ASCII_N, false);
+                SaveStringInfo(MyFileStream, database[numb].animation, MainMenu.settings.ASCII_N, 1);
                 //озвучка
-                SaveStringInfo(MyFileStream, database[numb].waw, MainMenu.settings.ASCII_N, false);
+                SaveStringInfo(MyFileStream, database[numb].waw, MainMenu.settings.ASCII_N, 1);
 
                 if (BitConverter.ToInt32(database[numb].lenght_of_textblok, 0) != 8)
                 {
@@ -2214,9 +2214,9 @@ namespace TTG_Tools
 
                         MyFileStream.Write(database[numb].count_text, 0, database[numb].count_text.Length);
                         //имя
-                        SaveStringInfo(MyFileStream, database[numb].name, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb].name, MainMenu.settings.ASCII_N, 1);
                         //текст
-                        SaveStringInfo(MyFileStream, database[numb].text, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb].text, MainMenu.settings.ASCII_N, 1);
                         //магические байты
                         MyFileStream.Write(database[numb].magic_bytes, 0, database[numb].magic_bytes.Length);
                     }
@@ -2227,15 +2227,15 @@ namespace TTG_Tools
 
                         MyFileStream.Write(database[numb].count_text, 0, database[numb].count_text.Length);
                         //имя
-                        SaveStringInfo(MyFileStream, database[numb].name, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb].name, MainMenu.settings.ASCII_N, 1);
                         //текст
-                        SaveStringInfo(MyFileStream, database[numb].text, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb].text, MainMenu.settings.ASCII_N, 1);
                         //имя
                         //магические байты
                         MyFileStream.Write(database[numb].magic_bytes, 0, database[numb].magic_bytes.Length);
-                        SaveStringInfo(MyFileStream, database[numb + 1].name, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb + 1].name, MainMenu.settings.ASCII_N, 1);
                         //текст
-                        SaveStringInfo(MyFileStream, database[numb + 1].text, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, database[numb + 1].text, MainMenu.settings.ASCII_N, 1);
                         //магические байты
                         MyFileStream.Write(database[numb + 1].magic_bytes, 0, database[numb + 1].magic_bytes.Length);
                         numb++;
@@ -2299,7 +2299,6 @@ namespace TTG_Tools
                 ////записываем всё остальное
                 while (numb < landb.Count)
                 {
-
                     MyFileStream.Write(landb[numb].hz_data, 0, landb[numb].hz_data.Length);
 
                     //byte[] temp = BitConverter.GetBytes((landb[numb].name.Length + landb[numb].text.Length + 8 + 8 + landb[numb].magic_bytes.Length) - 8);//-8 надо для борды, указывается всегда 12 хотя в Борде уже 20?
@@ -2308,24 +2307,24 @@ namespace TTG_Tools
                     if (verOfGame == "WAU") temp = BitConverter.GetBytes((BitConverter.ToInt32(landb[numb].lenght_of_name, 0) + BitConverter.ToInt32(landb[numb].lenght_of_text, 0) + 8 + 8 + landb[numb].magic_bytes.Length));//-8 надо для борды, указывается всегда 12 хотя в Борде уже 20?
                     //if ()
                     MyFileStream.Write(temp, 0, temp.Length);
-                    if ((verOfGame == "TFTB") && MainMenu.settings.unicodeSettings == 0 || (verOfGame == "Batman"))
+                    if ((verOfGame == "TFTB") && (MainMenu.settings.unicodeSettings != 1))
                     {
                         //имя
-                        SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, true);
+                        SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, 0);
 
                         //текст
                         if (landb[numb].text.IndexOf("\0") > 0)
                         {
-                            SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, false);
+                            SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, 1);
                         }
-                        else SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, true);
+                        else SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, 0);
                     }
                     else
                     {
                         //имя
-                        SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, 1);
                         //текст
-                        SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, false);
+                        SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, 1);
                     }
 
                     //магические байты
@@ -2374,9 +2373,9 @@ namespace TTG_Tools
 
                     MyFileStream.Write(landb[numb].hz_data, 0, landb[numb].hz_data.Length);
                     //анимация
-                    SaveStringInfo(MyFileStream, landb[numb].animation, MainMenu.settings.ASCII_N, false);
+                    SaveStringInfo(MyFileStream, landb[numb].animation, MainMenu.settings.ASCII_N, 1);
                     //озвучка
-                    SaveStringInfo(MyFileStream, landb[numb].waw, MainMenu.settings.ASCII_N, false);
+                    SaveStringInfo(MyFileStream, landb[numb].waw, MainMenu.settings.ASCII_N, 1);
 
                     MyFileStream.Write(landb[numb].count_text, 0, landb[numb].count_text.Length);
 
@@ -2384,9 +2383,9 @@ namespace TTG_Tools
                     MyFileStream.Write(temp, 0, temp.Length);
 
                     //имя
-                    SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, false);
+                    SaveStringInfo(MyFileStream, landb[numb].name, MainMenu.settings.ASCII_N, 1);
                     //текст
-                    SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, false);
+                    SaveStringInfo(MyFileStream, landb[numb].text, MainMenu.settings.ASCII_N, 1);
 
                     //магические байты
                     MyFileStream.Write(landb[numb].magic_bytes, 0, landb[numb].magic_bytes.Length);
@@ -2426,12 +2425,12 @@ namespace TTG_Tools
                 return 0;
             }
         }
-        public static void SaveStringInfo(FileStream MyFileStream, string data, int ASCII_N, bool Unicode)
+        public static void SaveStringInfo(FileStream MyFileStream, string data, int ASCII_N, int UnicodeMode)
         {
             byte[] b1 = BitConverter.GetBytes(data.Length + 8);
             byte[] b2 = BitConverter.GetBytes(data.Length);
 
-            if (Unicode)
+            if (UnicodeMode == 0 || UnicodeMode == 2)
             {
                 byte[] bin_data = Encoding.UTF8.GetBytes(data);
                 b1 = BitConverter.GetBytes(bin_data.Length + 8);
@@ -2444,7 +2443,7 @@ namespace TTG_Tools
             {
                 byte[] hex_data = new byte[data.Length];
                 //
-                if (Unicode == true) hex_data = (byte[])Encoding.UTF8.GetBytes(data);
+                if (MainMenu.settings.unicodeSettings != 1) hex_data = (byte[])Encoding.UTF8.GetBytes(data);
                 else hex_data = (byte[])ASCIIEncoding.GetEncoding(ASCII_N).GetBytes(data);
                 MyFileStream.Write(hex_data, 0, hex_data.Length);
             }

@@ -53,6 +53,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip2 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip3 = new System.Windows.Forms.ToolTip(this.components);
+            this.rbNonNormalUnicode2 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownASCII)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -259,11 +260,12 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.rbNonNormalUnicode2);
             this.groupBox2.Controls.Add(this.rbNonNormalUnicode);
             this.groupBox2.Controls.Add(this.rbNormalUnicode);
-            this.groupBox2.Location = new System.Drawing.Point(24, 326);
+            this.groupBox2.Location = new System.Drawing.Point(24, 282);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(561, 74);
+            this.groupBox2.Size = new System.Drawing.Size(561, 118);
             this.groupBox2.TabIndex = 13;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Coding for new games (From \"Tales From the Borderlands\" game)";
@@ -271,12 +273,12 @@
             // rbNonNormalUnicode
             // 
             this.rbNonNormalUnicode.AutoSize = true;
-            this.rbNonNormalUnicode.Location = new System.Drawing.Point(7, 47);
+            this.rbNonNormalUnicode.Location = new System.Drawing.Point(7, 86);
             this.rbNonNormalUnicode.Name = "rbNonNormalUnicode";
-            this.rbNonNormalUnicode.Size = new System.Drawing.Size(160, 21);
+            this.rbNonNormalUnicode.Size = new System.Drawing.Size(416, 21);
             this.rbNonNormalUnicode.TabIndex = 1;
             this.rbNonNormalUnicode.TabStop = true;
-            this.rbNonNormalUnicode.Text = "NOT normal unicode";
+            this.rbNonNormalUnicode.Text = "NOT normal unicode (uses additional char. Very old method.)";
             this.toolTip2.SetToolTip(this.rbNonNormalUnicode, resources.GetString("rbNonNormalUnicode.ToolTip"));
             this.rbNonNormalUnicode.UseVisualStyleBackColor = true;
             // 
@@ -293,6 +295,18 @@
         "lp\r\nto export/import text files from a new game and\r\nremake fonts with support o" +
         "f your symbols.");
             this.rbNormalUnicode.UseVisualStyleBackColor = true;
+            // 
+            // rbNonNormalUnicode2
+            // 
+            this.rbNonNormalUnicode2.AutoSize = true;
+            this.rbNonNormalUnicode2.Location = new System.Drawing.Point(7, 43);
+            this.rbNonNormalUnicode2.Name = "rbNonNormalUnicode2";
+            this.rbNonNormalUnicode2.Size = new System.Drawing.Size(440, 38);
+            this.rbNonNormalUnicode2.TabIndex = 2;
+            this.rbNonNormalUnicode2.TabStop = true;
+            this.rbNonNormalUnicode2.Text = "NOT normal unicode (convert your language into non-latin chars.\r\nRecommend for ne" +
+    "w version TftB.)";
+            this.rbNonNormalUnicode2.UseVisualStyleBackColor = true;
             // 
             // FormSettings
             // 
@@ -348,5 +362,6 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolTip toolTip2;
         private System.Windows.Forms.ToolTip toolTip3;
+        private System.Windows.Forms.RadioButton rbNonNormalUnicode2;
     }
 }

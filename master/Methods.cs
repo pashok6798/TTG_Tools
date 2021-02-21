@@ -378,7 +378,7 @@ namespace TTG_Tools
             }
         }
        
-        public static string ConvertHexToString(byte[] array, int poz, int len_string, int ASCII_N, bool Unicode)
+        public static string ConvertHexToString(byte[] array, int poz, int len_string, int ASCII_N, int UnicodeNum)
         {
             try
             {
@@ -389,17 +389,17 @@ namespace TTG_Tools
                 {
                     if (temp_hex_string[i] == 0x00 && i == temp_hex_string.Length - 1)
                     {
-                        Unicode = false;
+                        UnicodeNum = 1;//Unicode = false;
                     }
                     else if (temp_hex_string[i] == 0x00 && i <= temp_hex_string.Length - 1)
                     {
-                        Unicode = true;
+                        UnicodeNum = MainMenu.settings.unicodeSettings;
                         break;
                     }
                 }
 
                 string result;
-                if (Unicode) result = UnicodeEncoding.UTF8.GetString(temp_hex_string);
+                if (MainMenu.settings.unicodeSettings != 1) result = UnicodeEncoding.UTF8.GetString(temp_hex_string);
                 else result = ASCIIEncoding.GetEncoding(ASCII_N).GetString(temp_hex_string);
                 return result;
             }
@@ -440,10 +440,10 @@ namespace TTG_Tools
         public static int FindStartOfStringSomething(byte[] array, int offset, string string_something)
         {
             int poz = offset;
-            while (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, false) != string_something)
+            while (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, 1) != string_something)
             {
                 poz++;
-                if (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, false) == string_something)
+                if (Methods.ConvertHexToString(array, poz, string_something.Length, MainMenu.settings.ASCII_N, 1) == string_something)
                 {
                     return poz;
                 }
@@ -521,10 +521,10 @@ namespace TTG_Tools
                 byte[] checkBuffer = decBuf.Crypt_ECB(buffer, version, true);
 
                     int bfPos = 0; //Позиция в blowfish
-                    while (Methods.ConvertHexToString(checkBuffer, bfPos, NeedData.Length, MainMenu.settings.ASCII_N, false) != NeedData)
+                    while (Methods.ConvertHexToString(checkBuffer, bfPos, NeedData.Length, MainMenu.settings.ASCII_N, 1) != NeedData)
                     {
                         bfPos++;
-                        if (Methods.ConvertHexToString(checkBuffer, bfPos, NeedData.Length, MainMenu.settings.ASCII_N, false) == NeedData)
+                        if (Methods.ConvertHexToString(checkBuffer, bfPos, NeedData.Length, MainMenu.settings.ASCII_N, 1) == NeedData)
                         {
                             result = bfPos + pos - 1;
                             IsFinding = false;

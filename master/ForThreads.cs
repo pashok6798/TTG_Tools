@@ -174,19 +174,29 @@ namespace TTG_Tools
                     //тут добавил
                     if (versionOfGame != "TFTB")
                     {
-                        byte[] temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].name);
-                        temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
-                        all_text_for_export[w].name = UnicodeEncoding.UTF8.GetString(temp_string);
-
-                        if (all_text_for_export[w].text.IndexOf("\0") > 0)
+                        if (MainMenu.settings.unicodeSettings == 1)
                         {
-                            all_text_for_export[w].text = all_text_for_export[w].text.Replace("\0", "(ANSI)");
+                            byte[] temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].name);
+                            temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
+                            all_text_for_export[w].name = UnicodeEncoding.UTF8.GetString(temp_string);
+
+                            if (all_text_for_export[w].text.IndexOf("\0") > 0)
+                            {
+                                all_text_for_export[w].text = all_text_for_export[w].text.Replace("\0", "(ANSI)");
+                            }
+                            else
+                            {
+                                temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].text);
+                                temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
+                                all_text_for_export[w].text = UnicodeEncoding.UTF8.GetString(temp_string);
+                            }
                         }
                         else
                         {
-                            temp_string = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetBytes(all_text_for_export[w].text);
-                            temp_string = Encoding.Convert(Encoding.GetEncoding(MainMenu.settings.ASCII_N), Encoding.UTF8, temp_string);
-                            all_text_for_export[w].text = UnicodeEncoding.UTF8.GetString(temp_string);
+                            if (all_text_for_export[w].text.IndexOf("\0") > 0)
+                            {
+                                all_text_for_export[w].text = all_text_for_export[w].text.Replace("\0", "(ANSI)");
+                            }
                         }
                     }
                     if (MainMenu.settings.tsvFormat)
@@ -621,6 +631,14 @@ namespace TTG_Tools
                                         all_text[q].text = all_text[q].text.Replace(alphabet[a].ToString(), ("Г" + alphabet[a]));
                                     }
                                 }
+                                else if(MainMenu.settings.unicodeSettings == 2)
+                                {
+                                    byte[] tmp = UnicodeEncoding.UTF8.GetBytes(all_text[q].text);
+                                    tmp = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(MainMenu.settings.ASCII_N), tmp);
+                                    tmp = Encoding.Convert(Encoding.GetEncoding(1252), Encoding.UTF8, tmp);
+                                    all_text[q].text = UnicodeEncoding.UTF8.GetString(tmp);
+                                    tmp = null;
+                                }
                             }
 
                             //index = all_text[q].number;
@@ -628,7 +646,7 @@ namespace TTG_Tools
                             if (fileDestination[j].Extension == ".txt") landb[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
                             else if(fileDestination[j].Extension != ".txt" && landb[all_text[q].number - 1].text.Contains("\\n")) landb[all_text[q].number - 1].text = all_text[q].text.Replace("\\n", "\n");
 
-                            if((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings == 0))
+                            if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings != 1))
                             {
                                 if (landb[all_text[q].number - 1].text.IndexOf("(ANSI)") > 0)
                                 {
@@ -642,7 +660,15 @@ namespace TTG_Tools
                                     landb[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(unicode_bin.Length);
                                 }
                             }
-                            else landb[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(landb[all_text[q].number - 1].text.Length);
+                            else
+                            {
+                                if (landb[all_text[q].number - 1].text.IndexOf("(ANSI)") > 0)
+                                {
+                                    landb[all_text[q].number - 1].text = landb[all_text[q].number - 1].text.Replace("(ANSI)", "\0");
+                                }
+
+                                landb[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(landb[all_text[q].number - 1].text.Length);
+                            }
                         }
                         Methods.DeleteCurrentFile(pathOutput + "\\" + inputFiles[i].Name);
                         AutoPacker.CreateLandb(header, landb, end_of_file, (pathOutput + "\\" + inputFiles[i].Name), versionOfGame);

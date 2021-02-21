@@ -64,6 +64,7 @@ namespace TTG_Tools
             MainMenu.settings.exportRealID = checkBoxExportRealID.Checked;
             if (rbNormalUnicode.Checked == true) MainMenu.settings.unicodeSettings = 0;
             else if (rbNonNormalUnicode.Checked == true) MainMenu.settings.unicodeSettings = 1;
+            else if (rbNonNormalUnicode2.Checked == true) MainMenu.settings.unicodeSettings = 2;
 
             //MainMenu.settings.unicodeSupport = checkUnicode.Checked;
             Settings.SaveConfig(MainMenu.settings);
@@ -115,6 +116,9 @@ namespace TTG_Tools
                     break;
                 case 1:
                     rbNonNormalUnicode.Checked = true;
+                    break;
+                case 2:
+                    rbNonNormalUnicode2.Checked = true;
                     break;
                 default:
                     rbNormalUnicode.Checked = true;

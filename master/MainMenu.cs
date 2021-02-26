@@ -15,7 +15,7 @@ namespace TTG_Tools
 {
     public partial class MainMenu : Form
     {
-        public static Settings settings = new Settings("", "", "ГЁЙЦУКЕНШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮгёйцукеншщзхъфывапролджэячсмитьбю", 1251, false, false, false, true, false, 0, false, false, false, false, false, false, 0, 0, "", "", "", false, false, false, false, 0, 0);
+        public static Settings settings = new Settings("", "", "ГЁЙЦУКЕНШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮгёйцукеншщзхъфывапролджэячсмитьбю", 1251, false, false, false, true, false, 0, false, false, false, false, false, false, 0, 0, "", "", "", false, false, false, false, 0, 0, false);
 
         [DllImport("kernel32.dll")]
         public static extern void SetProcessWorkingSetSize(IntPtr hWnd, int i, int j);
@@ -71,13 +71,18 @@ namespace TTG_Tools
                 settings = (Settings)settingsDeserializer.Deserialize(reader);
                 reader.Close();
 
-                if (settings.additionalChar == "")
+                if ((settings.additionalChar == "") && !settings.ignoreAdditionalChar)
                 {
-                    DialogResult status = MessageBox.Show("TTG Tools didn't find additional characters for Tales From the Borderlands\r\nand Game of Thrones for correct showing text in game. Open settings form?", "Open settings form?", MessageBoxButtons.YesNo);
+                    DialogResult status = MessageBox.Show("TTG Tools didn't find additional characters for Tales From the Borderlands (old version)\r\nand Game of Thrones for correct showing text in game. Open settings form? You can ignore that message by click \"Cancel\" button.", "Open settings form?", MessageBoxButtons.YesNoCancel);
                     if (status == DialogResult.Yes)
                     {
                         Form formSettings = new FormSettings();
                         formSettings.Show();
+                    }
+                    if(status == DialogResult.Cancel)
+                    {
+                        settings.ignoreAdditionalChar = true;
+                        Settings.SaveConfig(settings);
                     }
                 }
 

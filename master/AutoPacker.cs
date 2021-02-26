@@ -2529,11 +2529,16 @@ namespace TTG_Tools
             comboBox1.SelectedIndex = MainMenu.settings.encKeyIndex;
             comboBox2.SelectedIndex = MainMenu.settings.versionEnc;
             checkUnicode.Checked = (MainMenu.settings.unicodeSettings == 0);
-            txtFilesRB.Checked = true;
+            if (MainMenu.settings.tsvFormat)
+            {
+                tsvFilesRB.Checked = true;
+            }
+            else txtFilesRB.Checked = true;
             checkEncDDS.Checked = MainMenu.settings.encDDSonly;
             checkIOS.Checked = MainMenu.settings.iOSsupport;
             checkEncLangdb.Checked = MainMenu.settings.encLangdb;
             CheckNewEngine.Checked = MainMenu.settings.encNewLua;
+
             if (MainMenu.settings.customKey && Methods.stringToKey(MainMenu.settings.encCustomKey) != null)
             {
                 checkCustomKey.Checked = MainMenu.settings.customKey;
@@ -2615,6 +2620,24 @@ namespace TTG_Tools
             {
                 MainMenu.settings.customKey = checkCustomKey.Checked;
                 MainMenu.settings.encCustomKey = textBox1.Text;
+                Settings.SaveConfig(MainMenu.settings);
+            }
+        }
+
+        private void tsvFilesRB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (tsvFilesRB.Checked)
+            {
+                MainMenu.settings.tsvFormat = true;
+                Settings.SaveConfig(MainMenu.settings);
+            }
+        }
+
+        private void txtFilesRB_CheckedChanged(object sender, EventArgs e)
+        {
+            if (txtFilesRB.Checked)
+            {
+                MainMenu.settings.tsvFormat = false;
                 Settings.SaveConfig(MainMenu.settings);
             }
         }

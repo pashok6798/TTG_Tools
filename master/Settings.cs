@@ -31,6 +31,7 @@ namespace TTG_Tools
         private string _AdditionalChar = "";
         private bool _exportRealID;
         private int _unicodeSettings;
+        private bool _ignoreAdditionalChar;
 
         private bool _encLangdb;
         private bool _encDDSonly;
@@ -399,6 +400,20 @@ namespace TTG_Tools
             }
         }
 
+        [XmlAttribute("ignoreAdditionalChar")]
+
+        public bool ignoreAdditionalChar
+        {
+            get
+            {
+                return _ignoreAdditionalChar;
+            }
+            set
+            {
+                _ignoreAdditionalChar = value;
+            }
+        }
+
         public Settings(
             string _pathForInputFolder,
             string _pathForOutputFolder,
@@ -426,7 +441,8 @@ namespace TTG_Tools
             bool _compressArchive,
             bool _oldXmode,
             int archiveFormat,
-            int _versionArchiveIndex)
+            int _versionArchiveIndex,
+            bool _ignoreAdditionalChar)
         {
             this.ASCII_N = _ASCII_N;
             this.pathForInputFolder = _pathForInputFolder;
@@ -454,6 +470,7 @@ namespace TTG_Tools
             this.compressArchive = _compressArchive;
             this.oldXmode = _oldXmode;
             this.archiveFormat = _archiveFormat;
+            this.ignoreAdditionalChar = _ignoreAdditionalChar;
         }
 
         public Settings()

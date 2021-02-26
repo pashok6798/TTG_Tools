@@ -644,13 +644,13 @@ namespace TTG_Tools
                             //index = all_text[q].number;
 
                             if (fileDestination[j].Extension == ".txt") landb[all_text[q].number - 1].text = all_text[q].text.Replace("\r\n", "\n");
-                            else if(fileDestination[j].Extension != ".txt" && landb[all_text[q].number - 1].text.Contains("\\n")) landb[all_text[q].number - 1].text = all_text[q].text.Replace("\\n", "\n");
+                            else if (fileDestination[j].Extension != ".txt" && MainMenu.settings.tsvFormat) landb[all_text[q].number - 1].text = all_text[q].text;
+                            else if (fileDestination[j].Extension != ".txt" && landb[all_text[q].number - 1].text.Contains("\\n")) landb[all_text[q].number - 1].text = all_text[q].text.Replace("\\n", "\n");
 
                             if ((versionOfGame == "TFTB") && (MainMenu.settings.unicodeSettings != 1))
                             {
                                 if (landb[all_text[q].number - 1].text.IndexOf("(ANSI)") > 0)
                                 {
-
                                     landb[all_text[q].number - 1].text = landb[all_text[q].number - 1].text.Replace("(ANSI)", "\0");
                                     landb[all_text[q].number - 1].lenght_of_text = BitConverter.GetBytes(landb[all_text[q].number - 1].text.Length);
                                 }

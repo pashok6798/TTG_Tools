@@ -252,6 +252,7 @@
             this.tsvFilesRB.TabStop = true;
             this.tsvFilesRB.Text = "tsv format (for Google tables)";
             this.tsvFilesRB.UseVisualStyleBackColor = true;
+            this.tsvFilesRB.CheckedChanged += new System.EventHandler(this.tsvFilesRB_CheckedChanged);
             // 
             // txtFilesRB
             // 
@@ -263,6 +264,7 @@
             this.txtFilesRB.TabStop = true;
             this.txtFilesRB.Text = "txt format";
             this.txtFilesRB.UseVisualStyleBackColor = true;
+            this.txtFilesRB.CheckedChanged += new System.EventHandler(this.txtFilesRB_CheckedChanged);
             // 
             // AutoPacker
             // 

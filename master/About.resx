@@ -143,6 +143,7 @@ Add support "Sam &amp; Max save the World Remastered"
 Add support new version "Tales from the Borderlands"
 +Auto (De)Packer &amp; Archive Packer:
 Now it saves your selected options.
+Remove option with support non-normal unicode for users with windows-1252 encoding.
 + Archive Packer:
 Now progress bar doesn't freeze when tool packs archive.
 

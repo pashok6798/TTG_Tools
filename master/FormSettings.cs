@@ -91,6 +91,22 @@ namespace TTG_Tools
             {
                 numericUpDownASCII.Value = 1250;
             }
+
+            //Terrible fix for users windows-1252 encoding
+            if(Convert.ToInt32(numericUpDownASCII.Value.ToString()) == 1252)
+            {
+                rbNormalUnicode.Checked = true;
+                MainMenu.settings.unicodeSettings = 0;
+                rbNonNormalUnicode.Enabled = false;
+                rbNonNormalUnicode2.Enabled = false;
+                rbNormalUnicode.Enabled = false;
+            }
+            else
+            {
+                rbNonNormalUnicode.Enabled = true;
+                rbNonNormalUnicode2.Enabled = true;
+                rbNormalUnicode.Enabled = true;
+            }
         }
 
         private void buttonPathForTtarchext_Click(object sender, EventArgs e)

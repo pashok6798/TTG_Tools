@@ -2544,6 +2544,13 @@ namespace TTG_Tools
                 checkCustomKey.Checked = MainMenu.settings.customKey;
                 textBox1.Text = MainMenu.settings.encCustomKey;
             }
+
+            if(MainMenu.settings.ASCII_N == 1252)
+            {
+                //Make unvisible that option for users with windows-1252 encoding
+                checkUnicode.Checked = true;
+                checkUnicode.Visible = false;
+            }
         }
 
         private void AutoPacker_FormClosing(object sender, FormClosingEventArgs e)

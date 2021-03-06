@@ -36,6 +36,8 @@ namespace TTG_Tools
         public static int selected_index;
         public static int EncVersion;
 
+        public static bool sizzleNintendo;
+
         public struct langdb
         {
             public byte[] head;
@@ -93,6 +95,8 @@ namespace TTG_Tools
             string versionOfGame = " ";
             numKey = comboBox1.SelectedIndex;
             selected_index = comboBox2.SelectedIndex;
+
+            sizzleNintendo = checkBox1.Checked;
 
             //Создаем нить для импорта текстур в DDS
             var processD3DTX = new ForThreads();

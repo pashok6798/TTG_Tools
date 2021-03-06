@@ -30,7 +30,6 @@ namespace TTG_Tools
             }
         }
 
-
         //Всё для экспорта текстур
         public static byte[] extract_old_textures(byte[] binContent, byte[] key, int version, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
         {
@@ -688,10 +687,29 @@ namespace TTG_Tools
             if (header != null)
             {
                 System.IO.MemoryStream ms = new System.IO.MemoryStream();
-                for (int i = DDSs.Count - 1; i >= 0; i--)
+
+                int dds_width = BitConverter.ToInt32(width, 0);
+                int dds_height = BitConverter.ToInt32(height, 0);
+
+                if (platform == 15)
                 {
-                    ms.Write(DDSs[i].content_chapter, 0, DDSs[i].content_chapter.Length);
+                    for (int i = 0; i < DDSs.Count; i++)
+                    {
+                        //DDSs[i].content_chapter = SwizzleNintendo(DDSs[i].content_chapter, dds_width, dds_height, tex_indx);
+                        DDSs[i].content_chapter = Swizzle.NintendoSwizzle(DDSs[i].content_chapter, dds_width, dds_height, code, true);
+                        ms.Write(DDSs[i].content_chapter, 0, DDSs[i].content_chapter.Length);
+                        if (dds_width % 2 == 0) dds_width /= 2;
+                        if (dds_height % 2 == 0) dds_height /= 2;
+                    }
                 }
+                else
+                {
+                    for (int i = DDSs.Count - 1; i >= 0; i--)
+                    {
+                        ms.Write(DDSs[i].content_chapter, 0, DDSs[i].content_chapter.Length);
+                    }
+                }
+
                 byte[] tempContent = ms.ToArray();
                 ms.Close();
 
@@ -852,6 +870,40 @@ namespace TTG_Tools
             
         }
 
+        private static void WriteMipHeader(string VersionOfGame, ref byte[] newD3dtxHeader, ref int poz, int[] contentChpater, int[] kratnostChapter, int x)
+        {
+            Array.Copy(BitConverter.GetBytes(x), 0, newD3dtxHeader, poz, 4);
+            poz += 4;
+
+            if (VersionOfGame != "PN2")
+            {
+                Array.Copy(BitConverter.GetBytes(1), 0, newD3dtxHeader, poz, 4);
+                poz += 4;
+            }
+
+            byte[] ddsContentLengthBin = BitConverter.GetBytes(contentChpater[x]);
+            Array.Copy(ddsContentLengthBin, 0, newD3dtxHeader, poz, 4);
+            poz += 4;
+
+            byte[] ddsKratnostBin = BitConverter.GetBytes(kratnostChapter[x]);
+            Array.Copy(ddsKratnostBin, 0, newD3dtxHeader, poz, 4);
+            poz += 4;
+
+            if (VersionOfGame == "Batman" || VersionOfGame == "WDDS")
+            {
+                Array.Copy(ddsContentLengthBin, 0, newD3dtxHeader, poz, 4);
+                poz += 4;
+            }
+
+            if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS" || VersionOfGame == "TftBR")
+            { //Странный метод в борде. Идут сначала какие-то 00 00 00 00 байта, а в конце тупо кратностью заканчивается
+                if (x != 0)
+                {
+                    poz += 4;
+                }
+            }
+        }
+
         public static byte[] import_new_textures(byte[] d3dtxContent, byte[] binContent, string Version, ref bool pvr, bool iOS)
         {
             string VersionOfGame = Version;
@@ -909,7 +961,6 @@ namespace TTG_Tools
             Array.Copy(binContent, height_pos, height, 0, height.Length);
             Array.Copy(binContent, mip_pos, mip, 0, mip.Length);
 
-
             int index = -1;
 
             for (int i = 0; i < MainMenu.texture_header.Count; i++)
@@ -943,6 +994,7 @@ namespace TTG_Tools
                 tex_type = BitConverter.GetBytes(TTG_Tools.MainMenu.texture_header[index].code);
 
                 if (BitConverter.ToInt32(mip, 0) == 0) mip = BitConverter.GetBytes(1);
+
                 Array.Copy(mip, 0, d3dtxContent, poz, mip.Length); //и заменяем тут
                 poz += 4;
                 Array.Copy(width, 0, d3dtxContent, poz, 4); //тут заменяем ширину текстуры
@@ -983,7 +1035,6 @@ namespace TTG_Tools
                 poz += 8;
 
                 byte[] ddsContentLengthBin = new byte[4];
-                int ddsKratnost = 0;
                 byte[] ddsKratnostBin = new byte[4];
 
                 ddsContentLengthBin = BitConverter.GetBytes(binContent.Length - header_length);
@@ -1025,44 +1076,26 @@ namespace TTG_Tools
                 for (int w = 0; w < contentChpater.Count(); w++)
                 {
                     Methods.get_kratnost_and_size(int_width, int_height, MainMenu.texture_header[index].code, ref contentChpater[w], ref kratnostChapter[w]);
-                    int_height /= 2;
-                    int_width /= 2;
+                    if(int_height % 2 == 0) int_height /= 2;
+                    if(int_width % 2 == 0) int_width /= 2;
                 }
 
-                    //Идёт запись в блок данных о мип-мапах и размерах текстурах с кратностями
+                //Write data block about mip maps
+                if (AutoPacker.sizzleNintendo)
+                {
+
+                    for (int x = 0; x < BitConverter.ToInt32(mip, 0); x++)
+                    {
+                        WriteMipHeader(VersionOfGame, ref newD3dtxHeader, ref poz, contentChpater, kratnostChapter, x);
+                    }
+                }
+                else
+                {
                     for (int x = BitConverter.ToInt32(mip, 0) - 1; x >= 0; x--)
                     {
-                        Array.Copy(BitConverter.GetBytes(x), 0, newD3dtxHeader, poz, 4);
-                        poz += 4;
-
-                        if (VersionOfGame != "PN2")
-                        {
-                            Array.Copy(BitConverter.GetBytes(1), 0, newD3dtxHeader, poz, 4);
-                            poz += 4;
-                        }
-
-                        ddsContentLengthBin = BitConverter.GetBytes(contentChpater[x]);
-                        Array.Copy(ddsContentLengthBin, 0, newD3dtxHeader, poz, 4);
-                        poz += 4;
-
-                        ddsKratnostBin = BitConverter.GetBytes(kratnostChapter[x]);
-                        Array.Copy(ddsKratnostBin, 0, newD3dtxHeader, poz, 4);
-                        poz += 4;
-
-                        if (VersionOfGame == "Batman" || VersionOfGame == "WDDS")
-                        {
-                            Array.Copy(ddsContentLengthBin, 0, newD3dtxHeader, poz, 4);
-                            poz += 4;
-                        }
-
-                        if (VersionOfGame == "TFTB" || VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS" || VersionOfGame == "TftBR")
-                        { //Странный метод в борде. Идут сначала какие-то 00 00 00 00 байта, а в конце тупо кратностью заканчивается
-                            if (x != 0)
-                            {
-                                poz += 4;
-                            }
-                        }
+                        WriteMipHeader(VersionOfGame, ref newD3dtxHeader, ref poz, contentChpater, kratnostChapter, x);
                     }
+                }
 
                     int plat_pos = 0;
 
@@ -1085,9 +1118,11 @@ namespace TTG_Tools
 
                     byte[] bPlat = new byte[4];
                     bPlat = BitConverter.GetBytes(TTG_Tools.MainMenu.texture_header[index].platform);
+                    
+                    if (AutoPacker.sizzleNintendo) bPlat = BitConverter.GetBytes(15);
                     Array.Copy(bPlat, 0, newD3dtxHeader, plat_pos, bPlat.Length);
 
-                if (VersionOfGame != "PN2")
+                    if (VersionOfGame != "PN2")
                 {
                     ulong blockSize = (ulong)newD3dtxHeader.Length - 92;
                     if (VersionOfGame == "WDM" || VersionOfGame == "Batman" || VersionOfGame == "WDDS" || VersionOfGame == "TftBR") blockSize -= 12;
@@ -1104,16 +1139,39 @@ namespace TTG_Tools
 
                 int pozFromEnd = binContent.Length; //begin reading from end of file
 
-                for (int y = BitConverter.ToInt32(mip, 0) - 1; y >= 0; y--)
+                if (AutoPacker.sizzleNintendo)
                 {
-                    pozFromEnd -= contentChpater[y];
+                    pozFromEnd = header_length;
+                    int_width = BitConverter.ToInt32(width, 0);
+                    int_height = BitConverter.ToInt32(height, 0);
 
-                    int contentSize = contentChpater[y];
-                    byte[] contentChapterBin = new byte[contentSize];
-                    Array.Copy(binContent, pozFromEnd, contentChapterBin, 0, contentSize);
-                    Array.Copy(contentChapterBin, 0, d3dtxContent, poz, contentSize);
-                    poz += contentSize;
-                    //fs.Write(contentChapterBin, 0, contentChapterBin.Length);
+                    for (int y = 0; y < BitConverter.ToInt32(mip, 0); y++)
+                    {
+
+                        int contentSize = contentChpater[y];
+                        byte[] contentChapterBin = new byte[contentSize];
+                        Array.Copy(binContent, pozFromEnd, contentChapterBin, 0, contentSize);
+                        contentChapterBin = Swizzle.NintendoSwizzle(contentChapterBin, int_width, int_height, MainMenu.texture_header[index].code, false);
+                        Array.Copy(contentChapterBin, 0, d3dtxContent, poz, contentSize);
+                        poz += contentSize;
+
+                        if (int_width % 2 == 0) int_width /= 2;
+                        if (int_height % 2 == 0) int_height /= 2;
+                        //fs.Write(contentChapterBin, 0, contentChapterBin.Length);
+                    }
+                }
+                else {
+                    for (int y = BitConverter.ToInt32(mip, 0) - 1; y >= 0; y--)
+                    {
+                        pozFromEnd -= contentChpater[y];
+
+                        int contentSize = contentChpater[y];
+                        byte[] contentChapterBin = new byte[contentSize];
+                        Array.Copy(binContent, pozFromEnd, contentChapterBin, 0, contentSize);
+                        Array.Copy(contentChapterBin, 0, d3dtxContent, poz, contentSize);
+                        poz += contentSize;
+                        //fs.Write(contentChapterBin, 0, contentChapterBin.Length);
+                    }
                 }
                 return d3dtxContent;
             }

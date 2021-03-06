@@ -49,6 +49,7 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.tsvFilesRB = new System.Windows.Forms.RadioButton();
             this.txtFilesRB = new System.Windows.Forms.RadioButton();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
@@ -112,6 +113,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.checkIOS);
             this.groupBox1.Controls.Add(this.CheckNewEngine);
             this.groupBox1.Controls.Add(this.checkEncDDS);
@@ -266,6 +268,16 @@
             this.txtFilesRB.UseVisualStyleBackColor = true;
             this.txtFilesRB.CheckedChanged += new System.EventHandler(this.txtFilesRB_CheckedChanged);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(375, 70);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(181, 21);
+            this.checkBox1.TabIndex = 15;
+            this.checkBox1.Text = "Swizzle Nintendo Switch";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
             // AutoPacker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -317,6 +329,7 @@
         private System.Windows.Forms.RadioButton tsvFilesRB;
         private System.Windows.Forms.RadioButton txtFilesRB;
         private System.Windows.Forms.CheckBox checkIOS;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 

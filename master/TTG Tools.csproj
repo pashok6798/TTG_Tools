@@ -119,6 +119,7 @@
     <Compile Include="FormSettings.Designer.cs">
       <DependentUpon>FormSettings.cs</DependentUpon>
     </Compile>
+    <Compile Include="Swizzle.cs" />
     <Compile Include="TextEditor.cs">
       <SubType>Form</SubType>
     </Compile>

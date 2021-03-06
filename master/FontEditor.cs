@@ -2007,7 +2007,26 @@ namespace TTG_Tools
 
                     byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
                     fs.Write(header, 0, header.Length);
-                    fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
+
+                    if(platform == 15)
+                    {
+                        int tex_indx = 0;
+
+                        switch (BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0))
+                        {
+                            case 0x40:
+                                tex_indx = 71;
+                                break;
+
+                            case 0x42:
+                                tex_indx = 77;
+                                break;
+                        }
+
+                        //byte[] tmp = TextureWorker.SwizzleNintendo(ffs.dds[file_n].dds_content, BitConverter.ToInt32(ffs.dds[file_n].widht_in_dds, 0), BitConverter.ToInt32(ffs.dds[file_n].height_in_dds, 0), tex_indx);
+                        //fs.Write(tmp, 0, tmp.Length);
+                    }
+                    else fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
                 }
                 fs.Close();
             }

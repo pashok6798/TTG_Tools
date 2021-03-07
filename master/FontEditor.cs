@@ -310,9 +310,13 @@ namespace TTG_Tools
             //byte[] b = new byte[1];
             //b[0] = 0;
 
-            if(version_used < 9)
+            if(version_used < 6)
             {
                 dataGridViewWithCoord.ColumnCount = 7;
+            }
+            else if(version_used >= 6 && version_used < 9)
+            {
+                dataGridViewWithCoord.ColumnCount = 9;
             }
 
             //выводим в дата грид всю инфу

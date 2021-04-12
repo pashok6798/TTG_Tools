@@ -967,7 +967,6 @@ namespace TTG_Tools
                             #region //версия 9 (Poker Night 2)
                             else if (version_used == 9)
                             {
-
                                 int temp_poz = poz;
                                 temp_poz += 16;
                                 byte[] tmp = new byte[4];
@@ -2014,21 +2013,11 @@ namespace TTG_Tools
 
                     if(platform == 15)
                     {
-                        int tex_indx = 0;
+                        int int_width = BitConverter.ToInt32(ffs.dds[file_n].widht_in_dds, 0);
+                        int int_height = BitConverter.ToInt32(ffs.dds[file_n].height_in_dds, 0);
 
-                        switch (BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0))
-                        {
-                            case 0x40:
-                                tex_indx = 71;
-                                break;
-
-                            case 0x42:
-                                tex_indx = 77;
-                                break;
-                        }
-
-                        //byte[] tmp = TextureWorker.SwizzleNintendo(ffs.dds[file_n].dds_content, BitConverter.ToInt32(ffs.dds[file_n].widht_in_dds, 0), BitConverter.ToInt32(ffs.dds[file_n].height_in_dds, 0), tex_indx);
-                        //fs.Write(tmp, 0, tmp.Length);
+                        byte[] tmp_dds = Swizzle.NintendoSwizzle(ffs.dds[file_n].dds_content, int_width, int_height, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), true);
+                        fs.Write(tmp_dds, 0, tmp_dds.Length);
                     }
                     else fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
                 }
@@ -2166,6 +2155,11 @@ namespace TTG_Tools
 
                     if (tempContent != null)
                     {
+                        if(platform == 15)
+                        {
+                            tempContent = Swizzle.NintendoSwizzle(tempContent, BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), BitConverter.ToInt32(code, 0), false);
+                        }
+
                         ffs.dds[file_n].widht_in_dds = width;
                         ffs.dds[file_n].height_in_dds = height;
                         ffs.dds[file_n].pn2dds_head[num] = code;

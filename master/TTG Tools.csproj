@@ -105,6 +105,10 @@
     <Compile Include="EncryptionVariants.Designer.cs">
       <DependentUpon>EncryptionVariants.cs</DependentUpon>
     </Compile>
+    <Compile Include="Graphics\DDS\DDS.cs" />
+    <Compile Include="Graphics\DDS\DDSImage.cs" />
+    <Compile Include="Graphics\DDS\Decompressor.cs" />
+    <Compile Include="Graphics\DDS\Utils.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ForThreads.cs" />
     <Compile Include="FontEditor.cs">
@@ -136,6 +140,12 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Graphics\TextureWorker.cs" />
+    <Compile Include="TexView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TexView.Designer.cs">
+      <DependentUpon>TexView.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="About.resx">
       <DependentUpon>About.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -180,6 +190,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="TexView.resx">
+      <DependentUpon>TexView.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -358,6 +358,33 @@ namespace TTG_Tools
 
             byte[] check_ver = new byte[4];
 
+
+            //For very old textures
+            if(Encoding.ASCII.GetString(check_header) != "5VSM" && Encoding.ASCII.GetString(check_header) != "6VSM" && Encoding.ASCII.GetString(check_header) != "ERTM")
+            {
+                string res = null;
+                byte[] BinContent = TextureWorker.extract_old_textures(d3dtx, key, version_arc, ref res, ref pvr);
+
+                if (BinContent != null)
+                {
+                    string message = "File " + fi[i].Name + " exported in dds file. " + res;
+                    string path = TTG_Tools.MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".dds";
+                    if (pvr)
+                    {
+                        message = "File " + fi[i].Name + " exported in pvr file. " + res;
+                        path = TTG_Tools.MainMenu.settings.pathForOutputFolder + "\\" + Methods.GetNameOfFileOnly(fi[i].Name, ".d3dtx") + ".pvr";
+                    }
+
+                    fs = new FileStream(path, FileMode.OpenOrCreate);
+                    fs.Write(BinContent, 0, BinContent.Length);
+                    fs.Close();
+
+                    return message;
+                    //listBox1.Items.Add(message);
+                }
+                else return "Unknown error in file " + fi[i].Name + ". Please write me about it.";
+            }
+
             if (Encoding.ASCII.GetString(check_header) == "5VSM" || Encoding.ASCII.GetString(check_header) == "6VSM")
             {
                 Array.Copy(d3dtx, 16, check_ver, 0, 4);

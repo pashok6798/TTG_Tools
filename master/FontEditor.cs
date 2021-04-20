@@ -71,6 +71,7 @@ namespace TTG_Tools
         public List<Version_of_font> version_of_font = new List<Version_of_font>();
         public List<byte[]> head = new List<byte[]>();
         public ClassesStructs.FlagsClass fontFlags;
+        FontClass.OldFontClass font = null;
 
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
@@ -390,7 +391,6 @@ namespace TTG_Tools
                 }
                 if (read)
                 {
-                recheck:
                     version_used = -1;
                     int DecKey = -1;
 
@@ -399,190 +399,19 @@ namespace TTG_Tools
                     byte[] header = new byte[4];
                     Array.Copy(binContent, 0, header, 0, 4);
 
-                    int start = 0;
                     int poz = 0;
 
-                    #region Old Worked code
-                    /*if (Encoding.ASCII.GetString(header) == "5VSM" || Encoding.ASCII.GetString(header) == "6VSM")
-                    {
-                        poz = 16;
-                    }
-                    else poz = 4;
-
-                    byte[] version = new byte[4];
-                    Array.Copy(binContent, poz, version, 0, 4);
-
-                    version_used = BitConverter.ToInt32(version, 0);
-
-                    //Если шрифт векторный (последняя игра от теллтейлов), то тулза сообщит об этом
-                    if (version_used == 1 && Encoding.ASCII.GetString(header) == "6VSM")
-                    {
-                        MessageBox.Show("This font is type of TrueType (vector font). You can try to extract it via Auto(De)Packer");
-                        return;
-                    }
-
-                    //указывается позиция заголовка в файле
-                    int head_poz = Methods.FindStartOfBinarySomething(binContent, 0, start_version) + start_version.Length;
-
-                    //находим начало блока с координатами
-                    if ((version_used == 10 && poz == 16))
-                    {
-                        version_used += version_of_font.Count;
-                        if (Encoding.ASCII.GetString(header) == "6VSM")
-                        {
-                            version_used++;
-
-                            //Terrible fix for support Walking Dead: The Definitive Series
-                            byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
-
-                            //Another terrible fix for support new version Tales From the Borderlands
-                            byte[] an_check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0xE8, 0xDE, 0x8F, 0xF2 };
-
-                            byte[] header_in_file = new byte[check_block.Length];
-                            Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
-                            if (CompareArray(header_in_file, check_block))
-                            {
-                                version_used = 15;
-                            }
-
-                            if (CompareArray(header_in_file, an_check_block))
-                            {
-                                version_used = 16;
-                            }
-                        }
-
-                        poz = 140;
-                    }
-                    else if (version_used == 13 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
-                    {
-                        version_used++;
-
-                        //Terrible fix for support Walking Dead: The Definitive Series
-                        byte[] check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0x12, 0x3A, 0xBA, 0x1B };
-
-                        //Another terrible fix for support new version Tales From the Borderlands
-                        byte[] an_check_block = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A, 0xE8, 0xDE, 0x8F, 0xF2 };
-                        byte[] header_in_file = new byte[check_block.Length];
-                        Array.Copy(binContent, head_poz - start_version.Length, header_in_file, 0, header_in_file.Length);
-                        if (CompareArray(header_in_file, check_block))
-                        {
-                            version_used = 15;
-                        }
-
-                        if (CompareArray(header_in_file, an_check_block))
-                        {
-                            version_used = 16;
-                        }
-
-                        poz = 176;
-                    }
-                    else if (version_used == 14 && poz == 16 && Encoding.ASCII.GetString(header) == "6VSM")
-                    {
-                        version_used++;
-                        poz = 172;
-                    }
-                    else if (version_used == 9 && poz == 16)
-                    {
-                        for (int q = 0; q < version_of_font.Count; q++)
-                        {
-                            byte[] header_in_file = new byte[version_of_font[q].header.Length];
-                            Array.Copy(binContent, head_poz, header_in_file, 0, header_in_file.Length);
-                            if (CompareArray(header_in_file, version_of_font[q].header))
-                            {
-                                version_used = q + 10;
-
-                                if (version_of_font[q].games == "Wolf Among Us PS4")
-                                {
-                                    version_used = q + 9;
-                                    platform = 2; //Глупый костыль для правильной работы с заголовками
-                                }
-
-                                poz = 128;
-                                //MessageBox.Show(version_of_font[q].games); //Проверял на правильность определения.
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (version_used == 9 && poz != 16)
-                        {
-                            version_used = 9;
-                            poz = 116;
-                        }
-                        else if (version_used < 9 && Encoding.ASCII.GetString(header) != "6VSM")
-                        {
-                            switch (version_used)
-                            {
-                                case 7:
-                                    poz = 92;
-                                    break;
-                                case 6:
-                                    poz = 80;
-                                    break;
-                                case 5:
-                                    if (Methods.FindStartOfStringSomething(binContent, 0, "class Font") == 12)
-                                    {
-                                        poz = 124;
-                                    }
-                                    else poz = 68;
-                                    break;
-                                default:
-                                    try
-                                    {
-                                        string info = Methods.FindingDecrytKey(binContent, "font");
-                                        if (info != null)
-                                        {
-                                            MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
-                                            encripted = true;
-                                            goto recheck;
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
-                                        poz = -1;
-                                    }
-
-                                    break;
-                            }
-                        }
-                        else //Сделал второй раз попытку расшифрования...
-                        {
-                            try
-                            {
-                                string info = Methods.FindingDecrytKey(binContent, "font");
-                                if (info != null)
-                                {
-                                    MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
-                                    encripted = true;
-                                    goto recheck;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
-                                poz = -1;
-                            }
-                        }
-                        //if (version_used <= 5 && version_used != -1) poz = version_of_font[version_used].header.Length + 16;
-                    }*/
-                    #endregion
-
-                    if (poz == -1) return;
-
                     //Experiments with too old fonts
-                    FontClass.OldFontClass font = new FontClass.OldFontClass();
+                    font = new FontClass.OldFontClass();
 
                     //First trying decrypt probably encrypted font
-                    /*try
+                    try
                     {
                         string info = Methods.FindingDecrytKey(binContent, "font");
                         if (info != null)
                         {
                             MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
                             encripted = true;
-                            goto recheck;
                         }
                     }
                     catch (Exception ex)
@@ -590,7 +419,7 @@ namespace TTG_Tools
                         MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
                         poz = -1;
                         return;
-                    }*/
+                    }
 
                     byte[] tmp = new byte[4];
                     Array.Copy(binContent, 4, tmp, 0, tmp.Length);
@@ -598,6 +427,8 @@ namespace TTG_Tools
                     string[] elements = new string[countElements];
                     int lenStr;
                     poz = 8;
+
+                    version_used = countElements;
 
                     for(int i = 0; i < countElements; i++)
                     {
@@ -1377,7 +1208,8 @@ namespace TTG_Tools
                 Methods.DeleteCurrentFile(saveFD.FileName);
                 if (version_used < 9)
                 {
-                    fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
+                    //fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
+                    fs.Write(font.tex[file_n].Content, 0, font.tex[file_n].Content.Length);
                 }
                 else if (version_used >= 9)
                 {

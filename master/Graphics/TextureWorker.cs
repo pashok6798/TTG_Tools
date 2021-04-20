@@ -30,6 +30,7 @@ namespace TTG_Tools
             }
         }
 
+
         //Всё для экспорта текстур
         public static byte[] extract_old_textures(byte[] binContent, byte[] key, int version, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
         {
@@ -88,7 +89,40 @@ namespace TTG_Tools
                 }
             }
 
-            //Проверки, которые были выше, нужны для проверки на зашифрованные файлы. Ниже как раз работа с текстурами
+            byte[] tmp = new byte[4];
+            Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+            int countElements = BitConverter.ToInt32(tmp, 0);
+            string[] Elements = new string[countElements];
+            int lenStr;
+
+            int poz = 8;
+
+            ClassesStructs.TextureClass.OldT3Texture tex = new ClassesStructs.TextureClass.OldT3Texture();
+            tex.TexFlags = null;
+
+            for (int i = 0; i < countElements; i++)
+            {
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+
+                lenStr = BitConverter.ToInt32(tmp, 0);
+                tmp = new byte[lenStr];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += lenStr + 4;
+                Elements[i] = Encoding.ASCII.GetString(tmp);
+
+                if(Elements[i] == "class Flags")
+                {
+                    tex.TexFlags = new ClassesStructs.FlagsClass();
+                }
+            }
+
+
+
+
+            #region Старый код
+            /*//Проверки, которые были выше, нужны для проверки на зашифрованные файлы. Ниже как раз работа с текстурами
 
             if (Methods.FindStartOfStringSomething(binContent, 8, "DDS") < binContent.Length - 100) //Тупо копируем DDS текстуру и возвращаем её обратно для записи
             {
@@ -185,7 +219,8 @@ namespace TTG_Tools
 
                 return binContent;
             }
-            else return null; //Иначе отправим ничего
+            else return null; //Иначе отправим ничего*/
+            #endregion
         }
 
         public static byte[] getFontHeader(byte[] binContent, ref byte[] code, ref byte[] width, ref byte[] height, ref byte[] tex_size, ref byte[] tex_kratnost)

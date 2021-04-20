@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using TTG_Tools.ClassesStructs;
 
 namespace TTG_Tools
 {
@@ -28,9 +29,6 @@ namespace TTG_Tools
         bool encripted; //В случае, если шрифт был зашифрован
         int platform = -1; //Номер платформы
 
-        List<texture_format> tex_format = new List<texture_format>(); //список форматов текстур
-        List<texture_format> old_tex_format = new List<texture_format>(); //Для старых игр iOS (pvr формат)
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
@@ -39,79 +37,6 @@ namespace TTG_Tools
         {
             edited = false; //Даем программе знать, что шрифт не изменен.
             iOS = false;
-
-            #region //Шаблоны формата текстур
-            /*byte[] ps_dxt5 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
-                               0x04, 0x00, 0x00, 0x00, 0x44, 0x58, 0x54, 0x35, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            tex_format.Add(new texture_format(ps_dxt5, 0x42, false, false)); //DXT5 формат
-
-            byte[] ps_8888 = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
-                               0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00,
-                               0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x10,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            tex_format.Add(new texture_format(ps_8888, 0x00, false, false)); //8888 ARGB формат
-
-            byte[] ps_4444 = { 0x00, 0x00, 0x08, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
-                               0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00,
-                               0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00,
-                               0x0F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00, 0x10,
-                               0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            tex_format.Add(new texture_format(ps_4444, 0x04, false, false));
-
-            //ps_n - формат заголовка из Nvidia Tex Tool (Photoshop)
-
-            byte[] pvr_8888 = { 0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x72, 0x67,
-                                0x62, 0x61, 0x08, 0x08, 0x08, 0x08, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-                                0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00 };
-            tex_format.Add(new texture_format(pvr_8888, 0x00, true, true)); //8888 RGBA формат
-
-            byte[] pvr_4444 = { 0x50, 0x56, 0x52, 0x03, 0x00, 0x00, 0x00, 0x00, 0x72, 0x67,
-                                0x62, 0x61, 0x04, 0x04, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00,
-                                0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-                                0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00 };
-            tex_format.Add(new texture_format(pvr_4444, 0x04, true, true)); //4444 RGBA формат
-            old_tex_format.Add(new texture_format(pvr_4444, 0x8010, true, true));*/
-
-
-            //pvr_n - формат текстур под графический ускоритель PowerVR (PVR Tex Tool)
-
-            /*byte[] atitc = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00,
-                             0x41, 0x54, 0x43, 0x49, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                             0x00, 0x00 };
-            tex_format.Add(new texture_format(atitc, 0x62, false, false)); //ATI Texture Compression*/
-            #endregion
 
             #region//Шаблоны некоторых шрифтов.
             byte[] i = {
@@ -142,53 +67,13 @@ namespace TTG_Tools
             #endregion
 
         }
-        byte[] dds_head = { 0x44, 0x44, 0x53, 0x20, 0x7C, 0x00, 0x00, 0x00, 0x07, 0x10, 0x00, 0x00 };
-        byte[] dds_head_cont = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x20, 0x00, 0x00, 0x00, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x00, 0x00, 0xF0, 0x00,
-                                 0x00, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00,
-                                 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
-        byte[] dds_head_cont_pvr = { 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x20, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x44, 0x58,
-                                     0x31, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1C, 0x00,
-                                     0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         public List<Version_of_font> version_of_font = new List<Version_of_font>();
         public List<byte[]> head = new List<byte[]>();
+        public ClassesStructs.FlagsClass fontFlags;
 
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
-
-        public class texture_format //класс для формата текстур
-        {
-            public byte[] sample; //Небольшой фрагмент из заголовка
-            public int code; //код формата для шрифта
-            public bool Is_iOS;
-            public bool Is_PVR;
-
-            public texture_format() { }
-            public texture_format(byte[] _sample, int _code, bool _Is_iOS, bool _Is_PVR)
-            {
-                this.sample = _sample;
-                this.code = _code;
-                this.Is_iOS = _Is_iOS;
-                this.Is_PVR = _Is_PVR;
-            }
-        }
-
 
         public class FontStructure
         {
@@ -201,14 +86,7 @@ namespace TTG_Tools
             public List<Dds> dds = new List<Dds>();
 
             public FontStructure() { }
-            public FontStructure(byte[] _header_of_file, byte[] _dds_lenght, byte[] _count_dds, byte[] _coord_lenght, byte[] _coord_count)
-            {
-                this.header_of_file = _header_of_file;
-                this.count_dds = _count_dds;
-                this.dds_lenght = _dds_lenght;
-                this.coord_count = _coord_count;
-                this.coord_lenght = _coord_lenght;
-            }
+            
             public void AddCoord(byte[] _h_start, byte[] _h_end, byte[] _w_start, byte[] _w_end, byte[] _n_texture, byte[] _widht, byte[] _height, byte[] _HZ, byte[] _kern_left_side, byte[] _to_top, byte[] _widht_with_kern, byte[] _symbol)
             {
                 coord.Add(new Coordinates(_h_start, _h_end, _w_start, _w_end, _n_texture, _widht, _height, _HZ, _kern_left_side, _to_top, _widht_with_kern, _symbol));
@@ -304,17 +182,46 @@ namespace TTG_Tools
         }
         public static int version_used;
 
+        private void fillTableofCoordinates(FontClass.OldFontClass font)
+        {
+            dataGridViewWithCoord.RowCount = font.glyph.CharCount;
+
+            for(int i = 0; i < font.glyph.CharCount; i++)
+            {
+                dataGridViewWithCoord[0, i].Value = i;
+                dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(i));
+                dataGridViewWithCoord[2, i].Value = font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth;
+                dataGridViewWithCoord[3, i].Value = font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth;
+                dataGridViewWithCoord[4, i].Value = font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight;
+                dataGridViewWithCoord[5, i].Value = font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight;
+                dataGridViewWithCoord[6, i].Value = font.glyph.chars[i].TexNum;
+            }
+        }
+
+        private void fillTableofTextures(FontClass.OldFontClass font)
+        {
+            dataGridViewWithTextures.RowCount = font.TexCount;
+
+            for(int i = 0; i < font.TexCount; i++)
+            {
+                dataGridViewWithTextures[0, i].Value = i;
+                dataGridViewWithTextures[1, i].Value = font.tex[i].OriginalHeight;
+                dataGridViewWithTextures[2, i].Value = font.tex[i].OriginalWidth;
+                dataGridViewWithTextures[3, i].Value = font.tex[i].TexSize;
+            }
+        }
+
         private void fillTableOfCoordinates()
         {
             dataGridViewWithCoord.RowCount = ffs.coord.Count;
             //byte[] b = new byte[1];
             //b[0] = 0;
 
-            if(version_used < 6)
+            if (version_used < 6)
             {
                 dataGridViewWithCoord.ColumnCount = 7;
             }
-            else if(version_used >= 6 && version_used < 9)
+            else if (version_used >= 6 && version_used < 9)
             {
                 dataGridViewWithCoord.ColumnCount = 9;
             }
@@ -487,13 +394,16 @@ namespace TTG_Tools
                     version_used = -1;
                     int DecKey = -1;
 
+                    fontFlags = null;
+
                     byte[] header = new byte[4];
                     Array.Copy(binContent, 0, header, 0, 4);
 
                     int start = 0;
                     int poz = 0;
 
-                    if (Encoding.ASCII.GetString(header) == "5VSM" || Encoding.ASCII.GetString(header) == "6VSM")
+                    #region Old Worked code
+                    /*if (Encoding.ASCII.GetString(header) == "5VSM" || Encoding.ASCII.GetString(header) == "6VSM")
                     {
                         poz = 16;
                     }
@@ -656,818 +566,294 @@ namespace TTG_Tools
                             }
                         }
                         //if (version_used <= 5 && version_used != -1) poz = version_of_font[version_used].header.Length + 16;
-                    }
+                    }*/
+                    #endregion
+
                     if (poz == -1) return;
 
-                    byte[] nameLength = new byte[4];
-                    Array.Copy(binContent, poz, nameLength, 0, 4);
-                    poz += BitConverter.ToInt32(nameLength, 0);
+                    //Experiments with too old fonts
+                    FontClass.OldFontClass font = new FontClass.OldFontClass();
 
-                    byte[] check_flag = new byte[1];
-                    Array.Copy(binContent, poz, check_flag, 0, 1);
+                    //First trying decrypt probably encrypted font
+                    /*try
+                    {
+                        string info = Methods.FindingDecrytKey(binContent, "font");
+                        if (info != null)
+                        {
+                            MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
+                            encripted = true;
+                            goto recheck;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
+                        poz = -1;
+                        return;
+                    }*/
 
-                    if (version_used > 5 && version_used <= 10 && version_used != -1)
+                    byte[] tmp = new byte[4];
+                    Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+                    int countElements = BitConverter.ToInt32(tmp, 0);
+                    string[] elements = new string[countElements];
+                    int lenStr;
+                    poz = 8;
+
+                    for(int i = 0; i < countElements; i++)
                     {
-                        byte[] check_length = new byte[4];
-                        int check_pos = poz + 13;
-                        Array.Copy(binContent, check_pos, check_length, 0, 4);
-                        if (BitConverter.ToInt32(check_length, 0) != 256) poz += 13; //Для остальных игр
-                        else poz += 9; //Для Puzzle Agent 1, например.
-                    }
-                    else if (version_used == 5) //Для Злого Силача, Назад в Будущее, Сэм и Макс сезон 3...
-                    {
-                        byte[] check_length = new byte[4];
-                        int check_poz = poz + 9;
-                        Array.Copy(binContent, check_poz, check_length, 0, 4);
-                        if (BitConverter.ToInt32(check_length, 0) != 256) poz += 9;
-                        else poz += 5;
-                    }
-                    else if(version_used == 15)
-                    {
-                        //Fix for Walking Dead: The definitive series
-                        poz += 9;
-                    }
-                    else
-                    {
-                        poz += 17;//TFtB, GoT, etc.
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+                        lenStr = BitConverter.ToInt32(tmp, 0);
+                        tmp = new byte[lenStr];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
+                        elements[i] = Encoding.ASCII.GetString(tmp);
+
+                        if(elements[i] == "class Flags")
+                        {
+                            fontFlags = new FlagsClass();
+                        }
                     }
 
-                    ffs.coord_lenght = new byte[4];
-                    Array.Copy(binContent, poz, ffs.coord_lenght, 0, 4);
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                     poz += 4;
-                    int countByteOfCoordinates = BitConverter.ToInt32(ffs.coord_lenght, 0);
 
-                    ffs.coord_count = new byte[4];
-                    Array.Copy(binContent, poz, ffs.coord_count, 0, 4);
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                     poz += 4;
 
-                    read = true;
+                    int nameLen = BitConverter.ToInt32(tmp, 0);
 
-                    if (read)
+                    tmp = new byte[nameLen];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.FontName = Encoding.ASCII.GetString(tmp);
+                    poz += nameLen;
+                    font.One = binContent[poz];
+                    poz++;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    poz += 4;
+                    font.BaseSize = BitConverter.ToSingle(tmp, 0);
+
+                    if (fontFlags != null)
                     {
-                        start = poz - 8;//-8
-
-                        //находим координаты
-                        #region
-                        ffs.header_of_file = new byte[start];
-                        Array.Copy(binContent, 0, ffs.header_of_file, 0, start);
-
-                        if (version_used < 9)
-                        {
-                            for (int i = 0; i < 256; i++)
-                            {
-                                byte[] nil = new byte[4];
-                                ffs.AddCoord(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
-
-                                ffs.coord[i].n_texture = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].n_texture, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].w_start = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].w_start, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].w_end = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].w_end, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].h_start = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].h_start, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].h_end = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].h_end, 0, 4);
-                                poz += 4;
-
-
-                                if (version_used != -1 && version_used >= 6)
-                                {
-                                    ffs.coord[i].widht = new byte[4];
-                                    Array.Copy(binContent, poz, ffs.coord[i].widht, 0, 4);
-                                    poz += 4;
-                                    ffs.coord[i].height = new byte[4];
-                                    Array.Copy(binContent, poz, ffs.coord[i].height, 0, 4);
-                                    poz += 4;
-                                }
-                            }
-                        }
-
-                        if (version_used >= 9)
-                        {
-                            int i = 0;
-                            int old_poz = poz;
-                            while (poz < countByteOfCoordinates + old_poz - 8)//-8
-                            {
-
-                                byte[] nil = new byte[4];
-                                ffs.AddCoord(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil);
-
-
-                                ffs.coord[i].symbol = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].symbol, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].n_texture = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].n_texture, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].HZ = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].HZ, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].w_start = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].w_start, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].w_end = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].w_end, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].h_start = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].h_start, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].h_end = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].h_end, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].widht = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].widht, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].height = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].height, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].kern_left_side = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].kern_left_side, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].to_top = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].to_top, 0, 4);
-                                poz += 4;
-
-                                ffs.coord[i].widht_with_kern = new byte[4];
-                                Array.Copy(binContent, poz, ffs.coord[i].widht_with_kern, 0, 4);
-                                poz += 4;
-                                i++;
-
-                            }
-                        }
-                        #endregion
-                        //находим все внутренние dds
-                        #region
-
-
-                        if (version_used >= 9)
-                        {
-                            ffs.dds_lenght = new byte[4];
-                            Array.Copy(binContent, poz, ffs.dds_lenght, 0, 4);
-                            poz += 4;
-                            ffs.count_dds = new byte[4];
-                            Array.Copy(binContent, poz, ffs.count_dds, 0, 4);
-                            poz += 4;
-                        }
-
-                        int num_of_dds = 0;//вытащил из цикла, чтобы счётчик не сбивался (были вылеты с большими шрифтами).
-                        while (poz != (binContent.Length))
-                        {
-                            if (version_used < 9)
-                            {
-                                //int end_of_header_dds = Methods.FindStartOfStringSomething(binContent, poz, "DXT5") + 4;
-                                int end_of_header_dds = Methods.FindStartOfStringSomething(binContent, poz, "DXT") + 4;
-                                if (end_of_header_dds < binContent.Length)
-                                {
-                                    byte[] nil2 = new byte[1];
-                                    ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                    int dlinna_header_of_dds = end_of_header_dds - poz;
-                                    ffs.dds[num_of_dds].header = new byte[dlinna_header_of_dds];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].header, 0, dlinna_header_of_dds);
-                                    poz = end_of_header_dds;
-
-                                    ffs.dds[num_of_dds].widht_in_font = new byte[4];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].widht_in_font, 0, 4);
-                                    poz += 4;
-
-                                    ffs.dds[num_of_dds].height_in_font = new byte[4];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].height_in_font, 0, 4);
-                                    poz += 4;
-
-                                }
-
-
-                                int lenght_of_hz;
-                            retry:
-                                if (Methods.FindStartOfStringSomething(binContent, poz, "DDS") < binContent.Length - 100)
-                                {
-                                    iOS = false;
-                                    lenght_of_hz = Methods.FindStartOfStringSomething(binContent, poz, "DDS") - 4 - poz;
-                                    ffs.dds[num_of_dds].hz_data_after_sizes = new byte[lenght_of_hz];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].hz_data_after_sizes, 0, lenght_of_hz);
-                                    poz += lenght_of_hz;
-
-                                    ffs.dds[num_of_dds].size_in_font = new byte[4];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].size_in_font, 0, 4);
-                                    poz += 4;
-
-                                    ffs.dds[num_of_dds].widht_in_dds = new byte[4];
-                                    Array.Copy(binContent, poz + 16, ffs.dds[num_of_dds].widht_in_dds, 0, 4);
-                                    ffs.dds[num_of_dds].height_in_dds = new byte[4];
-                                    Array.Copy(binContent, poz + 12, ffs.dds[num_of_dds].height_in_dds, 0, 4);
-
-                                    int size_of_dds = BitConverter.ToInt32(ffs.dds[num_of_dds].size_in_font, 0);
-                                    ffs.dds[num_of_dds].dds_content = new byte[size_of_dds];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].dds_content, 0, size_of_dds);
-                                    poz += size_of_dds;
-
-                                    ffs.dds[num_of_dds].size_of_dds = ffs.dds[num_of_dds].size_in_font;
-
-                                    num_of_dds++;
-                                }
-                                else if (Methods.FindStartOfStringSomething(binContent, poz, "PVR!") < binContent.Length - 100)
-                                {
-                                    iOS = true;
-                                    lenght_of_hz = Methods.FindStartOfStringSomething(binContent, poz, "PVR!") - poz;
-
-                                    ffs.dds[num_of_dds].hz_data_after_sizes = new byte[lenght_of_hz];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].hz_data_after_sizes, 0, lenght_of_hz);
-                                    poz += lenght_of_hz;
-
-                                    ffs.dds[num_of_dds].size_in_font = new byte[4];
-                                    Array.Copy(binContent, poz - 48, ffs.dds[num_of_dds].size_in_font, 0, 4);
-                                    int size_of_dds_in_font = BitConverter.ToInt32(ffs.dds[num_of_dds].size_in_font, 0) - 44;
-                                    //poz += 4;
-
-                                    ffs.dds[num_of_dds].widht_in_dds = new byte[4];
-                                    Array.Copy(binContent, poz - 36, ffs.dds[num_of_dds].widht_in_dds, 0, 4);
-                                    ffs.dds[num_of_dds].height_in_dds = new byte[4];
-                                    Array.Copy(binContent, poz - 40, ffs.dds[num_of_dds].height_in_dds, 0, 4);
-
-                                    byte[] SampleHeader = new byte[4];
-
-                                    byte[] texFormat = new byte[4];
-                                    Array.Copy(binContent, poz - 28, texFormat, 0, 4);
-
-                                    switch (BitConverter.ToInt32(texFormat, 0))
-                                    {
-                                        case 0x8010:
-                                            SampleHeader = new byte[TTG_Tools.MainMenu.texture_header[6].sample.Length];
-                                            Array.Copy(TTG_Tools.MainMenu.texture_header[6].sample, 0, SampleHeader, 0, TTG_Tools.MainMenu.texture_header[6].sample.Length);
-                                            break;
-
-                                        default:
-                                            SampleHeader = new byte[TTG_Tools.MainMenu.texture_header[6].sample.Length];
-                                            Array.Copy(TTG_Tools.MainMenu.texture_header[6].sample, 0, SampleHeader, 0, TTG_Tools.MainMenu.texture_header[6].sample.Length);
-                                            break;
-                                    }
-
-                                    Array.Copy(ffs.dds[num_of_dds].height_in_dds, 0, SampleHeader, 24, 4);
-                                    Array.Copy(ffs.dds[num_of_dds].widht_in_dds, 0, SampleHeader, 28, 4);
-
-                                    ffs.dds[num_of_dds].size_of_dds = new byte[4];
-                                    Array.Copy(binContent, poz - 24, ffs.dds[num_of_dds].size_of_dds, 0, 4);
-
-                                    int size_of_dds = BitConverter.ToInt32(ffs.dds[num_of_dds].size_of_dds, 0);
-                                    ffs.dds[num_of_dds].dds_content = new byte[SampleHeader.Length + size_of_dds];
-
-                                    Array.Copy(SampleHeader, 0, ffs.dds[num_of_dds].dds_content, 0, SampleHeader.Length);
-                                    Array.Copy(binContent, poz + 8, ffs.dds[num_of_dds].dds_content, SampleHeader.Length, size_of_dds);
-                                    poz += size_of_dds_in_font;
-
-                                    //ffs.dds[num_of_dds].size_of_dds = ffs.dds[num_of_dds].size_in_font;
-
-                                    num_of_dds++;
-                                }
-                                else
-                                {
-                                    try
-                                    {
-                                        string info = Methods.FindingDecrytKey(binContent, "font");
-
-                                        MessageBox.Show("Header of texture was encrypted, but I decrypted.\r\n" + info, "Yay!");
-
-                                        encripted = true;
-
-                                        goto retry;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        MessageBox.Show("Something's wrong.\r\n" + ex.Message, "Unknown error");
-                                        return;
-                                    }
-                                }
-                                if (binContent.Length == poz)
-                                {
-                                    break;
-                                }
-                            }
-
-
-                            #region //версия 9 (Poker Night 2)
-                            else if (version_used == 9)
-                            {
-                                int temp_poz = poz;
-                                temp_poz += 16;
-                                byte[] tmp = new byte[4];
-                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                platform = BitConverter.ToInt32(tmp, 0);
-                                temp_poz += 4;
-
-                                byte[] countName = new byte[4];
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);//прибавлеяем дубл. имя
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-                                int end_of_header_dds = temp_poz + 1;//FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-
-                                //int end_of_header_dds = FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                if (end_of_header_dds < binContent.Length)
-                                {
-                                    byte[] nil2 = new byte[1];
-
-                                    ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                    //копируем содержимое от конца блока координат до данных записанных в 5C байт
-
-                                    //в начале 4 байта - это количество байт до конца (заголовок + текстура(ы)).
-                                    int dlinna_header_of_dds = end_of_header_dds - poz;
-                                    ffs.dds[num_of_dds].header = new byte[dlinna_header_of_dds];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].header, 0, dlinna_header_of_dds);
-                                    poz = end_of_header_dds;
-
-
-                                    //теперь разбираем 5С байт по группам из 4 байт
-                                    string s_temp = "";
-                                    List<byte[]> head = new List<byte[]>();
-                                    for (int i = 0; i < 23; i++)
-                                    {
-                                        byte[] temp = new byte[4];
-                                        Array.Copy(binContent, poz, temp, 0, 4);
-                                        head.Add(temp);
-                                        poz += 4;
-                                        s_temp += BitConverter.ToInt32(temp, 0).ToString() + "\r\n";
-                                    }
-
-                                    // 0 - ???
-                                    // 1 - ???
-                                    // 2 - ширина
-                                    // 3 - высота
-                                    //...
-                                    //19 - размер текстуры в байтах
-                                    //20 - 
-                                    //21 - размер текстуры в байтах
-                                    //22 - 
-                                    // MessageBox.Show(s_temp);
-                                    ffs.dds[num_of_dds].pn2dds_head = head;
-
-                                    ffs.dds[num_of_dds].widht_in_font = new byte[4];
-                                    Array.Copy(head[2], 0, ffs.dds[num_of_dds].widht_in_font, 0, 4);
-
-                                    ffs.dds[num_of_dds].height_in_font = new byte[4];
-                                    Array.Copy(head[3], 0, ffs.dds[num_of_dds].height_in_font, 0, 4);
-
-                                    ffs.dds[num_of_dds].size_in_font = new byte[4];
-                                    Array.Copy(head[19], 0, ffs.dds[num_of_dds].size_in_font, 0, 4);
-
-                                    ffs.dds[num_of_dds].widht_in_dds = new byte[4];
-                                    Array.Copy(head[2], 0, ffs.dds[num_of_dds].widht_in_dds, 0, 4);
-
-                                    ffs.dds[num_of_dds].height_in_dds = new byte[4];
-                                    Array.Copy(head[3], 0, ffs.dds[num_of_dds].height_in_dds, 0, 4);
-
-                                    int size_of_dds = BitConverter.ToInt32(ffs.dds[num_of_dds].size_in_font, 0);
-                                    ffs.dds[num_of_dds].dds_content = new byte[size_of_dds];
-                                    Array.Copy(binContent, poz, ffs.dds[num_of_dds].dds_content, 0, size_of_dds);
-                                    poz += size_of_dds;
-
-                                    ffs.dds[num_of_dds].size_of_dds = ffs.dds[num_of_dds].size_in_font;
-
-                                    num_of_dds++;
-
-                                    if (binContent.Length == poz)
-                                    {
-                                        break;
-                                    }
-                                }
-
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            else if (version_used >= 10)
-                            { break; }
-                        }
-                        #endregion
-
-                        #region //версия 10
-                        if (version_used == 10)
-                        {
-                            int countTextures = BitConverter.ToInt32(ffs.count_dds, 0);
-                            for (int j = 0; j < countTextures; j++)
-                            {
-                                int temp_poz = poz;
-                                temp_poz += 16;
-
-                                byte[] platformType = new byte[4];
-                                Array.Copy(binContent, temp_poz, platformType, 0, 4);
-                                platform = BitConverter.ToInt32(platformType, 0);
-
-                                if (platform == 7 || platform == 9) iOS = true;
-                                else iOS = false;
-                                temp_poz += 4;
-
-                                byte[] countName = new byte[4];
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);//прибавлеяем дубл. имя
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-                                int end_of_header_dds = temp_poz;//FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-
-                                //int end_of_header_dds = FindStartOfStringSomething(binContent, poz, ".tga") + 4 + 1;
-                                //if (end_of_header_dds < binContent.Length)
-                                //{
-                                byte[] nil2 = new byte[1];
-
-                                ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                //копируем содержимое от конца блока координат до данных записанных в 5C байт
-
-                                //в начале 4 байта - это количество байт до конца (заголовок + текстура(ы)).
-                                int dlinna_header_of_dds = end_of_header_dds - poz + 1; //Прибавляю 1, чтобы в заголовок зашёл долбаный 00 байт.
-                                ffs.dds[j].header = new byte[dlinna_header_of_dds];
-                                Array.Copy(binContent, poz, ffs.dds[j].header, 0, dlinna_header_of_dds);
-                                poz = end_of_header_dds + 1;
-
-                                //теперь разбираем 5С байт по группам из 4 байт
-                                string s_temp = "";
-                                List<byte[]> head = new List<byte[]>();
-
-                                for (int i = 0; i < 25; i++)//было 25
-                                {
-                                    byte[] temp = new byte[4];
-                                    Array.Copy(binContent, poz, temp, 0, 4);
-                                    head.Add(temp);
-                                    poz += 4;
-                                    s_temp += BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
-                                }
-
-                                //MessageBox.Show(s_temp);
-
-
-                                // 0 - ???
-                                // 1 - ???
-                                // 2 - ширина
-                                // 3 - высота
-                                //...
-                                //19 - 
-                                //20 - размер текстуры в байтах
-                                //21 - 
-                                //22 - 
-                                //23 - размер текстуры в байтах
-                                ffs.dds[j].pn2dds_head = head;
-
-
-                                ffs.dds[j].widht_in_font = new byte[4];
-                                Array.Copy(head[2], 0, ffs.dds[j].widht_in_font, 0, 4);
-
-                                ffs.dds[j].height_in_font = new byte[4];
-                                Array.Copy(head[3], 0, ffs.dds[j].height_in_font, 0, 4);
-
-                                ffs.dds[j].size_in_font = new byte[4];
-                                Array.Copy(head[23], 0, ffs.dds[j].size_in_font, 0, 4);
-
-                                ffs.dds[j].widht_in_dds = new byte[4];
-                                Array.Copy(head[2], 0, ffs.dds[j].widht_in_dds, 0, 4);
-
-                                ffs.dds[j].height_in_dds = new byte[4];
-                                Array.Copy(head[3], 0, ffs.dds[j].height_in_dds, 0, 4);
-                            }
-                            //poz += 1;
-
-                            for (int q = 0; q < countTextures; q++)
-                            {
-                                int size_of_dds = BitConverter.ToInt32(ffs.dds[q].size_in_font, 0);
-                                ffs.dds[q].dds_content = new byte[size_of_dds];
-
-                                Array.Copy(binContent, poz, ffs.dds[q].dds_content, 0, size_of_dds);
-                                poz += size_of_dds;
-
-                                ffs.dds[q].size_of_dds = ffs.dds[q].size_in_font;
-                            }
-                            //}
-                        }
-                        #endregion
-
-                        #region //Версия 11 - 13 и 16
-                        else if ((version_used >= 11 && version_used <= 13) || (version_used == 16))
-                        {
-                            int countTextures = BitConverter.ToInt32(ffs.count_dds, 0);
-                            for (int j = 0; j < countTextures; j++)
-                            {
-                                int temp_poz = poz;
-                                temp_poz += 16;//20;//20
-
-                                byte[] platformType = new byte[4];
-                                Array.Copy(binContent, temp_poz, platformType, 0, 4);
-                                platform = BitConverter.ToInt32(platformType, 0);
-
-                                if (platform == 7 || platform == 9) iOS = true;
-                                else iOS = false;
-                                temp_poz += 4;
-
-                                byte[] countName = new byte[4];
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-                                Array.Copy(binContent, temp_poz, countName, 0, 4);//прибавлеяем дубл. имя
-                                temp_poz += BitConverter.ToInt32(countName, 0);
-
-                                int end_of_header_dds = temp_poz + 1;
-                                if (version_used == 16) end_of_header_dds += 4;
-                                
-                                byte[] nil2 = new byte[1];
-
-                                ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                //в начале 4 байта - это количество байт до конца (заголовок + текстура(ы)).
-                                int dlinna_header_of_dds = end_of_header_dds - poz;
-                                ffs.dds[j].header = new byte[dlinna_header_of_dds];
-                                Array.Copy(binContent, poz, ffs.dds[j].header, 0, dlinna_header_of_dds);
-                                poz = end_of_header_dds;
-
-                                int count = 30;
-                                if (version_used == 13) count = 36;
-                                if (version_used == 16) count = 29;
-
-                                //теперь разбираем по группам из 4 байт
-                                string s_temp = "";
-                                List<byte[]> head = new List<byte[]>();
-
-                                for (int i = 0; i < count; i++)//было 25
-                                {
-                                    byte[] temp = new byte[4];
-                                    Array.Copy(binContent, poz, temp, 0, 4);
-                                    head.Add(temp);
-                                    poz += 4;
-                                    s_temp += i.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
-                                }
-
-                                //MessageBox.Show(s_temp);
-
-                                // 0 - ???
-                                // 1 - ???
-                                // 3 - ширина
-                                // 4 - высота
-                                //...
-                                //24 - размер текстуры в байтах
-                                //28 - размер текстуры в байтах
-                                ffs.dds[j].pn2dds_head = head;
-
-                                int length_tex_num = 24;
-                                int height_num = 4;
-                                int width_num = 3;
-
-                                if (version_used == 13)
-                                {
-                                    height_num = 3;
-                                    width_num = 2;
-                                    length_tex_num = 29;
-                                }
-                                if (version_used == 16)
-                                {
-                                    height_num = 2;
-                                    width_num = 1;
-                                    length_tex_num = 27;
-                                }
-
-                                ffs.dds[j].height_in_font = new byte[4];
-                                Array.Copy(head[height_num], 0, ffs.dds[j].height_in_font, 0, 4);
-
-                                ffs.dds[j].widht_in_font = new byte[4];
-                                Array.Copy(head[width_num], 0, ffs.dds[j].widht_in_font, 0, 4);
-
-                                ffs.dds[j].size_in_font = new byte[4];
-                                Array.Copy(head[length_tex_num], 0, ffs.dds[j].size_in_font, 0, 4);
-
-                                ffs.dds[j].height_in_dds = new byte[4];
-                                Array.Copy(head[height_num], 0, ffs.dds[j].height_in_dds, 0, 4);
-                                ffs.dds[j].widht_in_dds = new byte[4];
-                                Array.Copy(head[width_num], 0, ffs.dds[j].widht_in_dds, 0, 4);
-                            }
-
-                            poz += 1;
-                            for (int q = 0; q < countTextures; q++)
-                            {
-                                int size_of_dds = BitConverter.ToInt32(ffs.dds[q].size_in_font, 0);
-                                ffs.dds[q].dds_content = new byte[size_of_dds];
-
-                                Array.Copy(binContent, poz, ffs.dds[q].dds_content, 0, size_of_dds);
-                                poz += size_of_dds;
-
-                                ffs.dds[q].size_of_dds = ffs.dds[q].size_in_font;
-
-                            }
-                            //}
-                        }
-                        #endregion
-
-
-                        #region //Версия 14 и 15
-                        if (version_used == 14 || version_used == 15)
-                        {
-                            int temp_poz = poz;
-
-                            bool wrong = false;
-
-                            for (int k = 0; k < BitConverter.ToInt32(ffs.count_dds, 0); k++)
-                            {
-                                temp_poz += 16;
-
-                                byte[] platform_bin = new byte[4];
-                                Array.Copy(binContent, temp_poz, platform_bin, 0, platform_bin.Length);
-
-                                platform = BitConverter.ToInt32(platform_bin, 0);
-                                if (platform == 7) iOS = true;
-                                else iOS = false;
-
-                                temp_poz += 4;
-
-                                byte[] block_name_bin = new byte[4];
-                                byte[] name_bin = new byte[4];
-                                byte[] block_name1_bin = new byte[4];
-                                byte[] name1_bin = new byte[4];
-
-                                Array.Copy(binContent, temp_poz, block_name_bin, 0, block_name_bin.Length);
-                                temp_poz += 4;
-                                Array.Copy(binContent, temp_poz, name_bin, 0, name_bin.Length);
-                                temp_poz += 4;
-                                byte[] Name = new byte[BitConverter.ToInt32(name_bin, 0)];
-                                Array.Copy(binContent, temp_poz, Name, 0, Name.Length);
-                                temp_poz += Name.Length;
-
-                                Array.Copy(binContent, temp_poz, block_name1_bin, 0, block_name1_bin.Length);
-                                temp_poz += 4;
-                                Array.Copy(binContent, temp_poz, name1_bin, 0, name1_bin.Length);
-                                temp_poz += 4;
-                                byte[] Name1 = new byte[BitConverter.ToInt32(name1_bin, 0)];
-                                Array.Copy(binContent, temp_poz, Name1, 0, Name1.Length);
-                                temp_poz += Name1.Length;
-
-                                temp_poz += 4;
-
-                                byte[] check_bin = new byte[1];
-                                byte check_b;
-
-                                Array.Copy(binContent, temp_poz, check_bin, 0, check_bin.Length);
-                                check_b = check_bin[0];
-
-                                if (check_b == 0x31)
-                                {
-                                    temp_poz += 9;
-                                    check_bin = new byte[4];
-                                    Array.Copy(binContent, temp_poz, check_bin, 0, check_bin.Length);
-                                    temp_poz += BitConverter.ToInt32(check_bin, 0);
-                                }
-                                else if (check_b == 0x30)
-                                {
-                                    temp_poz++;
-                                }
-
-                                byte[] mip = new byte[4];
-                                Array.Copy(binContent, temp_poz, mip, 0, mip.Length);
-                                temp_poz += 4;
-
-                                int end_of_header_dds = temp_poz;
-                                byte[] nil2 = new byte[1];
-
-                                ffs.AddDds(nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, nil2, null);
-
-                                //копируем содержимое от конца блока координат до данных записанных в 5C байт
-
-                                //в начале 4 байта - это количество байт до конца (заголовок + текстура(ы)).
-                                int dlinna_header_of_dds = end_of_header_dds - poz;
-                                ffs.dds[k].header = new byte[dlinna_header_of_dds];
-                                Array.Copy(binContent, poz, ffs.dds[k].header, 0, dlinna_header_of_dds);
-
-                                string s_temp = "";
-                                List<byte[]> head = new List<byte[]>();
-
-                                if (version_used == 14 || version_used == 15)
-                                {
-                                    for (int m = 0; m < 34; m++)//было 25
-                                    {
-                                        byte[] temp = new byte[4];
-                                        Array.Copy(binContent, temp_poz, temp, 0, 4);
-                                        head.Add(temp);
-                                        temp_poz += 4;
-                                        s_temp += m.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
-                                    }
-
-                                    ffs.dds[k].pn2dds_head = head;
-
-                                    ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
-                                    ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
-
-                                    ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
-                                    ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
-
-                                    ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[31];
-                                    ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[31];
-                                }
-                                else
-                                {
-                                    for (int m = 0; m < 29; m++)//было 25
-                                    {
-                                        byte[] temp = new byte[4];
-                                        Array.Copy(binContent, temp_poz, temp, 0, 4);
-                                        head.Add(temp);
-                                        temp_poz += 4;
-                                        s_temp += m.ToString() + ". " + BitConverter.ToInt32(temp, 0).ToString() + "\r\n";//тут
-                                    }
-
-                                    ffs.dds[k].pn2dds_head = head;
-
-                                    ffs.dds[k].widht_in_font = ffs.dds[k].pn2dds_head[0];
-                                    ffs.dds[k].widht_in_dds = ffs.dds[k].pn2dds_head[0];
-
-                                    ffs.dds[k].height_in_font = ffs.dds[k].pn2dds_head[1];
-                                    ffs.dds[k].height_in_dds = ffs.dds[k].pn2dds_head[1];
-
-                                    ffs.dds[k].size_in_font = ffs.dds[k].pn2dds_head[28];
-                                    ffs.dds[k].size_of_dds = ffs.dds[k].pn2dds_head[28];
-                                }
-
-                                poz = temp_poz;
-
-                            }
-
-                            if (BitConverter.ToInt32(version, 0) > 10)
-                            {
-                                poz = temp_poz;
-                                if (BitConverter.ToInt32(version, 0) == 13)
-                                {
-                                    byte[] tmp = new byte[1];
-
-                                    tmp = new byte[1];
-                                    Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                    if (tmp[0] == 0x30) temp_poz++;
-                                    else
-                                    {
-                                        MessageBox.Show("Unknown format! Please send me file.");
-                                        wrong = true;
-                                    }
-
-                                    if (wrong) return;
-
-                                    poz = temp_poz;
-                                }
-                                else poz++;
-                            }
-                            else
-                            {
-                                byte[] tmp = new byte[1];
-
-                                tmp = new byte[1];
-                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-
-                                if (tmp[0] == 0x30) temp_poz++;
-                                else
-                                {
-                                    MessageBox.Show("Unknown format! Please send me file.");
-                                    wrong = true;
-                                }
-
-                                if (wrong) return;
-
-                                tmp = new byte[22];
-                                Array.Copy(binContent, temp_poz, tmp, 0, tmp.Length);
-                                if(ASCIIEncoding.ASCII.GetString(tmp) == "00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00")
-                                {
-                                    temp_poz += 22;
-                                }
-
-                                poz = temp_poz;
-                            }
-
-                            for (int j = 0; j < BitConverter.ToInt32(ffs.count_dds, 0); j++)
-                            {
-                                ffs.dds[j].dds_content = new byte[BitConverter.ToInt32(ffs.dds[j].size_of_dds, 0)];
-                                Array.Copy(binContent, poz, ffs.dds[j].dds_content, 0, ffs.dds[j].dds_content.Length);
-                                poz += ffs.dds[j].dds_content.Length;
-                            }
-                        }
-                        #endregion
-                        #endregion
-
-
-                        fillTableOfTextures();
-                        fillTableOfCoordinates();
-                        saveToolStripMenuItem.Enabled = true;
-                        saveAsToolStripMenuItem.Enabled = true;
-                        edited = false; //Открыли новый неизмененный файл
-                        //Form.ActiveForm.Text = "Font Editor: " + ofd.SafeFileName.ToString();
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        fontFlags.halfVal = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
                     }
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.glyph.BlockCoordSize = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.glyph.CharCount = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    font.glyph.chars = new FontClass.OldFontClass.TRect[font.glyph.CharCount];
+
+                    for(int i = 0; i < font.glyph.CharCount; i++)
+                    {
+                        font.glyph.chars[i] = new FontClass.OldFontClass.TRect();
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.chars[i].TexNum = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.chars[i].XStart = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.chars[i].XEnd = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.chars[i].YStart = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.chars[i].YEnd = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
+                    }
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.BlockTexSize = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.TexCount = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    font.tex = new TextureClass.OldT3Texture[font.TexCount];
+                    int counter = 0;
+
+                    for(int i = 0; i < font.TexCount; i++)
+                    {
+                        font.tex[i] = new TextureClass.OldT3Texture();
+                        font.tex[i].TexFlags = null;
+                        if (fontFlags != null) font.tex[i].TexFlags = new FlagsClass();
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+
+                        nameLen = BitConverter.ToInt32(tmp, 0);
+                        tmp = new byte[nameLen];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += nameLen;
+                        font.tex[i].ObjectName = Encoding.ASCII.GetString(tmp);
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+                        nameLen = BitConverter.ToInt32(tmp, 0);
+                        tmp = new byte[nameLen];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += nameLen;
+                        font.tex[i].SubobjectName = Encoding.ASCII.GetString(tmp);
+
+                        //font.tex[i].Flags = new byte[6];
+                        //Array.Copy(binContent, poz, font.tex[i].Flags, 0, font.tex[i].Flags.Length);
+
+                        tmp = new byte[8];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                        counter = 0;
+
+                        for (int k = 0; k < tmp.Length; k++)
+                        {
+                            if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
+                            {
+                                counter++;
+                            }
+                        }
+
+                        font.tex[i].Flags = new byte[counter];
+                        Array.Copy(binContent, poz, font.tex[i].Flags, 0, font.tex[i].Flags.Length);
+                        poz += font.tex[i].Flags.Length;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.tex[i].Mip = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+                        font.tex[i].TextureFormat = BitConverter.ToInt32(tmp, 0);
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.tex[i].OriginalWidth = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.tex[i].OriginalHeight = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+
+                        font.tex[i].UnknownData = new byte[4];
+                        Array.Copy(binContent, poz, font.tex[i].UnknownData, 0, font.tex[i].UnknownData.Length);
+                        poz += font.tex[i].UnknownData.Length;
+
+                        if(font.tex[i].TexFlags != null)
+                        {
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.Unknown1 = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+                        }
+
+                        font.tex[i].Zero = binContent[poz];
+                        poz++;
+
+                        if (font.tex[i].TexFlags != null)
+                        {
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.Unknown2 = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.One = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.Unknown3 = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.Unknown4 = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                            counter = 0;
+
+                            for (int k = 0; k < tmp.Length; k++)
+                            {
+                                if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
+                                {
+                                    counter++;
+                                }
+                            }
+
+                            font.tex[i].TexFlags.TexFlags = new byte[counter];
+                            Array.Copy(binContent, poz, font.tex[i].TexFlags.TexFlags, 0, font.tex[i].TexFlags.TexFlags.Length);
+                            poz += font.tex[i].TexFlags.TexFlags.Length;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.tex[i].TexFlags.Unknown5 = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+                        }
+
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.tex[i].TexSize = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+
+                        font.tex[i].Content = new byte[font.tex[i].TexSize];
+                        Array.Copy(binContent, poz, font.tex[i].Content, 0, font.tex[i].Content.Length);
+                        poz += font.tex[i].Content.Length;
+                    }
+
+                    fillTableofCoordinates(font);
+                    fillTableofTextures(font);
+
+
+                    //fillTableOfTextures();
+                    //fillTableOfCoordinates();
+                    saveToolStripMenuItem.Enabled = true;
+                    saveAsToolStripMenuItem.Enabled = true;
+                    edited = false; //Открыли новый неизмененный файл
+                                    //Form.ActiveForm.Text = "Font Editor: " + ofd.SafeFileName.ToString();
                 }
             }
         stop_it:
@@ -1475,7 +861,7 @@ namespace TTG_Tools
             GC.Collect();
             //}
             //catch { MessageBox.Show("Maybe you forget decrypt font?", "Error!"); }
-        }
+}
 
         public int FindStartOfStringSomething(byte[] array, int offset, string string_something)
         {
@@ -2219,12 +1605,10 @@ namespace TTG_Tools
                     FileStream fs = new FileStream(ofd.SafeFileName, FileMode.Create); //Сохраняем в открытый файл.
                     SaveFont(fs, ffs);
                     //После соханения чистим списки
-                    tex_format.Clear();
                     version_of_font.Clear();
                 }
                 else //А иначе просто закрываем программу и чистим списки
                 {
-                    tex_format.Clear();
                     version_of_font.Clear();
                 }
             }
@@ -2265,6 +1649,7 @@ namespace TTG_Tools
             }
         }
         public static string old_data;
+
         private void dataGridViewWithCoord_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
             int now_edit_column = e.ColumnIndex;

@@ -99,6 +99,7 @@
       <DependentUpon>AutoPacker.cs</DependentUpon>
     </Compile>
     <Compile Include="blowfish.cs" />
+    <Compile Include="ClassesStructs\FlagsClass.cs" />
     <Compile Include="CRCs.cs" />
     <Compile Include="EncryptionVariants.cs">
       <SubType>Form</SubType>
@@ -110,6 +111,8 @@
     <Compile Include="Graphics\DDS\DDSImage.cs" />
     <Compile Include="Graphics\DDS\Decompressor.cs" />
     <Compile Include="Graphics\DDS\Utils.cs" />
+    <Compile Include="ClassesStructs\FontClass.cs" />
+    <Compile Include="ClassesStructs\TextureClass.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ForThreads.cs" />
     <Compile Include="FontEditor.cs">

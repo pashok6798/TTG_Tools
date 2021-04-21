@@ -404,21 +404,28 @@ namespace TTG_Tools
                     //Experiments with too old fonts
                     font = new FontClass.OldFontClass();
 
-                    //First trying decrypt probably encrypted font
-                    try
+                    byte[] check_header = new byte[4];
+                    Array.Copy(binContent, 0, check_header, 0, check_header.Length);
+
+                    if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
+                    && (Encoding.ASCII.GetString(check_header) != "6VSM") && (Encoding.ASCII.GetString(check_header) != "NIBM")) //Supposed this font encrypted
                     {
-                        string info = Methods.FindingDecrytKey(binContent, "font");
-                        if (info != null)
+                        //First trying decrypt probably encrypted font
+                        try
                         {
-                            MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
-                            encripted = true;
+                            string info = Methods.FindingDecrytKey(binContent, "font");
+                            if (info != null)
+                            {
+                                MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
+                                encripted = true;
+                            }
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
-                        poz = -1;
-                        return;
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Maybe that font encrypted. Try to decrypt first.", "Error " + ex.Message);
+                            poz = -1;
+                            return;
+                        }
                     }
 
                     byte[] tmp = new byte[4];
@@ -530,157 +537,15 @@ namespace TTG_Tools
                     poz += 4;
 
                     font.tex = new TextureClass.OldT3Texture[font.TexCount];
-                    int counter = 0;
 
                     for(int i = 0; i < font.TexCount; i++)
                     {
-                        font.tex[i] = new TextureClass.OldT3Texture();
-                        font.tex[i].TexFlags = null;
-                        if (fontFlags != null) font.tex[i].TexFlags = new FlagsClass();
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-
-                        nameLen = BitConverter.ToInt32(tmp, 0);
-                        tmp = new byte[nameLen];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += nameLen;
-                        font.tex[i].ObjectName = Encoding.ASCII.GetString(tmp);
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-                        nameLen = BitConverter.ToInt32(tmp, 0);
-                        tmp = new byte[nameLen];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += nameLen;
-                        font.tex[i].SubobjectName = Encoding.ASCII.GetString(tmp);
-
-                        //font.tex[i].Flags = new byte[6];
-                        //Array.Copy(binContent, poz, font.tex[i].Flags, 0, font.tex[i].Flags.Length);
-
-                        tmp = new byte[8];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-
-                        counter = 0;
-
-                        for (int k = 0; k < tmp.Length; k++)
-                        {
-                            if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
-                            {
-                                counter++;
-                            }
-                        }
-
-                        font.tex[i].Flags = new byte[counter];
-                        Array.Copy(binContent, poz, font.tex[i].Flags, 0, font.tex[i].Flags.Length);
-                        poz += font.tex[i].Flags.Length;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.tex[i].Mip = BitConverter.ToInt32(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-                        font.tex[i].TextureFormat = BitConverter.ToInt32(tmp, 0);
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.tex[i].OriginalWidth = BitConverter.ToInt32(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.tex[i].OriginalHeight = BitConverter.ToInt32(tmp, 0);
-                        poz += 4;
-
-                        font.tex[i].UnknownData = new byte[4];
-                        Array.Copy(binContent, poz, font.tex[i].UnknownData, 0, font.tex[i].UnknownData.Length);
-                        poz += font.tex[i].UnknownData.Length;
-
-                        if(font.tex[i].TexFlags != null)
-                        {
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.Unknown1 = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-                        }
-
-                        font.tex[i].Zero = binContent[poz];
-                        poz++;
-
-                        if (font.tex[i].TexFlags != null)
-                        {
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.Unknown2 = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.One = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.Unknown3 = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.Unknown4 = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-
-                            counter = 0;
-
-                            for (int k = 0; k < tmp.Length; k++)
-                            {
-                                if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
-                                {
-                                    counter++;
-                                }
-                            }
-
-                            font.tex[i].TexFlags.TexFlags = new byte[counter];
-                            Array.Copy(binContent, poz, font.tex[i].TexFlags.TexFlags, 0, font.tex[i].TexFlags.TexFlags.Length);
-                            poz += font.tex[i].TexFlags.TexFlags.Length;
-
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.tex[i].TexFlags.Unknown5 = BitConverter.ToInt32(tmp, 0);
-                            poz += 4;
-                        }
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.tex[i].TexSize = BitConverter.ToInt32(tmp, 0);
-                        poz += 4;
-
-                        font.tex[i].Content = new byte[font.tex[i].TexSize];
-                        Array.Copy(binContent, poz, font.tex[i].Content, 0, font.tex[i].Content.Length);
-                        poz += font.tex[i].Content.Length;
+                        font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null);
                     }
 
                     fillTableofCoordinates(font);
                     fillTableofTextures(font);
 
-
-                    //fillTableOfTextures();
-                    //fillTableOfCoordinates();
                     saveToolStripMenuItem.Enabled = true;
                     saveAsToolStripMenuItem.Enabled = true;
                     edited = false; //Открыли новый неизмененный файл

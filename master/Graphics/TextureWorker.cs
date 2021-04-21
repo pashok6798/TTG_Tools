@@ -30,6 +30,229 @@ namespace TTG_Tools
             }
         }
 
+        public static string ExtractTextures(string InputFile, string OutputDir)
+        {
+            string result = null;
+            string additionalMessage = null;
+
+            FileInfo fi = new FileInfo(InputFile);
+
+            byte[] binContent = File.ReadAllBytes(InputFile);
+            byte[] check_header = new byte[4];
+            Array.Copy(binContent, 0, check_header, 0, check_header.Length);
+
+            if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
+            && (Encoding.ASCII.GetString(check_header) != "6VSM") && (Encoding.ASCII.GetString(check_header) != "NIBM")) //Supposed this font encrypted
+            {
+                //First trying decrypt probably encrypted font
+                try
+                {
+                    string info = Methods.FindingDecrytKey(binContent, "font");
+                    if (info != null)
+                    {
+                        additionalMessage = "Font was encrypted, but I decrypted.\r\n" + info;
+                    }
+                }
+                catch
+                {
+                    result = "Maybe that D3DTX file encrypted. Try to decrypt first: " + fi.Name;
+
+                    return result;
+                }
+            }
+
+            try
+            {
+                byte[] tmp = new byte[4];
+                Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+                int countElements = BitConverter.ToInt32(tmp, 0);
+                string[] elements = new string[countElements];
+                int lenStr;
+                int poz = 8;
+                bool flags = false;
+
+                for (int i = 0; i < countElements; i++)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    poz += 4;
+                    lenStr = BitConverter.ToInt32(tmp, 0);
+                    tmp = new byte[lenStr];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
+                    elements[i] = Encoding.ASCII.GetString(tmp);
+
+                    if (elements[i] == "class Flags")
+                    {
+                        flags = true;
+                    }
+                }
+
+                ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags);
+
+                result = "File " + fi.Name + " successfully extracted.";
+                if (tex == null) result = "Something wrong with this file: " + fi.Name;
+
+                File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Content);
+
+                return result;
+            }
+            catch
+            {
+                return "Unsupported format";
+            }
+        }
+
+        public static ClassesStructs.TextureClass.OldT3Texture GetOldTextures(byte[] binContent, ref int poz, bool flags)
+        {
+            try
+            {
+                ClassesStructs.TextureClass.OldT3Texture tex = new ClassesStructs.TextureClass.OldT3Texture();
+                tex.TexFlags = null;
+
+                if (flags) tex.TexFlags = new ClassesStructs.FlagsClass();
+
+                byte[] tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+
+                int nameLen = BitConverter.ToInt32(tmp, 0);
+                tmp = new byte[nameLen];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += nameLen;
+                tex.ObjectName = Encoding.ASCII.GetString(tmp);
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+                nameLen = BitConverter.ToInt32(tmp, 0);
+                tmp = new byte[nameLen];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += nameLen;
+                tex.SubobjectName = Encoding.ASCII.GetString(tmp);
+
+                tmp = new byte[8];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                int counter = 0;
+
+                for (int k = 0; k < tmp.Length; k++)
+                {
+                    if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
+                    {
+                        counter++;
+                    }
+                }
+
+                tex.Flags = new byte[counter];
+                Array.Copy(binContent, poz, tex.Flags, 0, tex.Flags.Length);
+                poz += tex.Flags.Length;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.Mip = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += 4;
+                tex.TextureFormat = BitConverter.ToInt32(tmp, 0);
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.OriginalWidth = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.OriginalHeight = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tex.UnknownData = new byte[4];
+                Array.Copy(binContent, poz, tex.UnknownData, 0, tex.UnknownData.Length);
+                poz += tex.UnknownData.Length;
+
+                if (tex.TexFlags != null)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.Unknown1 = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+                }
+
+                tex.Zero = binContent[poz];
+                poz++;
+
+                if (tex.TexFlags != null)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.Unknown2 = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.One = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.Unknown3 = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.Unknown4 = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                    counter = 0;
+
+                    for (int k = 0; k < tmp.Length; k++)
+                    {
+                        if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
+                        {
+                            counter++;
+                        }
+                    }
+
+                    tex.TexFlags.TexFlags = new byte[counter];
+                    Array.Copy(binContent, poz, tex.TexFlags.TexFlags, 0, tex.TexFlags.TexFlags.Length);
+                    poz += tex.TexFlags.TexFlags.Length;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.TexFlags.Unknown5 = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+                }
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.TexSize = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tex.Content = new byte[tex.TexSize];
+                Array.Copy(binContent, poz, tex.Content, 0, tex.Content.Length);
+                poz += tex.Content.Length;
+
+                return tex;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
 
         //Всё для экспорта текстур
         public static byte[] extract_old_textures(byte[] binContent, byte[] key, int version, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
@@ -89,40 +312,7 @@ namespace TTG_Tools
                 }
             }
 
-            byte[] tmp = new byte[4];
-            Array.Copy(binContent, 4, tmp, 0, tmp.Length);
-            int countElements = BitConverter.ToInt32(tmp, 0);
-            string[] Elements = new string[countElements];
-            int lenStr;
-
-            int poz = 8;
-
-            ClassesStructs.TextureClass.OldT3Texture tex = new ClassesStructs.TextureClass.OldT3Texture();
-            tex.TexFlags = null;
-
-            for (int i = 0; i < countElements; i++)
-            {
-                tmp = new byte[4];
-                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                poz += 4;
-
-                lenStr = BitConverter.ToInt32(tmp, 0);
-                tmp = new byte[lenStr];
-                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                poz += lenStr + 4;
-                Elements[i] = Encoding.ASCII.GetString(tmp);
-
-                if(Elements[i] == "class Flags")
-                {
-                    tex.TexFlags = new ClassesStructs.FlagsClass();
-                }
-            }
-
-
-
-
-            #region Старый код
-            /*//Проверки, которые были выше, нужны для проверки на зашифрованные файлы. Ниже как раз работа с текстурами
+            //Проверки, которые были выше, нужны для проверки на зашифрованные файлы. Ниже как раз работа с текстурами
 
             if (Methods.FindStartOfStringSomething(binContent, 8, "DDS") < binContent.Length - 100) //Тупо копируем DDS текстуру и возвращаем её обратно для записи
             {
@@ -219,8 +409,7 @@ namespace TTG_Tools
 
                 return binContent;
             }
-            else return null; //Иначе отправим ничего*/
-            #endregion
+            else return null; //Иначе отправим ничего
         }
 
         public static byte[] getFontHeader(byte[] binContent, ref byte[] code, ref byte[] width, ref byte[] height, ref byte[] tex_size, ref byte[] tex_kratnost)

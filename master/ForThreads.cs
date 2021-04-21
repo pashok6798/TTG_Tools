@@ -1070,9 +1070,11 @@ namespace TTG_Tools
                                     }
                                 case ".d3dtx":
                                     {
-                                        string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, MainMenu.settings.iOSsupport);
-                                        if (message != "") ReportForWork(message);
-                                        else ReportForWork("Unknown error. Please send me file.");
+                                        string message = TextureWorker.ExtractTextures(inputFiles[i].FullName, pathOutput);
+                                        ReportForWork(message);
+                                        //string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, MainMenu.settings.iOSsupport);
+                                        //if (message != "") ReportForWork(message);
+                                        //else ReportForWork("Unknown error. Please send me file.");
                                         break;
                                     }
                                 case ".landb":

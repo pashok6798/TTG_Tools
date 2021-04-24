@@ -72,7 +72,7 @@ namespace TTG_Tools
         public List<byte[]> head = new List<byte[]>();
         public ClassesStructs.FlagsClass fontFlags;
         FontClass.OldFontClass font = null;
-
+        bool blockSize = false;
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
 
@@ -375,6 +375,8 @@ namespace TTG_Tools
             {
                 encripted = false;
                 bool read = false;
+                blockSize = false;
+
                 FileStream fs;
                 try
                 {
@@ -383,9 +385,9 @@ namespace TTG_Tools
                     fs.Close();
                     read = true;
                 }
-                catch
+                catch(Exception ex)
                 {
-                    MessageBox.Show("File is busing by another process!", "Error!");
+                    MessageBox.Show(ex.Message, "Error!");
                     saveToolStripMenuItem.Enabled = false;
                     saveAsToolStripMenuItem.Enabled = false;
                 }
@@ -485,6 +487,7 @@ namespace TTG_Tools
                     {
                         nameLen = BitConverter.ToInt32(tmp, 0);
                         poz += 4;
+                        blockSize = true;
                     }
 
                     tmp = new byte[nameLen];
@@ -508,10 +511,15 @@ namespace TTG_Tools
                         poz += 4;
                     }
 
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    font.glyph.BlockCoordSize = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
+                    font.glyph.BlockCoordSize = 0;
+
+                    if (blockSize)
+                    {
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.glyph.BlockCoordSize = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+                    }
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -550,10 +558,13 @@ namespace TTG_Tools
                         poz += 4;
                     }
 
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    font.BlockTexSize = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
+                    if (blockSize)
+                    {
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        font.BlockTexSize = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+                    }
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);

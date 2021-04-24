@@ -15,15 +15,8 @@ namespace TTG_Tools.ClassesStructs
 
         //after 0x30 byte
         public int Unknown2;
-        public int One; //Saw value 1
-        public int Unknown3;
-        public int Unknown4;
-        public byte[] TexFlags; //Something 0x30 and 0x31 values
-        public int Unknown5;
-
-
-
-        //flags for Fonts
-        public float halfVal; //I saw value with 0.5f. What is it?!
+        public int TextureCount; //Strong Bad has value 3 and after DDS shows some texture, in another files it's just one
+        public int[] TexSizes; //Sizes another textures
+        public byte[][] SubTexContent; //From Strong Bad
     }
 }

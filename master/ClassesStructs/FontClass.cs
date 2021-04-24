@@ -28,6 +28,7 @@ namespace TTG_Tools.ClassesStructs
             }
 
             public string FontName;
+            public float half; //Shows in some fonts
             public byte One;
             public float BaseSize; //Common char size in text line
             public int BlockTexSize; //Size of block Textures

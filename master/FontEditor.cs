@@ -432,37 +432,60 @@ namespace TTG_Tools
                     Array.Copy(binContent, 4, tmp, 0, tmp.Length);
                     int countElements = BitConverter.ToInt32(tmp, 0);
                     string[] elements = new string[countElements];
+                    byte[][] binElements = new byte[countElements][];
                     int lenStr;
                     poz = 8;
 
                     version_used = countElements;
 
-                    for(int i = 0; i < countElements; i++)
-                    {
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += 4;
-                        lenStr = BitConverter.ToInt32(tmp, 0);
-                        tmp = new byte[lenStr];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
-                        elements[i] = Encoding.ASCII.GetString(tmp);
+                    tmp = new byte[8];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
 
-                        if(elements[i] == "class Flags")
+                    if(BitConverter.ToString(tmp) == "81-53-37-63-9E-4A-3A-9A")
+                    {
+                        for (int i = 0; i < countElements; i++)
                         {
-                            fontFlags = new FlagsClass();
+                            binElements[i] = new byte[8];
+                            Array.Copy(binContent, poz, binElements[i], 0, binElements[i].Length);
+                            poz += 12;
+
+                            if (BitConverter.ToString(binElements[i]) == "41-16-D7-79-B9-3C-28-84")
+                            {
+                                fontFlags = new FlagsClass();
+                            }
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < countElements; i++)
+                        {
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            poz += 4;
+                            lenStr = BitConverter.ToInt32(tmp, 0);
+                            tmp = new byte[lenStr];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
+                            elements[i] = Encoding.ASCII.GetString(tmp);
+
+                            if (elements[i] == "class Flags")
+                            {
+                                fontFlags = new FlagsClass();
+                            }
                         }
                     }
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    int nameLen = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    poz += 4;
-
-                    int nameLen = BitConverter.ToInt32(tmp, 0);
+                    if (nameLen - BitConverter.ToInt32(tmp, 0) == 8)
+                    {
+                        nameLen = BitConverter.ToInt32(tmp, 0);
+                        poz += 4;
+                    }
 
                     tmp = new byte[nameLen];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -476,11 +499,12 @@ namespace TTG_Tools
                     poz += 4;
                     font.BaseSize = BitConverter.ToSingle(tmp, 0);
 
-                    if (fontFlags != null)
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                    if (BitConverter.ToSingle(tmp, 0) == 0.5)
                     {
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        fontFlags.halfVal = BitConverter.ToSingle(tmp, 0);
+                        font.half = BitConverter.ToSingle(tmp, 0);
                         poz += 4;
                     }
 
@@ -541,7 +565,13 @@ namespace TTG_Tools
                     for(int i = 0; i < font.TexCount; i++)
                     {
                         font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null);
+                        if(font.tex[i] == null)
+                        {
+                            MessageBox.Show("Maybe unsupported font.", "Error");
+                            return;
+                        }
                     }
+
 
                     fillTableofCoordinates(font);
                     fillTableofTextures(font);

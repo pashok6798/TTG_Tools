@@ -42,15 +42,15 @@ namespace TTG_Tools
             Array.Copy(binContent, 0, check_header, 0, check_header.Length);
 
             if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
-            && (Encoding.ASCII.GetString(check_header) != "6VSM") && (Encoding.ASCII.GetString(check_header) != "NIBM")) //Supposed this font encrypted
+            && (Encoding.ASCII.GetString(check_header) != "6VSM")) //Supposed this texture encrypted
             {
                 //First trying decrypt probably encrypted font
                 try
                 {
-                    string info = Methods.FindingDecrytKey(binContent, "font");
+                    string info = Methods.FindingDecrytKey(binContent, "texture");
                     if (info != null)
                     {
-                        additionalMessage = "Font was encrypted, but I decrypted.\r\n" + info;
+                        additionalMessage = "D3dtx file was encrypted, but I decrypted. " + info;
                     }
                 }
                 catch
@@ -66,45 +66,76 @@ namespace TTG_Tools
                 byte[] tmp = new byte[4];
                 Array.Copy(binContent, 4, tmp, 0, tmp.Length);
                 int countElements = BitConverter.ToInt32(tmp, 0);
-                string[] elements = new string[countElements];
-                int lenStr;
+
+                tmp = new byte[8];
+                Array.Copy(binContent, 8, tmp, 0, tmp.Length);
+
                 int poz = 8;
                 bool flags = false;
 
-                for (int i = 0; i < countElements; i++)
+                if (BitConverter.ToString(tmp) == "E2-CC-38-6F-7E-9E-24-3E")
                 {
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    poz += 4;
-                    lenStr = BitConverter.ToInt32(tmp, 0);
-                    tmp = new byte[lenStr];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
-                    elements[i] = Encoding.ASCII.GetString(tmp);
+                    byte[][] elements = new byte[countElements][];
 
-                    if (elements[i] == "class Flags")
+                    for(int i = 0; i < countElements; i++)
                     {
-                        flags = true;
+                        elements[i] = new byte[8];
+                        Array.Copy(binContent, poz, elements[i], 0, elements[i].Length);
+                        poz += 12;
+
+                        if(BitConverter.ToString(elements[i]) == "41-16-D7-79-B9-3C-28-84")
+                        {
+                            flags = true;
+                        }
+                    }
+                }
+                else
+                {
+                    string[] elements = new string[countElements];
+                    int lenStr;
+
+                    for (int i = 0; i < countElements; i++)
+                    {
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+                        lenStr = BitConverter.ToInt32(tmp, 0);
+                        tmp = new byte[lenStr];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
+                        elements[i] = Encoding.ASCII.GetString(tmp);
+
+                        if (elements[i] == "class Flags")
+                        {
+                            flags = true;
+                        }
                     }
                 }
 
                 ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags);
 
-                result = "File " + fi.Name + " successfully extracted.";
-                if (tex == null) result = "Something wrong with this file: " + fi.Name;
+                result = "File " + fi.Name + " successfully extracted. ";
+                if (tex == null)
+                {
+                    result = "Something wrong with this file: " + fi.Name;
+                    return result;
+                }
 
                 File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Content);
+
+                if (additionalMessage != null) result += additionalMessage;
 
                 return result;
             }
             catch
             {
-                return "Unsupported format";
+                return fi.Name + ": Unsupported format";
             }
         }
 
         public static ClassesStructs.TextureClass.OldT3Texture GetOldTextures(byte[] binContent, ref int poz, bool flags)
         {
+            //Try read begin of file
             try
             {
                 ClassesStructs.TextureClass.OldT3Texture tex = new ClassesStructs.TextureClass.OldT3Texture();
@@ -114,13 +145,17 @@ namespace TTG_Tools
 
                 byte[] tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                int nameLen = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                poz += 4;
+                if (nameLen - BitConverter.ToInt32(tmp, 0) == 8)
+                {
+                    nameLen = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+                }
 
-                int nameLen = BitConverter.ToInt32(tmp, 0);
                 tmp = new byte[nameLen];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 poz += nameLen;
@@ -128,12 +163,17 @@ namespace TTG_Tools
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                nameLen = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                poz += 4;
-                nameLen = BitConverter.ToInt32(tmp, 0);
+                if (nameLen - BitConverter.ToInt32(tmp, 0) == 8)
+                {
+                    nameLen = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+                }
+
                 tmp = new byte[nameLen];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 poz += nameLen;
@@ -176,7 +216,7 @@ namespace TTG_Tools
                 tex.OriginalHeight = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
-                tex.UnknownData = new byte[4];
+                /*tex.UnknownData = new byte[4];
                 Array.Copy(binContent, poz, tex.UnknownData, 0, tex.UnknownData.Length);
                 poz += tex.UnknownData.Length;
 
@@ -200,41 +240,26 @@ namespace TTG_Tools
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.One = BitConverter.ToInt32(tmp, 0);
+                    tex.TexFlags.TextureCount = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
 
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.Unknown3 = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.Unknown4 = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-
-                    counter = 0;
-
-                    for (int k = 0; k < tmp.Length; k++)
+                    if (tex.TexFlags.TextureCount >= 3)
                     {
-                        if ((tmp[k] == 0x30) || (tmp[k] == 0x31))
+                        tex.TexFlags.TexSizes = new int[tex.TexFlags.TextureCount - 2];
+                        tex.TexFlags.SubTexContent = new byte[tex.TexFlags.TexSizes.Length][];
+
+                        for (int j = 0; j < tex.TexFlags.TexSizes.Length; j++)
                         {
-                            counter++;
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            poz += 4;
+                            tex.TexFlags.TexSizes[j] = BitConverter.ToInt32(tmp, 0);
                         }
                     }
+                }*/
+                    //And just ignore some flags and etc. Just search DDS header
 
-                    tex.TexFlags.TexFlags = new byte[counter];
-                    Array.Copy(binContent, poz, tex.TexFlags.TexFlags, 0, tex.TexFlags.TexFlags.Length);
-                    poz += tex.TexFlags.TexFlags.Length;
-
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.Unknown5 = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-                }
+                poz = Methods.FindStartOfStringSomething(binContent, poz, "DDS ") - 4; //Get position for a size
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -244,6 +269,16 @@ namespace TTG_Tools
                 tex.Content = new byte[tex.TexSize];
                 Array.Copy(binContent, poz, tex.Content, 0, tex.Content.Length);
                 poz += tex.Content.Length;
+
+                if((tex.TexFlags != null) && (tex.TexFlags.TexSizes != null)) 
+                {
+                    for (int j = 0; j < tex.TexFlags.TexSizes.Length; j++)
+                    {
+                        tex.TexFlags.SubTexContent[j] = new byte[tex.TexFlags.TexSizes[j]];
+                        Array.Copy(binContent, poz, tex.TexFlags.SubTexContent[j], 0, tex.TexFlags.SubTexContent[j].Length);
+                        poz += tex.TexFlags.TexSizes[j];
+                    }
+                }
 
                 return tex;
             }

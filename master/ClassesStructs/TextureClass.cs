@@ -11,6 +11,8 @@ namespace TTG_Tools.ClassesStructs
     {
         public class OldT3Texture
         {
+            public int sizeBlock; //For games since Hector
+            public int someValue; //For games since Hector
             public string ObjectName;
             public string SubobjectName;
             public byte[] Flags;

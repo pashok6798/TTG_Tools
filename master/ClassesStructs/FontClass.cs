@@ -17,6 +17,8 @@ namespace TTG_Tools.ClassesStructs
                 public float XEnd;
                 public float YStart;
                 public float YEnd;
+                public float CharWidth;
+                public float CharHeight;
 
                 public TRect() { }
             }
@@ -27,8 +29,12 @@ namespace TTG_Tools.ClassesStructs
                 public TRect[] chars; //Table of characters
             }
 
+            public bool blockSize;
+            public bool hasScaleValue; //Use since Hector games
+
             public string FontName;
-            public float half; //Shows in some fonts
+            public float halfValue; //Shows in some fonts
+            public float oneValue; //Scale font. Use since Hector and newer games
             public byte One;
             public float BaseSize; //Common char size in text line
             public int BlockTexSize; //Size of block Textures

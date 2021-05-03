@@ -72,6 +72,7 @@ namespace TTG_Tools
 
                 int poz = 8;
                 bool flags = false;
+                bool someData = false;
 
                 if (BitConverter.ToString(tmp) == "E2-CC-38-6F-7E-9E-24-3E")
                 {
@@ -86,6 +87,11 @@ namespace TTG_Tools
                         if(BitConverter.ToString(elements[i]) == "41-16-D7-79-B9-3C-28-84")
                         {
                             flags = true;
+                        }
+                        
+                        if(BitConverter.ToString(elements[i]) == "E3-88-09-7A-48-5D-7F-93")
+                        {
+                            someData = true;
                         }
                     }
                 }
@@ -112,7 +118,7 @@ namespace TTG_Tools
                     }
                 }
 
-                ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags);
+                ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags, someData);
 
                 result = "File " + fi.Name + " successfully extracted. ";
                 if (tex == null)
@@ -133,7 +139,7 @@ namespace TTG_Tools
             }
         }
 
-        public static ClassesStructs.TextureClass.OldT3Texture GetOldTextures(byte[] binContent, ref int poz, bool flags)
+        public static ClassesStructs.TextureClass.OldT3Texture GetOldTextures(byte[] binContent, ref int poz, bool flags, bool someData)
         {
             //Try read begin of file
             try
@@ -142,6 +148,21 @@ namespace TTG_Tools
                 tex.TexFlags = null;
 
                 if (flags) tex.TexFlags = new ClassesStructs.FlagsClass();
+
+                if (someData)
+                {
+                    byte[] someBinData = new byte[4];
+                    Array.Copy(binContent, poz, someBinData, 0, someBinData.Length);
+                    tex.sizeBlock = BitConverter.ToInt32(someBinData, 0);
+                    poz += 4;
+
+                    someBinData = new byte[4];
+                    Array.Copy(binContent, poz, someBinData, 0, someBinData.Length);
+                    tex.someValue = BitConverter.ToInt32(someBinData, 0);
+                    poz += 4;
+
+                    someBinData = null;
+                }
 
                 byte[] tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -216,48 +237,7 @@ namespace TTG_Tools
                 tex.OriginalHeight = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
-                /*tex.UnknownData = new byte[4];
-                Array.Copy(binContent, poz, tex.UnknownData, 0, tex.UnknownData.Length);
-                poz += tex.UnknownData.Length;
-
-                if (tex.TexFlags != null)
-                {
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.Unknown1 = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-                }
-
-                tex.Zero = binContent[poz];
-                poz++;
-
-                if (tex.TexFlags != null)
-                {
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.Unknown2 = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-
-                    tmp = new byte[4];
-                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                    tex.TexFlags.TextureCount = BitConverter.ToInt32(tmp, 0);
-                    poz += 4;
-
-                    if (tex.TexFlags.TextureCount >= 3)
-                    {
-                        tex.TexFlags.TexSizes = new int[tex.TexFlags.TextureCount - 2];
-                        tex.TexFlags.SubTexContent = new byte[tex.TexFlags.TexSizes.Length][];
-
-                        for (int j = 0; j < tex.TexFlags.TexSizes.Length; j++)
-                        {
-                            tmp = new byte[4];
-                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            poz += 4;
-                            tex.TexFlags.TexSizes[j] = BitConverter.ToInt32(tmp, 0);
-                        }
-                    }
-                }*/
-                    //And just ignore some flags and etc. Just search DDS header
+                //And just ignore some flags and etc. Just search DDS header
 
                 poz = Methods.FindStartOfStringSomething(binContent, poz, "DDS ") - 4; //Get position for a size
 

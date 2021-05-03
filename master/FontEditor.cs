@@ -72,7 +72,6 @@ namespace TTG_Tools
         public List<byte[]> head = new List<byte[]>();
         public ClassesStructs.FlagsClass fontFlags;
         FontClass.OldFontClass font = null;
-        bool blockSize = false;
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
 
@@ -186,16 +185,29 @@ namespace TTG_Tools
         private void fillTableofCoordinates(FontClass.OldFontClass font)
         {
             dataGridViewWithCoord.RowCount = font.glyph.CharCount;
+            dataGridViewWithCoord.ColumnCount = 7;
+            if (font.hasScaleValue)
+            {
+                dataGridViewWithCoord.ColumnCount = 9;
+                dataGridViewWithCoord.Columns[7].HeaderText = "Width";
+                dataGridViewWithCoord.Columns[8].HeaderText = "Height";
+            }
 
             for(int i = 0; i < font.glyph.CharCount; i++)
             {
                 dataGridViewWithCoord[0, i].Value = i;
                 dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(i));
-                dataGridViewWithCoord[2, i].Value = font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth;
-                dataGridViewWithCoord[3, i].Value = font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth;
-                dataGridViewWithCoord[4, i].Value = font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight;
-                dataGridViewWithCoord[5, i].Value = font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight;
+                dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
                 dataGridViewWithCoord[6, i].Value = font.glyph.chars[i].TexNum;
+
+                if (font.hasScaleValue)
+                {
+                    dataGridViewWithCoord[7, i].Value = Math.Round(font.glyph.chars[i].CharWidth);
+                    dataGridViewWithCoord[8, i].Value = Math.Round(font.glyph.chars[i].CharHeight);
+                }
             }
         }
 
@@ -375,7 +387,6 @@ namespace TTG_Tools
             {
                 encripted = false;
                 bool read = false;
-                blockSize = false;
 
                 FileStream fs;
                 try
@@ -405,6 +416,8 @@ namespace TTG_Tools
 
                     //Experiments with too old fonts
                     font = new FontClass.OldFontClass();
+                    font.blockSize = false;
+                    font.hasScaleValue = false;
 
                     byte[] check_header = new byte[4];
                     Array.Copy(binContent, 0, check_header, 0, check_header.Length);
@@ -436,6 +449,7 @@ namespace TTG_Tools
                     string[] elements = new string[countElements];
                     byte[][] binElements = new byte[countElements][];
                     int lenStr;
+                    bool someTexData = false;
                     poz = 8;
 
                     version_used = countElements;
@@ -454,6 +468,11 @@ namespace TTG_Tools
                             if (BitConverter.ToString(binElements[i]) == "41-16-D7-79-B9-3C-28-84")
                             {
                                 fontFlags = new FlagsClass();
+                            }
+
+                            if (BitConverter.ToString(binElements[i]) == "E3-88-09-7A-48-5D-7F-93")
+                            {
+                                someTexData = true;
                             }
                         }
                     }
@@ -487,7 +506,7 @@ namespace TTG_Tools
                     {
                         nameLen = BitConverter.ToInt32(tmp, 0);
                         poz += 4;
-                        blockSize = true;
+                        font.blockSize = true;
                     }
 
                     tmp = new byte[nameLen];
@@ -505,15 +524,26 @@ namespace TTG_Tools
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
 
-                    if (BitConverter.ToSingle(tmp, 0) == 0.5)
+                    if ((BitConverter.ToSingle(tmp, 0) == 0.5)
+                        || (BitConverter.ToSingle(tmp, 0) == 1.0))
                     {
-                        font.half = BitConverter.ToSingle(tmp, 0);
+                        font.halfValue = BitConverter.ToSingle(tmp, 0);
+                        poz += 4;
+                    }
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                    if (BitConverter.ToSingle(tmp, 0) == 1.0)
+                    {
+                        font.oneValue = BitConverter.ToSingle(tmp, 0);
+                        font.hasScaleValue = true;
                         poz += 4;
                     }
 
                     font.glyph.BlockCoordSize = 0;
 
-                    if (blockSize)
+                    if (font.blockSize)
                     {
                         tmp = new byte[4];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -556,9 +586,22 @@ namespace TTG_Tools
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                         font.glyph.chars[i].YEnd = BitConverter.ToSingle(tmp, 0);
                         poz += 4;
+
+                        if (font.hasScaleValue)
+                        {
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.chars[i].CharWidth = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.chars[i].CharHeight = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+                        }
                     }
 
-                    if (blockSize)
+                    if (font.blockSize)
                     {
                         tmp = new byte[4];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -575,7 +618,7 @@ namespace TTG_Tools
 
                     for(int i = 0; i < font.TexCount; i++)
                     {
-                        font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null);
+                        font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null, someTexData);
                         if(font.tex[i] == null)
                         {
                             MessageBox.Show("Maybe unsupported font.", "Error");

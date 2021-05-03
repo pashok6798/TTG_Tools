@@ -121,12 +121,14 @@ namespace TTG_Tools
                 ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags, someData);
 
                 result = "File " + fi.Name + " successfully extracted. ";
+
                 if (tex == null)
                 {
                     result = "Something wrong with this file: " + fi.Name;
                     return result;
                 }
 
+                if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
                 File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Content);
 
                 if (additionalMessage != null) result += additionalMessage;

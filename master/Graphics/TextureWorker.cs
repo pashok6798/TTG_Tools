@@ -93,6 +93,11 @@ namespace TTG_Tools
                         {
                             someData = true;
                         }
+
+                        if(BitConverter.ToString(elements[i]) == "0D-A8-77-C9-95-5F-7B-AC")
+                        {
+                            //May contains additional information in textures
+                        }
                     }
                 }
                 else

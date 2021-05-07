@@ -71,7 +71,7 @@ namespace TTG_Tools
         public List<Version_of_font> version_of_font = new List<Version_of_font>();
         public List<byte[]> head = new List<byte[]>();
         public ClassesStructs.FlagsClass fontFlags;
-        FontClass.OldFontClass font = null;
+        FontClass.ClassFont font = null;
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
 
@@ -182,7 +182,7 @@ namespace TTG_Tools
         }
         public static int version_used;
 
-        private void fillTableofCoordinates(FontClass.OldFontClass font)
+        private void fillTableofCoordinates(FontClass.ClassFont font)
         {
             dataGridViewWithCoord.RowCount = font.glyph.CharCount;
             dataGridViewWithCoord.ColumnCount = 7;
@@ -211,7 +211,7 @@ namespace TTG_Tools
             }
         }
 
-        private void fillTableofTextures(FontClass.OldFontClass font)
+        private void fillTableofTextures(FontClass.ClassFont font)
         {
             dataGridViewWithTextures.RowCount = font.TexCount;
 
@@ -415,7 +415,7 @@ namespace TTG_Tools
                     int poz = 0;
 
                     //Experiments with too old fonts
-                    font = new FontClass.OldFontClass();
+                    font = new FontClass.ClassFont();
                     font.blockSize = false;
                     font.hasScaleValue = false;
 
@@ -473,6 +473,11 @@ namespace TTG_Tools
                             if (BitConverter.ToString(binElements[i]) == "E3-88-09-7A-48-5D-7F-93")
                             {
                                 someTexData = true;
+                            }
+
+                            if(BitConverter.ToString(binElements[i]) == "0F-F4-20-E6-20-BA-A1-EF")
+                            {
+
                             }
                         }
                     }
@@ -556,11 +561,11 @@ namespace TTG_Tools
                     font.glyph.CharCount = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
 
-                    font.glyph.chars = new FontClass.OldFontClass.TRect[font.glyph.CharCount];
+                    font.glyph.chars = new FontClass.ClassFont.TRect[font.glyph.CharCount];
 
                     for(int i = 0; i < font.glyph.CharCount; i++)
                     {
-                        font.glyph.chars[i] = new FontClass.OldFontClass.TRect();
+                        font.glyph.chars[i] = new FontClass.ClassFont.TRect();
 
                         tmp = new byte[4];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);

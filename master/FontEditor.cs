@@ -1180,8 +1180,8 @@ namespace TTG_Tools
                     bool pvr = false;
                     string result = null;
 
-                    byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
-                    fs.Write(header, 0, header.Length);
+                    //byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
+                    //fs.Write(header, 0, header.Length);
 
                     if(platform == 15)
                     {

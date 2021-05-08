@@ -34,12 +34,14 @@ namespace TTG_Tools
         {
             string result = null;
             string additionalMessage = null;
+            bool NewFormat = false;
 
             FileInfo fi = new FileInfo(InputFile);
 
             byte[] binContent = File.ReadAllBytes(InputFile);
             byte[] check_header = new byte[4];
             Array.Copy(binContent, 0, check_header, 0, check_header.Length);
+            int poz = 4;
 
             if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
             && (Encoding.ASCII.GetString(check_header) != "6VSM")) //Supposed this texture encrypted
@@ -60,17 +62,22 @@ namespace TTG_Tools
                     return result;
                 }
             }
+            if ((Encoding.ASCII.GetString(check_header) == "5VSM") || (Encoding.ASCII.GetString(check_header) == "6VSM"))
+            {
+                poz = 16;
+                NewFormat = true;
+            }
 
             try
             {
                 byte[] tmp = new byte[4];
-                Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 int countElements = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
 
                 tmp = new byte[8];
-                Array.Copy(binContent, 8, tmp, 0, tmp.Length);
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
 
-                int poz = 8;
                 bool flags = false;
                 bool someData = false;
 
@@ -94,9 +101,9 @@ namespace TTG_Tools
                             someData = true;
                         }
 
-                        if(BitConverter.ToString(elements[i]) == "0D-A8-77-C9-95-5F-7B-AC")
+                        if(BitConverter.ToString(elements[i]) == "0F-F4-20-E6-20-BA-A1-EF")
                         {
-                            //May contains additional information in textures
+                            NewFormat = true;
                         }
                     }
                 }
@@ -123,7 +130,28 @@ namespace TTG_Tools
                     }
                 }
 
-                ClassesStructs.TextureClass.OldT3Texture tex = GetOldTextures(binContent, ref poz, flags, someData);
+                if (!NewFormat)
+                {
+                    ClassesStructs.TextureClass.OldT3Texture oldTex = GetOldTextures(binContent, ref poz, flags, someData);
+
+                    result = "File " + fi.Name + " successfully extracted. ";
+
+                    if (oldTex == null)
+                    {
+                        result = "Something wrong with this file: " + fi.Name;
+                        return result;
+                    }
+
+                    if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
+                    File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), oldTex.Content);
+
+                    if (additionalMessage != null) result += additionalMessage;
+
+                    return result;
+                }
+                   
+                
+                ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, flags, someData, false, ref additionalMessage);
 
                 result = "File " + fi.Name + " successfully extracted. ";
 
@@ -134,7 +162,7 @@ namespace TTG_Tools
                 }
 
                 if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
-                File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Content);
+                File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Tex.Content);
 
                 if (additionalMessage != null) result += additionalMessage;
 
@@ -275,6 +303,227 @@ namespace TTG_Tools
             }
         }
 
+        //Extract new format textures (Since Poker Night 2)
+        public static ClassesStructs.TextureClass.NewT3Texture GetNewTextures(byte[] binContent, ref int poz, bool flags, bool someData, bool IsFont, ref string AdditionalInfo)
+        {
+            ClassesStructs.TextureClass.NewT3Texture tex = new ClassesStructs.TextureClass.NewT3Texture();
+            byte[] tmp = new byte[4];
+
+            Array.Copy(binContent, 0, tmp, 0, tmp.Length);
+            if(Encoding.ASCII.GetString(tmp) != "ERTM")
+            {
+                if (!IsFont)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+                    tex.headerSize = BitConverter.ToInt32(tmp, 0);
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, 12, tmp, 0, tmp.Length);
+                    tex.textureSize = BitConverter.ToUInt32(tmp, 0);
+                }
+            }
+
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.SomeValue = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.unknownFlags.blockSize = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.unknownFlags.block = BitConverter.ToUInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.platform.blockSize = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.platform.platform = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            int tmpInt = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tmpInt = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[tmpInt];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.ObjectName = Encoding.ASCII.GetString(tmp);
+            poz += tmpInt;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tmpInt = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tmpInt = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[tmpInt];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.SubObjectName = Encoding.ASCII.GetString(tmp);
+            poz += tmpInt;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+            if (BitConverter.ToInt32(tmp, 0) == 0)
+            {
+                tex.Zero = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            }
+
+            tex.OneValue = BitConverter.ToSingle(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[1];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.OneByte = tmp[0];
+            poz++;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Mip = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Width = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Height = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.TextureFormat = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Unknown1 = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            int blSize = 0x2c;
+
+            switch (tex.SomeValue)
+            {
+                case 4:
+                    blSize = 0x30;
+                    break;
+            }
+
+            tex.block = new byte[blSize];
+            Array.Copy(binContent, poz, tex.block, 0, tex.block.Length);
+            poz += tex.block.Length;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Tex.MipCount = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Tex.SomeData = BitConverter.ToInt32(tmp, 0);
+            poz += 4;
+
+            tmp = new byte[4];
+            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            tex.Tex.TexSize = BitConverter.ToUInt32(tmp, 0);
+            poz += 4;
+
+            tex.Tex.Textures = new ClassesStructs.TextureClass.NewT3Texture.TextureStruct[tex.Mip];
+
+            for(int i = tex.Mip - 1; i >= 0; i--)
+            {
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.Tex.Textures[i].CurrentMip = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                if (BitConverter.ToInt32(tmp, 0) == 1)
+                {
+                    tex.Tex.Textures[i].One = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                }
+
+                tex.Tex.Textures[i].MipSize = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.Tex.Textures[i].BlockSize = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+            }
+
+            if(tex.Tex.SomeData > 0)
+            {
+                tex.Tex.SubBlocks = new ClassesStructs.TextureClass.NewT3Texture.SubBlock[tex.Tex.SomeData];
+
+                for(int i = 0; i < tex.Tex.SomeData; i++)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.Tex.SubBlocks[i].Size = BitConverter.ToInt32(tmp, 0);
+
+                    tex.Tex.SubBlocks[i].Block = new byte[tex.Tex.SubBlocks[i].Size];
+                    Array.Copy(binContent, poz, tex.Tex.SubBlocks[i].Block, 0, tex.Tex.SubBlocks[i].Block.Length);
+                    poz += tex.Tex.SubBlocks[i].Block.Length;
+                }
+            }
+
+            string format = "";
+            bool pvr = false;
+
+            byte[] header = genHeader(tex.Width, tex.Height, tex.Mip, tex.TextureFormat, tex.platform.platform, ref pvr, ref format);
+
+            if(header == null)
+            {
+                return null;
+            }
+
+            AdditionalInfo = "Texture format: " + format + ". Mip count: " + Convert.ToString(tex.Mip);
+
+            tex.Tex.Content = new byte[tex.Tex.TexSize + header.Length];
+            Array.Copy(header, 0, tex.Tex.Content, 0, header.Length);
+            int texPoz = tex.Tex.Content.Length;
+
+            for(int i = tex.Mip - 1; i >= 0; i--)
+            {
+                texPoz -= tex.Tex.Textures[i].MipSize;
+                tmp = new byte[tex.Tex.Textures[i].MipSize];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                poz += tex.Tex.Textures[i].MipSize;
+
+                Array.Copy(tmp, 0, tex.Tex.Content, texPoz, tmp.Length);
+            }
+
+            return tex;
+        }
 
         //Всё для экспорта текстур
         public static byte[] extract_old_textures(byte[] binContent, byte[] key, int version, ref string result, ref bool pvr) //Разбор ресурсов древних версий движков Telltale Tool
@@ -514,11 +763,13 @@ namespace TTG_Tools
             else return null;
         }
 
-        public static byte[] genHeader(byte[] width, byte[] height, byte[] mip, int code, int platform, ref bool pvr, ref string format) //"Генератор" заголовка для текстуры
+        //Generate header for PVR and DDS files (need destroy it and use from DDS directory!)
+        public static byte[] genHeader(int width, int height, int mip, int code, int platform, ref bool pvr, ref string format)
         {
             byte[] binContent = null;
 
             int index = -1;
+            byte[] tmp = null;
 
             for (int i = 0; i < TTG_Tools.MainMenu.texture_header.Count; i++)
             {
@@ -546,23 +797,34 @@ namespace TTG_Tools
                 if (pvr)
                 {
                     binContent = TTG_Tools.MainMenu.texture_header[index].sample;
-                    Array.Copy(height, 0, binContent, 24, height.Length);
-                    Array.Copy(width, 0, binContent, 28, width.Length);
+                    tmp = BitConverter.GetBytes(height);
+                    Array.Copy(tmp, 0, binContent, 24, tmp.Length);
+
+                    tmp = BitConverter.GetBytes(width);
+                    Array.Copy(tmp, 0, binContent, 28, tmp.Length);
                     format = TTG_Tools.MainMenu.texture_header[index].tex_info;
-                    Array.Copy(mip, 0, binContent, 44, mip.Length);
+
+                    tmp = BitConverter.GetBytes(mip);
+                    Array.Copy(tmp, 0, binContent, 44, tmp.Length);
                 }
                 else
                 {
                     binContent = TTG_Tools.MainMenu.texture_header[index].sample;
                     int length = 0;
                     int kratnost = 0;
-                    Methods.get_kratnost_and_size(BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), TTG_Tools.MainMenu.texture_header[index].code, ref length, ref kratnost);
+                    Methods.get_kratnost_and_size(width, height, TTG_Tools.MainMenu.texture_header[index].code, ref length, ref kratnost);
                     byte[] bLength = new byte[4];
                     bLength = BitConverter.GetBytes(length);
-                    Array.Copy(height, 0, binContent, 12, 4);
-                    Array.Copy(width, 0, binContent, 16, 4);
+
+                    tmp = BitConverter.GetBytes(height);
+                    Array.Copy(tmp, 0, binContent, 12, 4);
+
+                    tmp = BitConverter.GetBytes(width);
+                    Array.Copy(tmp, 0, binContent, 16, 4);
                     Array.Copy(bLength, 0, binContent, 20, bLength.Length);
-                    Array.Copy(mip, 0, binContent, 28, 1);
+
+                    tmp = BitConverter.GetBytes(mip);
+                    Array.Copy(tmp, 0, binContent, 28, 1);
                     format = TTG_Tools.MainMenu.texture_header[index].tex_info;
                 }
             }
@@ -572,14 +834,20 @@ namespace TTG_Tools
                 index = 0;
                 int length = 0;
                 int kratnost = 0;
-                Methods.get_kratnost_and_size(BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), TTG_Tools.MainMenu.texture_header[index].code, ref length, ref kratnost);
+                Methods.get_kratnost_and_size(width, height, TTG_Tools.MainMenu.texture_header[index].code, ref length, ref kratnost);
                 binContent = TTG_Tools.MainMenu.texture_header[index].sample;
                 byte[] bLength = new byte[4];
                 bLength = BitConverter.GetBytes(length);
-                Array.Copy(height, 0, binContent, 12, 4);
-                Array.Copy(width, 0, binContent, 16, 4);
+                tmp = BitConverter.GetBytes(height);
+                Array.Copy(tmp, 0, binContent, 12, 4);
+
+                tmp = BitConverter.GetBytes(height);
+                Array.Copy(tmp, 0, binContent, 16, 4);
+
                 Array.Copy(bLength, 0, binContent, 20, bLength.Length);
-                Array.Copy(mip, 0, binContent, 28, 1);
+
+                tmp = BitConverter.GetBytes(mip);
+                Array.Copy(tmp, 0, binContent, 28, 1);
                 format = "Unknown format. Set default: " + TTG_Tools.MainMenu.texture_header[index].tex_info;
             }
 
@@ -956,7 +1224,7 @@ namespace TTG_Tools
             string format = null;
             //int code = BitConverter.ToInt32(chDDS[num], 0);
             //byte[] header = genHeader(chDDS[num_width], chDDS[num_height], chDDS[num_mip], code, platform, ref pvr, ref format);
-            byte[] header = genHeader(width, height, mips, code, platform, ref pvr, ref format);
+            byte[] header = genHeader(BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), BitConverter.ToInt32(mips, 0), code, platform, ref pvr, ref format);
 
             if (header != null)
             {

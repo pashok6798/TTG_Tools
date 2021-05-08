@@ -50,9 +50,9 @@ namespace TTG_Tools.ClassesStructs
             public struct TextureStruct
             {
                 public int CurrentMip;
+                public int One;
                 public int MipSize; //Size of one mipmap
                 public int BlockSize;
-                public byte[] Content;
             }
 
             public struct SubBlock
@@ -68,8 +68,13 @@ namespace TTG_Tools.ClassesStructs
                 public uint TexSize;
                 public TextureStruct[] Textures;
                 public SubBlock[] SubBlocks;
+                public byte[] Content;
             }
 
+
+            //For headers 5VSM and 6VSM
+            public int headerSize; //Size of header
+            public uint textureSize; //Size of texture
 
             public int SomeValue; //Some value for flags
             public UnknownFlags unknownFlags;

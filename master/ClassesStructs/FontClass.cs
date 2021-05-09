@@ -10,7 +10,14 @@ namespace TTG_Tools.ClassesStructs
     {
             public class ClassFont
             {
-            //Before Poker Night 2 game
+                //For games since The Wolf Among Us
+                public uint headerSize; //Calculation of coordinates and texture headers
+                public uint texSize; //Size of textures
+
+                public string[] elements;
+                public byte[][] binElements;
+
+                //Before Poker Night 2 game
                 public class TRect
                 {
                     public int TexNum; //CurrentTexture
@@ -53,6 +60,7 @@ namespace TTG_Tools.ClassesStructs
 
                 public bool blockSize;
                 public bool hasScaleValue; //Use since Hector games
+                public bool NewFormat;
 
                 public string FontName;
                 public float halfValue; //Shows in some fonts
@@ -64,6 +72,7 @@ namespace TTG_Tools.ClassesStructs
 
                 public GlyphInfo glyph;
                 public TextureClass.OldT3Texture[] tex;
+                public TextureClass.NewT3Texture[] NewTex;
 
                 public ClassFont() { }
             }

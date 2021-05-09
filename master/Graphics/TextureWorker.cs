@@ -149,9 +149,10 @@ namespace TTG_Tools
 
                     return result;
                 }
-                   
+
+                uint tmpPoz = 0;
                 
-                ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, flags, someData, false, ref additionalMessage);
+                ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, ref tmpPoz, flags, someData, false, ref additionalMessage);
 
                 result = "File " + fi.Name + " successfully extracted. ";
 
@@ -304,7 +305,7 @@ namespace TTG_Tools
         }
 
         //Extract new format textures (Since Poker Night 2)
-        public static ClassesStructs.TextureClass.NewT3Texture GetNewTextures(byte[] binContent, ref int poz, bool flags, bool someData, bool IsFont, ref string AdditionalInfo)
+        public static ClassesStructs.TextureClass.NewT3Texture GetNewTextures(byte[] binContent, ref int poz, ref uint texFontPoz, bool flags, bool someData, bool IsFont, ref string AdditionalInfo)
         {
             ClassesStructs.TextureClass.NewT3Texture tex = new ClassesStructs.TextureClass.NewT3Texture();
             byte[] tmp = new byte[4];
@@ -512,15 +513,23 @@ namespace TTG_Tools
             Array.Copy(header, 0, tex.Tex.Content, 0, header.Length);
             int texPoz = tex.Tex.Content.Length;
 
+            uint tmpPoz = (uint)poz;
+            if (texFontPoz != 0) tmpPoz = texFontPoz;
+
             for(int i = tex.Mip - 1; i >= 0; i--)
             {
                 texPoz -= tex.Tex.Textures[i].MipSize;
                 tmp = new byte[tex.Tex.Textures[i].MipSize];
-                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                poz += tex.Tex.Textures[i].MipSize;
+                Array.Copy(binContent, tmpPoz, tmp, 0, tmp.Length);
+                tmpPoz += (uint)tex.Tex.Textures[i].MipSize;
 
                 Array.Copy(tmp, 0, tex.Tex.Content, texPoz, tmp.Length);
             }
+
+            tmp = new byte[4];
+            Array.Copy(binContent, 0, tmp, 0, tmp.Length);
+            if (Encoding.ASCII.GetString(tmp) == "ERTM") poz = (int)tmpPoz;
+            else texFontPoz = tmpPoz;
 
             return tex;
         }

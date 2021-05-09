@@ -184,29 +184,66 @@ namespace TTG_Tools
 
         private void fillTableofCoordinates(FontClass.ClassFont font)
         {
-            dataGridViewWithCoord.RowCount = font.glyph.CharCount;
-            dataGridViewWithCoord.ColumnCount = 7;
-            if (font.hasScaleValue)
+            if (!font.NewFormat)
             {
-                dataGridViewWithCoord.ColumnCount = 9;
-                dataGridViewWithCoord.Columns[7].HeaderText = "Width";
-                dataGridViewWithCoord.Columns[8].HeaderText = "Height";
-            }
-
-            for(int i = 0; i < font.glyph.CharCount; i++)
-            {
-                dataGridViewWithCoord[0, i].Value = i;
-                dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(i));
-                dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
-                dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
-                dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
-                dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
-                dataGridViewWithCoord[6, i].Value = font.glyph.chars[i].TexNum;
-
+                dataGridViewWithCoord.RowCount = font.glyph.CharCount;
+                dataGridViewWithCoord.ColumnCount = 7;
                 if (font.hasScaleValue)
                 {
-                    dataGridViewWithCoord[7, i].Value = Math.Round(font.glyph.chars[i].CharWidth);
-                    dataGridViewWithCoord[8, i].Value = Math.Round(font.glyph.chars[i].CharHeight);
+                    dataGridViewWithCoord.ColumnCount = 9;
+                    dataGridViewWithCoord.Columns[7].HeaderText = "Width";
+                    dataGridViewWithCoord.Columns[8].HeaderText = "Height";
+                }
+
+                for (int i = 0; i < font.glyph.CharCount; i++)
+                {
+                    dataGridViewWithCoord[0, i].Value = i;
+                    dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(i));
+                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                    dataGridViewWithCoord[6, i].Value = font.glyph.chars[i].TexNum;
+
+                    if (font.hasScaleValue)
+                    {
+                        dataGridViewWithCoord[7, i].Value = Math.Round(font.glyph.chars[i].CharWidth);
+                        dataGridViewWithCoord[8, i].Value = Math.Round(font.glyph.chars[i].CharHeight);
+                    }
+                }
+            }
+            else
+            {
+                dataGridViewWithCoord.RowCount = font.glyph.CharCount;
+                dataGridViewWithCoord.ColumnCount = 13;
+                dataGridViewWithCoord.Columns[7].HeaderText = "Width";
+                dataGridViewWithCoord.Columns[8].HeaderText = "Height";
+                dataGridViewWithCoord.Columns[9].HeaderText = "XOffset";
+                dataGridViewWithCoord.Columns[10].HeaderText = "YOffset";
+                dataGridViewWithCoord.Columns[11].HeaderText = "XAdvance";
+                dataGridViewWithCoord.Columns[12].HeaderText = "Channel";
+
+                for (int i = 0; i < font.glyph.CharCount; i++)
+                {
+                    dataGridViewWithCoord[0, i].Value = i;
+                    dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(font.glyph.charsNew[i].charId));
+                    
+                    if(MainMenu.settings.unicodeSettings == 0)
+                    {
+                        dataGridViewWithCoord[1, i].Value = Encoding.Unicode.GetString(BitConverter.GetBytes(font.glyph.charsNew[i].charId));
+                    }
+
+                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.charsNew[i].XStart * font.NewTex[font.glyph.charsNew[i].TexNum].Width);
+                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.charsNew[i].XEnd * font.NewTex[font.glyph.charsNew[i].TexNum].Width);
+                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.charsNew[i].YStart * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
+                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.charsNew[i].YEnd * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
+                    dataGridViewWithCoord[6, i].Value = font.glyph.charsNew[i].TexNum;
+                    dataGridViewWithCoord[7, i].Value = Math.Round(font.glyph.charsNew[i].CharWidth);
+                    dataGridViewWithCoord[8, i].Value = Math.Round(font.glyph.charsNew[i].CharHeight);
+                    dataGridViewWithCoord[9, i].Value = Math.Round(font.glyph.charsNew[i].XOffset);
+                    dataGridViewWithCoord[10, i].Value = Math.Round(font.glyph.charsNew[i].YOffset);
+                    dataGridViewWithCoord[11, i].Value = Math.Round(font.glyph.charsNew[i].XAdvance);
+                    dataGridViewWithCoord[12, i].Value = font.glyph.charsNew[i].Channel;
                 }
             }
         }
@@ -215,12 +252,25 @@ namespace TTG_Tools
         {
             dataGridViewWithTextures.RowCount = font.TexCount;
 
-            for(int i = 0; i < font.TexCount; i++)
+            if (!font.NewFormat)
             {
-                dataGridViewWithTextures[0, i].Value = i;
-                dataGridViewWithTextures[1, i].Value = font.tex[i].OriginalHeight;
-                dataGridViewWithTextures[2, i].Value = font.tex[i].OriginalWidth;
-                dataGridViewWithTextures[3, i].Value = font.tex[i].TexSize;
+                for (int i = 0; i < font.TexCount; i++)
+                {
+                    dataGridViewWithTextures[0, i].Value = i;
+                    dataGridViewWithTextures[1, i].Value = font.tex[i].OriginalHeight;
+                    dataGridViewWithTextures[2, i].Value = font.tex[i].OriginalWidth;
+                    dataGridViewWithTextures[3, i].Value = font.tex[i].TexSize;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < font.TexCount; i++)
+                {
+                    dataGridViewWithTextures[0, i].Value = i;
+                    dataGridViewWithTextures[1, i].Value = font.NewTex[i].Height;
+                    dataGridViewWithTextures[2, i].Value = font.NewTex[i].Width;
+                    dataGridViewWithTextures[3, i].Value = font.NewTex[i].Tex.TexSize;
+                }
             }
         }
 
@@ -419,6 +469,11 @@ namespace TTG_Tools
                     font.blockSize = false;
                     font.hasScaleValue = false;
 
+                    font.headerSize = 0;
+                    font.texSize = 0;
+
+                    poz = 4; //Begin position
+
                     byte[] check_header = new byte[4];
                     Array.Copy(binContent, 0, check_header, 0, check_header.Length);
 
@@ -443,14 +498,28 @@ namespace TTG_Tools
                         }
                     }
 
+                    if ((Encoding.ASCII.GetString(check_header) == "5VSM") || (Encoding.ASCII.GetString(check_header) == "6VSM"))
+                    {
+                        byte[] tmpBytes = new byte[4];
+                        Array.Copy(binContent, 4, tmpBytes, 0, tmpBytes.Length);
+                        font.NewFormat = true;
+                        font.headerSize = BitConverter.ToUInt32(tmpBytes, 0);
+
+                        tmpBytes = new byte[4];
+                        Array.Copy(binContent, 12, tmpBytes, 0, tmpBytes.Length);
+                        font.texSize = BitConverter.ToUInt32(tmpBytes, 0);
+
+                        poz = 16;
+                    }
+
                     byte[] tmp = new byte[4];
-                    Array.Copy(binContent, 4, tmp, 0, tmp.Length);
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    poz += 4;
                     int countElements = BitConverter.ToInt32(tmp, 0);
-                    string[] elements = new string[countElements];
-                    byte[][] binElements = new byte[countElements][];
+                    font.elements = new string[countElements];
+                    font.binElements = new byte[countElements][];
                     int lenStr;
                     bool someTexData = false;
-                    poz = 8;
 
                     version_used = countElements;
 
@@ -461,23 +530,23 @@ namespace TTG_Tools
                     {
                         for (int i = 0; i < countElements; i++)
                         {
-                            binElements[i] = new byte[8];
-                            Array.Copy(binContent, poz, binElements[i], 0, binElements[i].Length);
+                            font.binElements[i] = new byte[8];
+                            Array.Copy(binContent, poz, font.binElements[i], 0, font.binElements[i].Length);
                             poz += 12;
 
-                            if (BitConverter.ToString(binElements[i]) == "41-16-D7-79-B9-3C-28-84")
+                            if (BitConverter.ToString(font.binElements[i]) == "41-16-D7-79-B9-3C-28-84")
                             {
                                 fontFlags = new FlagsClass();
                             }
 
-                            if (BitConverter.ToString(binElements[i]) == "E3-88-09-7A-48-5D-7F-93")
+                            if (BitConverter.ToString(font.binElements[i]) == "E3-88-09-7A-48-5D-7F-93")
                             {
                                 someTexData = true;
                             }
 
-                            if(BitConverter.ToString(binElements[i]) == "0F-F4-20-E6-20-BA-A1-EF")
+                            if (BitConverter.ToString(font.binElements[i]) == "0F-F4-20-E6-20-BA-A1-EF")
                             {
-
+                                font.NewFormat = true;
                             }
                         }
                     }
@@ -491,9 +560,9 @@ namespace TTG_Tools
                             tmp = new byte[lenStr];
                             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                             poz += lenStr + 4; //Length element's name and 4 bytes data for Telltale Tool
-                            elements[i] = Encoding.ASCII.GetString(tmp);
+                            font.elements[i] = Encoding.ASCII.GetString(tmp);
 
-                            if (elements[i] == "class Flags")
+                            if (font.elements[i] == "class Flags")
                             {
                                 fontFlags = new FlagsClass();
                             }
@@ -561,47 +630,121 @@ namespace TTG_Tools
                     font.glyph.CharCount = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
 
-                    font.glyph.chars = new FontClass.ClassFont.TRect[font.glyph.CharCount];
-
-                    for(int i = 0; i < font.glyph.CharCount; i++)
+                    if (!font.NewFormat)
                     {
-                        font.glyph.chars[i] = new FontClass.ClassFont.TRect();
+                        font.glyph.chars = new FontClass.ClassFont.TRect[font.glyph.CharCount];
+                        font.glyph.charsNew = null;
 
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.glyph.chars[i].TexNum = BitConverter.ToInt32(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.glyph.chars[i].XStart = BitConverter.ToSingle(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.glyph.chars[i].XEnd = BitConverter.ToSingle(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.glyph.chars[i].YStart = BitConverter.ToSingle(tmp, 0);
-                        poz += 4;
-
-                        tmp = new byte[4];
-                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                        font.glyph.chars[i].YEnd = BitConverter.ToSingle(tmp, 0);
-                        poz += 4;
-
-                        if (font.hasScaleValue)
+                        for (int i = 0; i < font.glyph.CharCount; i++)
                         {
+                            font.glyph.chars[i] = new FontClass.ClassFont.TRect();
+
                             tmp = new byte[4];
                             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.glyph.chars[i].CharWidth = BitConverter.ToSingle(tmp, 0);
+                            font.glyph.chars[i].TexNum = BitConverter.ToInt32(tmp, 0);
                             poz += 4;
 
                             tmp = new byte[4];
                             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                            font.glyph.chars[i].CharHeight = BitConverter.ToSingle(tmp, 0);
+                            font.glyph.chars[i].XStart = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.chars[i].XEnd = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.chars[i].YStart = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.chars[i].YEnd = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            if (font.hasScaleValue)
+                            {
+                                tmp = new byte[4];
+                                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                                font.glyph.chars[i].CharWidth = BitConverter.ToSingle(tmp, 0);
+                                poz += 4;
+
+                                tmp = new byte[4];
+                                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                                font.glyph.chars[i].CharHeight = BitConverter.ToSingle(tmp, 0);
+                                poz += 4;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        font.glyph.chars = null;
+                        font.glyph.charsNew = new ClassesStructs.FontClass.ClassFont.TRectNew[font.glyph.CharCount];
+
+                        for(int i = 0; i < font.glyph.CharCount; i++)
+                        {
+                            font.glyph.charsNew[i] = new FontClass.ClassFont.TRectNew();
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].charId = BitConverter.ToUInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].TexNum = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].Channel = BitConverter.ToInt32(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].XStart = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].XEnd = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].YStart = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].YEnd = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].CharWidth = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].CharHeight = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].XOffset = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].YOffset = BitConverter.ToSingle(tmp, 0);
+                            poz += 4;
+
+                            tmp = new byte[4];
+                            Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                            font.glyph.charsNew[i].XAdvance = BitConverter.ToSingle(tmp, 0);
                             poz += 4;
                         }
                     }
@@ -619,18 +762,44 @@ namespace TTG_Tools
                     font.TexCount = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
 
-                    font.tex = new TextureClass.OldT3Texture[font.TexCount];
-
-                    for(int i = 0; i < font.TexCount; i++)
+                    if (!font.NewFormat)
                     {
-                        font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null, someTexData);
-                        if(font.tex[i] == null)
+                        font.tex = new TextureClass.OldT3Texture[font.TexCount];
+                        font.NewTex = null;
+
+                        for (int i = 0; i < font.TexCount; i++)
                         {
-                            MessageBox.Show("Maybe unsupported font.", "Error");
-                            return;
+                            font.tex[i] = TextureWorker.GetOldTextures(binContent, ref poz, fontFlags != null, someTexData);
+                            if (font.tex[i] == null)
+                            {
+                                MessageBox.Show("Maybe unsupported font.", "Error");
+                                return;
+                            }
                         }
                     }
+                    else
+                    {
+                        font.tex = null;
+                        font.NewTex = new TextureClass.NewT3Texture[font.TexCount];
+                        string format = "";
+                        uint tmpPosition = 0;
 
+                        if(font.headerSize != 0)
+                        {
+                            tmpPosition = font.headerSize + 16 + ((uint)countElements * 12) + 4;
+                        }
+
+                        for(int i = 0; i < font.TexCount; i++)
+                        {
+                            font.NewTex[i] = TextureWorker.GetNewTextures(binContent, ref poz, ref tmpPosition, fontFlags != null, someTexData, true, ref format);
+
+                            if(font.NewTex[i] == null)
+                            {
+                                MessageBox.Show("Maybe unsupported font.", "Error");
+                                return;
+                            }
+                        }
+                    }
 
                     fillTableofCoordinates(font);
                     fillTableofTextures(font);
@@ -1167,7 +1336,8 @@ namespace TTG_Tools
                 }
                 else if (version_used >= 9)
                 {
-                    int num = 4;
+                    fs.Write(font.NewTex[file_n].Tex.Content, 0, font.NewTex[file_n].Tex.Content.Length);
+                    /*int num = 4;
 
                     if (version_used == 11 || version_used == 12) num = 5;
                     else if (version_used == 13) num = 6;
@@ -1191,7 +1361,7 @@ namespace TTG_Tools
                         byte[] tmp_dds = Swizzle.NintendoSwizzle(ffs.dds[file_n].dds_content, int_width, int_height, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), true);
                         fs.Write(tmp_dds, 0, tmp_dds.Length);
                     }
-                    else fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
+                    else fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);*/
                 }
                 fs.Close();
             }

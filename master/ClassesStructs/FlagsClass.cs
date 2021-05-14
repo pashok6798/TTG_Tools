@@ -18,5 +18,14 @@ namespace TTG_Tools.ClassesStructs
         public int TextureCount; //Strong Bad has value 3 and after DDS shows some texture, in another files it's just one
         public int[] TexSizes; //Sizes another textures
         public byte[][] SubTexContent; //From Strong Bad
+
+        public class SomeClassData //For Walking Dead The New Frontier
+        {
+            public int count;
+            public int Unknown1;
+            public int len;
+            public byte[] someData;
+            public SomeClassData() { }
+        }
     }
 }

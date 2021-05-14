@@ -66,6 +66,7 @@ namespace TTG_Tools.ClassesStructs
                 public float halfValue; //Shows in some fonts
                 public float oneValue; //Scale font. Use since Hector and newer games
                 public byte One;
+                public float NewSomeValue; //Since Game of Thrones if 0x31 byte
                 public float BaseSize; //Common char size in text line
                 public int BlockTexSize; //Size of block Textures
                 public int TexCount; //Count textures

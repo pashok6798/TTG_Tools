@@ -587,8 +587,19 @@ namespace TTG_Tools
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                     font.FontName = Encoding.ASCII.GetString(tmp);
                     poz += nameLen;
+                    
                     font.One = binContent[poz];
                     poz++;
+
+                    if(font.One == 0x31 && ((Encoding.ASCII.GetString(check_header) == "5VSM")
+                        || (Encoding.ASCII.GetString(check_header) == "6VSM")))
+                    {
+                        tmp = new byte[4];
+                        Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                        poz += 4;
+
+                        font.NewSomeValue = BitConverter.ToSingle(tmp, 0);
+                    }
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);

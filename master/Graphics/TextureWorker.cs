@@ -80,6 +80,7 @@ namespace TTG_Tools
 
                 bool flags = false;
                 bool someData = false;
+                bool PossibleNewFlags = false;
 
                 if (BitConverter.ToString(tmp) == "E2-CC-38-6F-7E-9E-24-3E")
                 {
@@ -104,6 +105,10 @@ namespace TTG_Tools
                         if(BitConverter.ToString(elements[i]) == "0F-F4-20-E6-20-BA-A1-EF")
                         {
                             NewFormat = true;
+                        }
+                        if(BitConverter.ToString(elements[i]) == "D2-15-9F-6B-4F-DC-75-CD")
+                        {
+                            PossibleNewFlags = true;
                         }
                     }
                 }
@@ -309,9 +314,10 @@ namespace TTG_Tools
         {
             ClassesStructs.TextureClass.NewT3Texture tex = new ClassesStructs.TextureClass.NewT3Texture();
             byte[] tmp = new byte[4];
-
             Array.Copy(binContent, 0, tmp, 0, tmp.Length);
-            if(Encoding.ASCII.GetString(tmp) != "ERTM")
+            string checkHeader = Encoding.ASCII.GetString(tmp);
+
+            if (checkHeader != "ERTM")
             {
                 if (!IsFont)
                 {
@@ -381,22 +387,46 @@ namespace TTG_Tools
 
             tmp = new byte[4];
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-
-            if (BitConverter.ToInt32(tmp, 0) == 0)
-            {
-                tex.Zero = BitConverter.ToInt32(tmp, 0);
-                poz += 4;
-                tmp = new byte[4];
-                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-            }
-
             tex.OneValue = BitConverter.ToSingle(tmp, 0);
             poz += 4;
 
-            tmp = new byte[1];
+            tmp = new byte[4];
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+            if (checkHeader == "5VSM" && tex.SomeValue > 4)
+            {
+                tex.Zero = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+                tmp = new byte[1];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+            }
+
             tex.OneByte = tmp[0];
             poz++;
+
+            if(tex.OneByte == 0x31)
+            {
+                tex.UnknownData = new ClassesStructs.FlagsClass.SomeClassData();
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.UnknownData.count = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.UnknownData.Unknown1 = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.UnknownData.len = BitConverter.ToInt32(tmp, 0);
+
+                tex.UnknownData.someData = new byte[tex.UnknownData.len];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+
+                poz += tex.UnknownData.len;
+            }
 
             tmp = new byte[4];
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -412,6 +442,21 @@ namespace TTG_Tools
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
             tex.Height = BitConverter.ToInt32(tmp, 0);
             poz += 4;
+
+            if(checkHeader == "6VSM" && tex.SomeValue == 9)
+            {
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.Surfaces = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                tmp = new byte[4];
+                Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                tex.Faces = BitConverter.ToInt32(tmp, 0);
+                poz += 4;
+
+                if (tex.Surfaces > 1 || tex.Faces > 1) return null; //Need think about it!
+            }
 
             tmp = new byte[4];
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -429,6 +474,16 @@ namespace TTG_Tools
             {
                 case 4:
                     blSize = 0x30;
+                    break;
+
+                case 5:
+                    blSize = 0x3c;
+                    break;
+                case 7:
+                    blSize = 0x40;
+                    break;
+                case 9:
+                    blSize = 0x4c;
                     break;
             }
 
@@ -451,10 +506,18 @@ namespace TTG_Tools
             tex.Tex.TexSize = BitConverter.ToUInt32(tmp, 0);
             poz += 4;
 
-            tex.Tex.Textures = new ClassesStructs.TextureClass.NewT3Texture.TextureStruct[tex.Mip];
+            tex.Tex.Textures = new ClassesStructs.TextureClass.NewT3Texture.TextureStruct[tex.Tex.MipCount];
 
-            for(int i = tex.Mip - 1; i >= 0; i--)
+            for(int i = tex.Tex.MipCount - 1; i >= 0; i--)
             {
+                if(tex.SomeValue >= 5)
+                {
+                    tmp = new byte[4];
+                    Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    tex.Tex.Textures[i].Zero = BitConverter.ToInt32(tmp, 0);
+                    poz += 4;
+                }
+
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.Tex.Textures[i].CurrentMip = BitConverter.ToInt32(tmp, 0);
@@ -479,6 +542,11 @@ namespace TTG_Tools
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.Tex.Textures[i].BlockSize = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+
+                if(checkHeader == "6VSM" && tex.SomeValue == 9)
+                {
+                    poz += 4; //Skip Mip size
+                }
             }
 
             if(tex.Tex.SomeData > 0)
@@ -508,6 +576,11 @@ namespace TTG_Tools
             }
 
             AdditionalInfo = "Texture format: " + format + ". Mip count: " + Convert.ToString(tex.Mip);
+
+            if(checkHeader == "6VSM" && tex.SomeValue == 9)
+            {
+                AdditionalInfo += ". Surfaces: " + Convert.ToString(tex.Surfaces) + ". Faces: " + Convert.ToString(tex.Faces);
+            }
 
             tex.Tex.Content = new byte[tex.Tex.TexSize + header.Length];
             Array.Copy(header, 0, tex.Tex.Content, 0, header.Length);

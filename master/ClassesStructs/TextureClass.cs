@@ -49,6 +49,7 @@ namespace TTG_Tools.ClassesStructs
 
             public struct TextureStruct
             {
+                public int Zero; //Since value 5
                 public int CurrentMip;
                 public int One;
                 public int MipSize; //Size of one mipmap
@@ -84,9 +85,12 @@ namespace TTG_Tools.ClassesStructs
             public int Zero; //Saw in Wolf among Us or Game of Thrones
             public float OneValue;
             public byte OneByte;
+            public FlagsClass.SomeClassData UnknownData; //For Walking Dead the New Frontier
             public int Mip;
             public int Width;
             public int Height;
+            public int Surfaces; //Surface value?
+            public int Faces; //For cubmaps
             public int TextureFormat;
             public int Unknown1;
             public byte[] block; //temporary solution

@@ -218,14 +218,14 @@ namespace TTG_Tools
                 dataGridViewWithCoord.ColumnCount = 13;
                 dataGridViewWithCoord.Columns[7].HeaderText = "Width";
                 dataGridViewWithCoord.Columns[8].HeaderText = "Height";
-                dataGridViewWithCoord.Columns[9].HeaderText = "XOffset";
-                dataGridViewWithCoord.Columns[10].HeaderText = "YOffset";
-                dataGridViewWithCoord.Columns[11].HeaderText = "XAdvance";
+                dataGridViewWithCoord.Columns[9].HeaderText = "Offset by X";
+                dataGridViewWithCoord.Columns[10].HeaderText = "Offset by Y";
+                dataGridViewWithCoord.Columns[11].HeaderText = "X advance";
                 dataGridViewWithCoord.Columns[12].HeaderText = "Channel";
 
                 for (int i = 0; i < font.glyph.CharCount; i++)
                 {
-                    dataGridViewWithCoord[0, i].Value = i;
+                    dataGridViewWithCoord[0, i].Value = font.glyph.charsNew[i].charId;
                     dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(font.glyph.charsNew[i].charId));
                     
                     if(MainMenu.settings.unicodeSettings == 0)

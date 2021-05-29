@@ -89,8 +89,8 @@ namespace TTG_Tools.ClassesStructs
             public int Mip;
             public int Width;
             public int Height;
-            public int Surfaces; //Surface value?
             public int Faces; //For cubmaps
+            public int ArrayMembers; //Saw in PVRTexTool
             public int TextureFormat;
             public int Unknown1;
             public byte[] block; //temporary solution

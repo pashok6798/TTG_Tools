@@ -447,15 +447,15 @@ namespace TTG_Tools
             {
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                tex.Surfaces = BitConverter.ToInt32(tmp, 0);
+                tex.Faces = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
-                tex.Faces = BitConverter.ToInt32(tmp, 0);
+                tex.ArrayMembers = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
-                if (tex.Surfaces > 1 || tex.Faces > 1) return null; //Need think about it!
+                //if (tex.Surfaces > 1 || tex.Faces > 1) return null; //Need think about it!
             }
 
             tmp = new byte[4];
@@ -579,7 +579,7 @@ namespace TTG_Tools
 
             if(checkHeader == "6VSM" && tex.SomeValue == 9)
             {
-                AdditionalInfo += ". Surfaces: " + Convert.ToString(tex.Surfaces) + ". Faces: " + Convert.ToString(tex.Faces);
+                AdditionalInfo += ". Faces: " + Convert.ToString(tex.Faces) + ". Array members: " + Convert.ToString(tex.ArrayMembers);
             }
 
             tex.Tex.Content = new byte[tex.Tex.TexSize + header.Length];
@@ -588,7 +588,7 @@ namespace TTG_Tools
 
             uint tmpPoz = (uint)poz;
             if (texFontPoz != 0) tmpPoz = texFontPoz;
-
+            
             for(int i = tex.Mip - 1; i >= 0; i--)
             {
                 texPoz -= tex.Tex.Textures[i].MipSize;

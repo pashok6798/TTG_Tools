@@ -817,6 +817,7 @@ namespace TTG_Tools
 
                     saveToolStripMenuItem.Enabled = true;
                     saveAsToolStripMenuItem.Enabled = true;
+                    exportCoordinatesToolStripMenuItem1.Enabled = true;
                     edited = false; //Открыли новый неизмененный файл
                                     //Form.ActiveForm.Text = "Font Editor: " + ofd.SafeFileName.ToString();
                 }
@@ -1328,7 +1329,7 @@ namespace TTG_Tools
             if (iOS == false)
             {
                 saveFD.Filter = "dds files (*.dds)|*.dds";
-                saveFD.FileName = Methods.GetNameOfFileOnly(ofd.SafeFileName.ToString(), ".font") + "(" + file_n.ToString() + ").dds";
+                saveFD.FileName = Methods.GetNameOfFileOnly(ofd.SafeFileName.ToString(), ".font") + "_" + file_n.ToString() + ".dds";
             }
             else
             {
@@ -1747,7 +1748,92 @@ namespace TTG_Tools
 
         private void exportCoordinatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "FNT file (*.fnt) | *.fnt";
+            sfd.FileName = font.FontName + ".fnt";
 
+            if(sfd.ShowDialog() == DialogResult.OK)
+            {
+                string info = "info face=\"" + font.FontName + "\" size=" + font.BaseSize + " bold=0 italic=0 charset=\"\" unicode=";
+                switch (font.NewFormat)
+                {
+                    case true:
+                        info += "1\r\n";
+                        break;
+
+                    default:
+                        info += "0\r\n";
+                        break;
+                }
+                
+                info += "common lineHeight=" + font.BaseSize + " base=" + font.BaseSize + " scaleW=" + font.tex[0].OriginalWidth + " scaleH=" + font.tex[0].OriginalHeight + " pages=" + font.TexCount + "\r\n";
+
+                if (File.Exists(sfd.FileName)) File.Delete(sfd.FileName);
+                FileStream fs = new FileStream(sfd.FileName, FileMode.CreateNew);
+                StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                sw.Write(info);
+                info = "";
+
+                for(int i = 0; i < font.TexCount; i++)
+                {
+                    info = "page id=" + i + " file=\"" + font.FontName + "_" + i + ".dds\"\r\n";
+                    sw.Write(info);
+                }
+
+                info = "chars count=" + font.glyph.CharCount + "\r\n";
+                sw.Write(info);
+
+                if (!font.NewFormat)
+                {
+                    for(int i = 0; i < font.glyph.CharCount; i++)
+                    {
+                        info = "char id=" + i + " x=" + (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) + " y=" + (font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                        info += " width=";
+
+                        if (font.hasScaleValue)
+                        {
+                            info += font.glyph.chars[i].CharWidth;
+                        }
+                        else
+                        {
+                            info += (font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) - (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                        }
+
+                        info += " height=";
+
+                        if (font.hasScaleValue)
+                        {
+                            info += font.glyph.chars[i].CharHeight;
+                        }
+                        else
+                        {
+                            info += (font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight) - (font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                        }
+
+                        info += " xoffset=0 yoffset=0 xadvance=";
+
+                        if (font.hasScaleValue)
+                        {
+                            info += font.glyph.chars[i].CharWidth;
+                        }
+                        else
+                        {
+                            info += (font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) - (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                        }
+
+                        info += " page=" + font.glyph.chars[i].TexNum + " chnl=15\r\n";
+
+                        sw.Write(info);
+                    }
+                }
+                else
+                {
+
+                }
+
+                sw.Close();
+                fs.Close();
+            }
         }
 
         private void importCoordinatesToolStripMenuItem1_Click(object sender, EventArgs e)

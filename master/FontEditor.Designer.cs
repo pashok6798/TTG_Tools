@@ -81,8 +81,8 @@
             this.changeCoordinatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeDuplicatesCharsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.rbNoKerning = new System.Windows.Forms.RadioButton();
+            this.rbKerning = new System.Windows.Forms.RadioButton();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioButtonXstart = new System.Windows.Forms.RadioButton();
             this.radioButtonXend = new System.Windows.Forms.RadioButton();
@@ -254,7 +254,7 @@
             this.openToolStripMenuItem.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -263,7 +263,7 @@
             this.saveToolStripMenuItem.Enabled = false;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -271,14 +271,14 @@
             // 
             this.saveAsToolStripMenuItem.Enabled = false;
             this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.saveAsToolStripMenuItem.Text = "Save As ...";
             this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -575,8 +575,8 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.radioButton2);
-            this.groupBox2.Controls.Add(this.radioButton1);
+            this.groupBox2.Controls.Add(this.rbNoKerning);
+            this.groupBox2.Controls.Add(this.rbKerning);
             this.groupBox2.Location = new System.Drawing.Point(1065, 34);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.groupBox2.Name = "groupBox2";
@@ -586,29 +586,29 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Import/Export:";
             // 
-            // radioButton2
+            // rbNoKerning
             // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(9, 73);
-            this.radioButton2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(126, 21);
-            this.radioButton2.TabIndex = 1;
-            this.radioButton2.Text = "without Kerning";
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.rbNoKerning.AutoSize = true;
+            this.rbNoKerning.Location = new System.Drawing.Point(9, 73);
+            this.rbNoKerning.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.rbNoKerning.Name = "rbNoKerning";
+            this.rbNoKerning.Size = new System.Drawing.Size(126, 21);
+            this.rbNoKerning.TabIndex = 1;
+            this.rbNoKerning.Text = "without Kerning";
+            this.rbNoKerning.UseVisualStyleBackColor = true;
             // 
-            // radioButton1
+            // rbKerning
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Checked = true;
-            this.radioButton1.Location = new System.Drawing.Point(9, 44);
-            this.radioButton1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(106, 21);
-            this.radioButton1.TabIndex = 0;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "with Kerning";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.rbKerning.AutoSize = true;
+            this.rbKerning.Checked = true;
+            this.rbKerning.Location = new System.Drawing.Point(9, 44);
+            this.rbKerning.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.rbKerning.Name = "rbKerning";
+            this.rbKerning.Size = new System.Drawing.Size(106, 21);
+            this.rbKerning.TabIndex = 0;
+            this.rbKerning.TabStop = true;
+            this.rbKerning.Text = "with Kerning";
+            this.rbKerning.UseVisualStyleBackColor = true;
             // 
             // groupBox3
             // 
@@ -748,8 +748,8 @@
         private System.Windows.Forms.ToolStripMenuItem importCoordinatesToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem importCoordinatesFromFontStudioxmlToolStripMenuItem;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.RadioButton radioButton1;
+        private System.Windows.Forms.RadioButton rbNoKerning;
+        private System.Windows.Forms.RadioButton rbKerning;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox1;

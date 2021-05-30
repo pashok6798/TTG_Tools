@@ -591,6 +591,7 @@ namespace TTG_Tools
                     font.One = binContent[poz];
                     poz++;
 
+                    //Need research this moment!
                     if(font.One == 0x31 && ((Encoding.ASCII.GetString(check_header) == "5VSM")
                         || (Encoding.ASCII.GetString(check_header) == "6VSM")))
                     {
@@ -818,6 +819,8 @@ namespace TTG_Tools
                     saveToolStripMenuItem.Enabled = true;
                     saveAsToolStripMenuItem.Enabled = true;
                     exportCoordinatesToolStripMenuItem1.Enabled = true;
+                    rbKerning.Enabled = font.NewFormat;
+                    rbNoKerning.Enabled = font.NewFormat;
                     edited = false; //Открыли новый неизмененный файл
                                     //Form.ActiveForm.Text = "Font Editor: " + ofd.SafeFileName.ToString();
                 }
@@ -1667,7 +1670,7 @@ namespace TTG_Tools
 
                     if (version_used >= 9)
                     {
-                        if (radioButton1.Checked == true)
+                        if (rbKerning.Checked == true)
                         {
                             str += " ";
                             str += dataGridViewWithCoord[9, i].Value.ToString() + " ";
@@ -1766,7 +1769,7 @@ namespace TTG_Tools
                         break;
                 }
                 
-                info += "common lineHeight=" + font.BaseSize + " base=" + font.BaseSize + " scaleW=" + font.tex[0].OriginalWidth + " scaleH=" + font.tex[0].OriginalHeight + " pages=" + font.TexCount + "\r\n";
+                info += "common lineHeight=" + font.BaseSize + " base=" + font.BaseSize + " pages=" + font.TexCount + "\r\n";
 
                 if (File.Exists(sfd.FileName)) File.Delete(sfd.FileName);
                 FileStream fs = new FileStream(sfd.FileName, FileMode.CreateNew);
@@ -1828,7 +1831,15 @@ namespace TTG_Tools
                 }
                 else
                 {
+                    for (int i = 0; i < font.glyph.CharCount; i++)
+                    {
+                        info = "char id=" + font.glyph.charsNew[i].charId + " x=" + (font.glyph.charsNew[i].XStart * font.NewTex[font.glyph.charsNew[i].TexNum].Width) + " y=" + (font.glyph.charsNew[i].YStart * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
+                        info += " width=" + font.glyph.charsNew[i].CharWidth + " height=" + font.glyph.charsNew[i].CharHeight;
+                        info += " xoffset=" + font.glyph.charsNew[i].XOffset + " yoffset=" + font.glyph.charsNew[i].YOffset + " xadvance=";
+                        info += font.glyph.charsNew[i].XAdvance + " page=" + font.glyph.charsNew[i].TexNum + " chnl=" + font.glyph.charsNew[i].Channel + "\r\n";
 
+                        sw.Write(info);
+                    }
                 }
 
                 sw.Close();
@@ -1941,7 +1952,7 @@ namespace TTG_Tools
                                     dataGridViewWithCoord[6, i].Value = dataGridViewWithTextures.SelectedCells[0].RowIndex.ToString();
                                     dataGridViewWithCoord[7, i].Value = widht;
                                     dataGridViewWithCoord[8, i].Value = height;
-                                    if (radioButton1.Checked)
+                                    if (rbKerning.Checked)
                                     {
                                         //dataGridViewWithCoord[9, i].Value = 0;
                                         dataGridViewWithCoord[10, i].Value = str[3];
@@ -2022,7 +2033,7 @@ namespace TTG_Tools
                                     }
                                     if (version_used >= 9)
                                     {
-                                        if (radioButton1.Checked)
+                                        if (rbKerning.Checked)
                                         {
                                             //dataGridViewWithCoord[9, i].Value = 0;
                                             dataGridViewWithCoord[10, i].Value = str[3];
@@ -2202,7 +2213,7 @@ namespace TTG_Tools
                                 }
                                 if (version_used >= 9)
                                 {
-                                    if (radioButton1.Checked)
+                                    if (rbKerning.Checked)
                                     {
                                         //dataGridViewWithCoord[9, i].Value = 0;
                                         dataGridViewWithCoord[10, i].Value = str[11];
@@ -2288,7 +2299,7 @@ namespace TTG_Tools
                             int y_offset = 0;
                             int x_advance = width;
 
-                            if (version_used >= 9 && radioButton1.Checked && block.Length == 10)
+                            if (version_used >= 9 && rbKerning.Checked && block.Length == 10)
                             {
                                 chnl = Convert.ToInt32(block[6]);
                                 x_offset = Convert.ToInt32(block[7]);
@@ -2339,7 +2350,7 @@ namespace TTG_Tools
                                 int y_offset = 0;
                                 int x_advance = width;
 
-                                if (radioButton1.Checked && block.Length == 10)
+                                if (rbKerning.Checked && block.Length == 10)
                                 {
                                     chnl = Convert.ToInt32(block[6]);
                                     x_offset = Convert.ToInt32(block[7]);

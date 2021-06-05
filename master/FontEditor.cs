@@ -816,8 +816,8 @@ namespace TTG_Tools
 
                         for (int k = 0; k < font.glyph.CharCount; k++)
                         {
-                            font.glyph.chars[k].XStart *= font.NewTex[font.glyph.chars[k].TexNum].Width;
-                            font.glyph.chars[k].XEnd *= font.NewTex[font.glyph.chars[k].TexNum].Width;
+                            font.glyph.chars[k].XStart *= font.tex[font.glyph.chars[k].TexNum].Width;
+                            font.glyph.chars[k].XEnd *= font.tex[font.glyph.chars[k].TexNum].Width;
 
                             font.glyph.chars[k].YStart *= font.tex[font.glyph.chars[k].TexNum].Width;
                             font.glyph.chars[k].YEnd *= font.tex[font.glyph.chars[k].TexNum].Height;
@@ -2277,96 +2277,188 @@ namespace TTG_Tools
                     }
                 }
 
-                for (int m = 0; m < strings.Length; m++)
+                if (font.NewFormat)
                 {
-                    if (strings[m].ToLower().Contains("common lineheight"))
+                    for (int m = 0; m < strings.Length; m++)
                     {
-                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
-                        for (int k = 0; k < splitted.Length; k++)
+                        if (strings[m].ToLower().Contains("common lineheight"))
                         {
-                            switch (splitted[k].ToLower())
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                            for (int k = 0; k < splitted.Length; k++)
                             {
-                                case "lineheight":
-                                    font.BaseSize = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "lineheight":
+                                        font.BaseSize = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+                                }
                             }
                         }
-                    }
 
-                    if (strings[m].Contains("chars count") && font.NewFormat)
-                    {
-                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
-                        for (int k = 0; k < splitted.Length; k++)
+                        if (strings[m].Contains("chars count"))
                         {
-                            switch (splitted[k].ToLower())
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                            for (int k = 0; k < splitted.Length; k++)
                             {
-                                case "count":
-                                    font.glyph.CharCount = Convert.ToInt32(splitted[k + 1]);
-                                    font.glyph.charsNew = new FontClass.ClassFont.TRectNew[font.glyph.CharCount];
-                                    break;
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "count":
+                                        font.glyph.CharCount = Convert.ToInt32(splitted[k + 1]);
+                                        font.glyph.charsNew = new FontClass.ClassFont.TRectNew[font.glyph.CharCount];
+                                        break;
+                                }
                             }
                         }
-                    }
 
-                    if (strings[m].Contains("char id"))
-                    {
-                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
-
-                        for(int k = 0; k < splitted.Length; k++)
+                        if (strings[m].Contains("char id"))
                         {
-                            switch (splitted[k].ToLower())
-                            {
-                                case "id":
-                                    ch++;
-                                    font.glyph.charsNew[ch] = new FontClass.ClassFont.TRectNew();
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
 
-                                    if (Convert.ToInt32(splitted[k + 1]) < 0)
-                                    {
-                                        font.glyph.charsNew[ch].charId = 0;
-                                    }
-                                    else
-                                    {
-                                        font.glyph.charsNew[ch].charId = Convert.ToUInt32(splitted[k + 1]);
-                                    }
+                            for (int k = 0; k < splitted.Length; k++)
+                            {
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "id":
+                                        ch++;
+                                        font.glyph.charsNew[ch] = new FontClass.ClassFont.TRectNew();
+
+                                        if (Convert.ToInt32(splitted[k + 1]) < 0)
+                                        {
+                                            font.glyph.charsNew[ch].charId = 0;
+                                        }
+                                        else
+                                        {
+                                            font.glyph.charsNew[ch].charId = Convert.ToUInt32(splitted[k + 1]);
+                                        }
                                         break;
 
-                                case "x":
-                                    font.glyph.charsNew[ch].XStart = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                    case "x":
+                                        font.glyph.charsNew[ch].XStart = Convert.ToSingle(splitted[k + 1]);
+                                        break;
 
-                                case "y":
-                                    font.glyph.charsNew[ch].YStart = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                    case "y":
+                                        font.glyph.charsNew[ch].YStart = Convert.ToSingle(splitted[k + 1]);
+                                        break;
 
-                                case "width":
-                                    font.glyph.charsNew[ch].CharWidth = Convert.ToSingle(splitted[k + 1]);
-                                    font.glyph.charsNew[ch].XEnd = font.glyph.charsNew[ch].XStart + font.glyph.charsNew[ch].CharWidth;
-                                    break;
+                                    case "width":
+                                        font.glyph.charsNew[ch].CharWidth = Convert.ToSingle(splitted[k + 1]);
+                                        font.glyph.charsNew[ch].XEnd = font.glyph.charsNew[ch].XStart + font.glyph.charsNew[ch].CharWidth;
+                                        break;
 
-                                case "height":
-                                    font.glyph.charsNew[ch].CharHeight = Convert.ToSingle(splitted[k + 1]);
-                                    font.glyph.charsNew[ch].YEnd = font.glyph.charsNew[ch].YStart + font.glyph.charsNew[ch].CharHeight;
-                                    break;
+                                    case "height":
+                                        font.glyph.charsNew[ch].CharHeight = Convert.ToSingle(splitted[k + 1]);
+                                        font.glyph.charsNew[ch].YEnd = font.glyph.charsNew[ch].YStart + font.glyph.charsNew[ch].CharHeight;
+                                        break;
 
-                                case "xoffset":
-                                    font.glyph.charsNew[ch].XOffset = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                    case "xoffset":
+                                        font.glyph.charsNew[ch].XOffset = Convert.ToSingle(splitted[k + 1]);
+                                        break;
 
-                                case "yoffset":
-                                    font.glyph.charsNew[ch].YOffset = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                    case "yoffset":
+                                        font.glyph.charsNew[ch].YOffset = Convert.ToSingle(splitted[k + 1]);
+                                        break;
 
-                                case "xadvance":
-                                    font.glyph.charsNew[ch].XAdvance = Convert.ToSingle(splitted[k + 1]);
-                                    break;
+                                    case "xadvance":
+                                        font.glyph.charsNew[ch].XAdvance = Convert.ToSingle(splitted[k + 1]);
+                                        break;
 
-                                case "page":
-                                    font.glyph.charsNew[ch].TexNum = Convert.ToInt32(splitted[k + 1]);
-                                    break;
+                                    case "page":
+                                        font.glyph.charsNew[ch].TexNum = Convert.ToInt32(splitted[k + 1]);
+                                        break;
 
-                                case "chnl":
-                                    font.glyph.charsNew[ch].Channel = Convert.ToInt32(splitted[k + 1]);
-                                    break;
+                                    case "chnl":
+                                        font.glyph.charsNew[ch].Channel = Convert.ToInt32(splitted[k + 1]);
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int m = 0; m < strings.Length; m++)
+                    {
+                        if (strings[m].ToLower().Contains("common lineheight"))
+                        {
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                            for (int k = 0; k < splitted.Length; k++)
+                            {
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "lineheight":
+                                        font.BaseSize = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+                                }
+                            }
+                        }
+
+                        if (strings[m].Contains("char id"))
+                        {
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+
+                            for (int k = 0; k < splitted.Length; k++)
+                            {
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "id":
+                                        uint tmpChar = 0;
+
+                                        if (Convert.ToInt32(splitted[k + 1]) < 0)
+                                        {
+                                            tmpChar = 0;
+                                        }
+                                        else
+                                        {
+                                            tmpChar = Convert.ToUInt32(splitted[k + 1]);
+                                        }
+
+                                        for(int t = 0; t < font.glyph.CharCount; t++)
+                                        {
+                                            if(Convert.ToUInt32(dataGridViewWithCoord[0, t].Value) == tmpChar)
+                                            {
+                                                ch = t;
+                                                break;
+                                            }
+                                        }
+
+                                        break;
+
+                                    case "x":
+                                        font.glyph.chars[ch].XStart = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+
+                                    case "y":
+                                        font.glyph.chars[ch].YStart = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+
+                                    case "width":
+                                        if (font.hasScaleValue)
+                                        {
+                                            font.glyph.chars[ch].CharWidth = Convert.ToSingle(splitted[k + 1]);
+                                            font.glyph.chars[ch].XEnd = font.glyph.chars[ch].XStart + font.glyph.chars[ch].CharWidth;
+                                        }
+                                        else
+                                        {
+                                            font.glyph.chars[ch].XEnd = font.glyph.chars[ch].XStart + Convert.ToSingle(splitted[k + 1]);
+                                        }
+                                        break;
+
+                                    case "height":
+                                        if (font.hasScaleValue)
+                                        {
+                                            font.glyph.chars[ch].CharHeight = Convert.ToSingle(splitted[k + 1]);
+                                            font.glyph.chars[ch].YEnd = font.glyph.chars[ch].YStart + font.glyph.chars[ch].CharHeight;
+                                        }
+                                        else
+                                        {
+                                            font.glyph.chars[ch].YEnd = font.glyph.chars[ch].YStart + Convert.ToSingle(splitted[k + 1]);
+                                        }
+                                        break;
+
+                                    case "page":
+                                        font.glyph.chars[ch].TexNum = Convert.ToInt32(splitted[k + 1]);
+                                        break;
+                                }
                             }
                         }
                     }

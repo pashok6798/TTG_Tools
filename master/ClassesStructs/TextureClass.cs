@@ -20,6 +20,8 @@ namespace TTG_Tools.ClassesStructs
             public int TextureFormat;
             public int OriginalWidth;
             public int OriginalHeight;
+            public int Width;
+            public int Height;
             public byte[] UnknownData; //4 bytes
             public byte Zero;
             public FlagsClass TexFlags;

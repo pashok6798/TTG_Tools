@@ -182,7 +182,7 @@ namespace TTG_Tools
         }
         public static int version_used;
 
-        private void fillTableofCoordinates(FontClass.ClassFont font)
+        private void fillTableofCoordinates(FontClass.ClassFont font, bool Modified)
         {
             if (!font.NewFormat)
             {
@@ -197,12 +197,13 @@ namespace TTG_Tools
 
                 for (int i = 0; i < font.glyph.CharCount; i++)
                 {
+                    dataGridViewWithCoord.Rows[i].HeaderCell.Value = Convert.ToString(i + 1);
                     dataGridViewWithCoord[0, i].Value = i;
                     dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(i));
-                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
-                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
-                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
-                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.chars[i].XStart);
+                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.chars[i].XEnd);
+                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.chars[i].YStart);
+                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.chars[i].YEnd);
                     dataGridViewWithCoord[6, i].Value = font.glyph.chars[i].TexNum;
 
                     if (font.hasScaleValue)
@@ -225,6 +226,7 @@ namespace TTG_Tools
 
                 for (int i = 0; i < font.glyph.CharCount; i++)
                 {
+                    dataGridViewWithCoord.Rows[i].HeaderCell.Value = Convert.ToString(i + 1);
                     dataGridViewWithCoord[0, i].Value = font.glyph.charsNew[i].charId;
                     dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(BitConverter.GetBytes(font.glyph.charsNew[i].charId));
                     
@@ -233,10 +235,10 @@ namespace TTG_Tools
                         dataGridViewWithCoord[1, i].Value = Encoding.Unicode.GetString(BitConverter.GetBytes(font.glyph.charsNew[i].charId));
                     }
 
-                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.charsNew[i].XStart * font.NewTex[font.glyph.charsNew[i].TexNum].Width);
-                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.charsNew[i].XEnd * font.NewTex[font.glyph.charsNew[i].TexNum].Width);
-                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.charsNew[i].YStart * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
-                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.charsNew[i].YEnd * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
+                    dataGridViewWithCoord[2, i].Value = Math.Round(font.glyph.charsNew[i].XStart);
+                    dataGridViewWithCoord[3, i].Value = Math.Round(font.glyph.charsNew[i].XEnd);
+                    dataGridViewWithCoord[4, i].Value = Math.Round(font.glyph.charsNew[i].YStart);
+                    dataGridViewWithCoord[5, i].Value = Math.Round(font.glyph.charsNew[i].YEnd);
                     dataGridViewWithCoord[6, i].Value = font.glyph.charsNew[i].TexNum;
                     dataGridViewWithCoord[7, i].Value = Math.Round(font.glyph.charsNew[i].CharWidth);
                     dataGridViewWithCoord[8, i].Value = Math.Round(font.glyph.charsNew[i].CharHeight);
@@ -244,6 +246,23 @@ namespace TTG_Tools
                     dataGridViewWithCoord[10, i].Value = Math.Round(font.glyph.charsNew[i].YOffset);
                     dataGridViewWithCoord[11, i].Value = Math.Round(font.glyph.charsNew[i].XAdvance);
                     dataGridViewWithCoord[12, i].Value = font.glyph.charsNew[i].Channel;
+                }
+            }
+
+            for(int k = 0; k < dataGridViewWithCoord.RowCount; k++)
+            {
+                for(int l = 0; l < dataGridViewWithCoord.ColumnCount; l++)
+                {
+                    switch (Modified)
+                    {
+                        case true:
+                            dataGridViewWithCoord[l, k].Style.BackColor = Color.GreenYellow;
+                            break;
+
+                        default:
+                            dataGridViewWithCoord[l, k].Style.BackColor = Color.White;
+                            break;
+                    }
                 }
             }
         }
@@ -257,8 +276,8 @@ namespace TTG_Tools
                 for (int i = 0; i < font.TexCount; i++)
                 {
                     dataGridViewWithTextures[0, i].Value = i;
-                    dataGridViewWithTextures[1, i].Value = font.tex[i].OriginalHeight;
-                    dataGridViewWithTextures[2, i].Value = font.tex[i].OriginalWidth;
+                    dataGridViewWithTextures[1, i].Value = font.tex[i].Height;
+                    dataGridViewWithTextures[2, i].Value = font.tex[i].Width;
                     dataGridViewWithTextures[3, i].Value = font.tex[i].TexSize;
                 }
             }
@@ -433,6 +452,8 @@ namespace TTG_Tools
             ofd.Title = "Open font file";
             ofd.DereferenceLinks = false;
             byte[] binContent = new byte[0];
+            string FileName = "";
+
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 encripted = false;
@@ -441,6 +462,7 @@ namespace TTG_Tools
                 FileStream fs;
                 try
                 {
+                    FileName = ofd.FileName;
                     fs = new FileStream(ofd.FileName, FileMode.Open);
                     binContent = Methods.ReadFull(fs);
                     fs.Close();
@@ -451,6 +473,9 @@ namespace TTG_Tools
                     MessageBox.Show(ex.Message, "Error!");
                     saveToolStripMenuItem.Enabled = false;
                     saveAsToolStripMenuItem.Enabled = false;
+                    exportCoordinatesToolStripMenuItem1.Enabled = false;
+                    importCoordinatesToolStripMenuItem1.Enabled = false;
+                    Form.ActiveForm.Text = "Font Editor";
                 }
                 if (read)
                 {
@@ -591,9 +616,9 @@ namespace TTG_Tools
                     font.One = binContent[poz];
                     poz++;
 
-                    //Need research this moment!
-                    if(font.One == 0x31 && ((Encoding.ASCII.GetString(check_header) == "5VSM")
-                        || (Encoding.ASCII.GetString(check_header) == "6VSM")))
+                    //Temporary solution
+                    if((font.One == 0x31 && (Encoding.ASCII.GetString(check_header) == "5VSM"))
+                        || (Encoding.ASCII.GetString(check_header) == "6VSM"))
                     {
                         tmp = new byte[4];
                         Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -788,6 +813,15 @@ namespace TTG_Tools
                                 return;
                             }
                         }
+
+                        for (int k = 0; k < font.glyph.CharCount; k++)
+                        {
+                            font.glyph.chars[k].XStart *= font.NewTex[font.glyph.chars[k].TexNum].Width;
+                            font.glyph.chars[k].XEnd *= font.NewTex[font.glyph.chars[k].TexNum].Width;
+
+                            font.glyph.chars[k].YStart *= font.tex[font.glyph.chars[k].TexNum].Width;
+                            font.glyph.chars[k].YEnd *= font.tex[font.glyph.chars[k].TexNum].Height;
+                        }
                     }
                     else
                     {
@@ -811,9 +845,18 @@ namespace TTG_Tools
                                 return;
                             }
                         }
+
+                        for(int k = 0; k < font.glyph.CharCount; k++)
+                        {
+                            font.glyph.charsNew[k].XStart *= font.NewTex[font.glyph.charsNew[k].TexNum].Width;
+                            font.glyph.charsNew[k].XEnd *= font.NewTex[font.glyph.charsNew[k].TexNum].Width;
+
+                            font.glyph.charsNew[k].YStart *= font.NewTex[font.glyph.charsNew[k].TexNum].Height;
+                            font.glyph.charsNew[k].YEnd *= font.NewTex[font.glyph.charsNew[k].TexNum].Height;
+                        }
                     }
 
-                    fillTableofCoordinates(font);
+                    fillTableofCoordinates(font, false);
                     fillTableofTextures(font);
 
                     saveToolStripMenuItem.Enabled = true;
@@ -822,7 +865,7 @@ namespace TTG_Tools
                     rbKerning.Enabled = font.NewFormat;
                     rbNoKerning.Enabled = font.NewFormat;
                     edited = false; //Открыли новый неизмененный файл
-                                    //Form.ActiveForm.Text = "Font Editor: " + ofd.SafeFileName.ToString();
+                    Form.ActiveForm.Text = "Font Editor. Opened file " + FileName;
                 }
             }
         stop_it:
@@ -1648,43 +1691,7 @@ namespace TTG_Tools
 
         private void exportCoordinatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveFD = new SaveFileDialog();
-            saveFD.Filter = "txt files (*.txt)|*.txt";
-            saveFD.FileName = Methods.GetNameOfFileOnly(ofd.SafeFileName, ".font") + ".txt";
-
-            if (saveFD.ShowDialog() == DialogResult.OK)
-            {
-                Methods.DeleteCurrentFile((saveFD.FileName));
-                FileStream ExportStream = new System.IO.FileStream(saveFD.FileName, FileMode.Create);
-
-                for (int i = 0; i < dataGridViewWithCoord.RowCount; i++)
-                {
-
-                    string str = null;
-                    str = dataGridViewWithCoord[0, i].Value.ToString() + " ";
-                    str += dataGridViewWithCoord[2, i].Value.ToString() + " ";
-                    str += dataGridViewWithCoord[3, i].Value.ToString() + " ";
-                    str += dataGridViewWithCoord[4, i].Value.ToString() + " ";
-                    str += dataGridViewWithCoord[5, i].Value.ToString() + " ";
-                    str += dataGridViewWithCoord[6, i].Value.ToString();
-
-                    if (version_used >= 9)
-                    {
-                        if (rbKerning.Checked == true)
-                        {
-                            str += " ";
-                            str += dataGridViewWithCoord[9, i].Value.ToString() + " ";
-                            str += dataGridViewWithCoord[10, i].Value.ToString() + " ";
-                            str += dataGridViewWithCoord[11, i].Value.ToString() + " ";
-                            str += dataGridViewWithCoord[12, i].Value.ToString();
-                        }
-                    }
-                    //str += dataGridViewWithCoord[1, i].Value.ToString() + "\r\n";                    
-                    if (i + 1 < dataGridViewWithCoord.RowCount) str += "\r\n";
-                    TextCollector.SaveString(ExportStream, str, MainMenu.settings.unicodeSettings);
-                }
-                ExportStream.Close();
-            }
+            exportCoordinatesToolStripMenuItem1_Click(sender, e);
         }
 
         private void importCoordinatesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1790,7 +1797,7 @@ namespace TTG_Tools
                 {
                     for(int i = 0; i < font.glyph.CharCount; i++)
                     {
-                        info = "char id=" + i + " x=" + (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) + " y=" + (font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                        info = "char id=" + i + " x=" + font.glyph.chars[i].XStart + " y=" + font.glyph.chars[i].YStart;
                         info += " width=";
 
                         if (font.hasScaleValue)
@@ -1799,7 +1806,7 @@ namespace TTG_Tools
                         }
                         else
                         {
-                            info += (font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) - (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                            info += font.glyph.chars[i].XEnd - font.glyph.chars[i].XStart;
                         }
 
                         info += " height=";
@@ -1810,7 +1817,7 @@ namespace TTG_Tools
                         }
                         else
                         {
-                            info += (font.glyph.chars[i].YEnd * font.tex[font.glyph.chars[i].TexNum].OriginalHeight) - (font.glyph.chars[i].YStart * font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                            info += font.glyph.chars[i].YEnd - font.glyph.chars[i].YStart;
                         }
 
                         info += " xoffset=0 yoffset=0 xadvance=";
@@ -1821,7 +1828,7 @@ namespace TTG_Tools
                         }
                         else
                         {
-                            info += (font.glyph.chars[i].XEnd * font.tex[font.glyph.chars[i].TexNum].OriginalWidth) - (font.glyph.chars[i].XStart * font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                            info += font.glyph.chars[i].XEnd - font.glyph.chars[i].XStart;
                         }
 
                         info += " page=" + font.glyph.chars[i].TexNum + " chnl=15\r\n";
@@ -1833,7 +1840,7 @@ namespace TTG_Tools
                 {
                     for (int i = 0; i < font.glyph.CharCount; i++)
                     {
-                        info = "char id=" + font.glyph.charsNew[i].charId + " x=" + (font.glyph.charsNew[i].XStart * font.NewTex[font.glyph.charsNew[i].TexNum].Width) + " y=" + (font.glyph.charsNew[i].YStart * font.NewTex[font.glyph.charsNew[i].TexNum].Height);
+                        info = "char id=" + font.glyph.charsNew[i].charId + " x=" + font.glyph.charsNew[i].XStart + " y=" + font.glyph.charsNew[i].YStart;
                         info += " width=" + font.glyph.charsNew[i].CharWidth + " height=" + font.glyph.charsNew[i].CharHeight;
                         info += " xoffset=" + font.glyph.charsNew[i].XOffset + " yoffset=" + font.glyph.charsNew[i].YOffset + " xadvance=";
                         info += font.glyph.charsNew[i].XAdvance + " page=" + font.glyph.charsNew[i].TexNum + " chnl=" + font.glyph.charsNew[i].Channel + "\r\n";
@@ -2091,7 +2098,8 @@ namespace TTG_Tools
 
             if (openFD.ShowDialog() == DialogResult.OK)
             {
-                StreamReader sr = new StreamReader(openFD.FileName, System.Text.UnicodeEncoding.GetEncoding(MainMenu.settings.ASCII_N));//System.Text.ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N));
+                #region old code
+                /*StreamReader sr = new StreamReader(openFD.FileName, System.Text.UnicodeEncoding.GetEncoding(MainMenu.settings.ASCII_N));//System.Text.ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N));
 
                 bool unicode = true;
 
@@ -2239,7 +2247,132 @@ namespace TTG_Tools
                     }
                 }
                 sr.Close();
-                edited = true; //Шрифт изменен
+                edited = true; //Шрифт изменен*/
+                #endregion
+
+                FileInfo fi = new FileInfo(openFD.FileName);
+
+                int charsCount = 0;
+
+                string[] strings = File.ReadAllLines(fi.FullName);
+
+                int ch = -1;
+
+                //Check for xml tags and removing it for comfortable searching needed data (useful for xml fnt files)
+                for (int n = 0; n < strings.Length; n++)
+                {
+                    if ((strings[n].IndexOf('<') >= 0) || (strings[n].IndexOf('<') >= 0 && strings[n].IndexOf('/') > 0))
+                    {
+                        strings[n] = strings[n].Remove(strings[n].IndexOf('<'), 1);
+                        if (strings[n].IndexOf('/') >= 0) strings[n] = strings[n].Remove(strings[n].IndexOf('/'), 1);
+                    }
+                    if (strings[n].IndexOf('>') >= 0 || (strings[n].IndexOf('/') >= 0 && strings[n + 1].IndexOf('>') > 0))
+                    {
+                        strings[n] = strings[n].Remove(strings[n].IndexOf('>'), 1);
+                        if (strings[n].IndexOf('/') >= 0) strings[n] = strings[n].Remove(strings[n].IndexOf('/'), 1);
+                    }
+                    if (strings[n].IndexOf('"') >= 0)
+                    {
+                        while (strings[n].IndexOf('"') >= 0) strings[n] = strings[n].Remove(strings[n].IndexOf('"'), 1);
+                    }
+                }
+
+                for (int m = 0; m < strings.Length; m++)
+                {
+                    if (strings[m].ToLower().Contains("common lineheight"))
+                    {
+                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                        for (int k = 0; k < splitted.Length; k++)
+                        {
+                            switch (splitted[k].ToLower())
+                            {
+                                case "lineheight":
+                                    font.BaseSize = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (strings[m].Contains("chars count") && font.NewFormat)
+                    {
+                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                        for (int k = 0; k < splitted.Length; k++)
+                        {
+                            switch (splitted[k].ToLower())
+                            {
+                                case "count":
+                                    font.glyph.CharCount = Convert.ToInt32(splitted[k + 1]);
+                                    font.glyph.charsNew = new FontClass.ClassFont.TRectNew[font.glyph.CharCount];
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (strings[m].Contains("char id"))
+                    {
+                        string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+
+                        for(int k = 0; k < splitted.Length; k++)
+                        {
+                            switch (splitted[k].ToLower())
+                            {
+                                case "id":
+                                    ch++;
+                                    font.glyph.charsNew[ch] = new FontClass.ClassFont.TRectNew();
+
+                                    if (Convert.ToInt32(splitted[k + 1]) < 0)
+                                    {
+                                        font.glyph.charsNew[ch].charId = 0;
+                                    }
+                                    else
+                                    {
+                                        font.glyph.charsNew[ch].charId = Convert.ToUInt32(splitted[k + 1]);
+                                    }
+                                        break;
+
+                                case "x":
+                                    font.glyph.charsNew[ch].XStart = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+
+                                case "y":
+                                    font.glyph.charsNew[ch].YStart = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+
+                                case "width":
+                                    font.glyph.charsNew[ch].CharWidth = Convert.ToSingle(splitted[k + 1]);
+                                    font.glyph.charsNew[ch].XEnd = font.glyph.charsNew[ch].XStart + font.glyph.charsNew[ch].CharWidth;
+                                    break;
+
+                                case "height":
+                                    font.glyph.charsNew[ch].CharHeight = Convert.ToSingle(splitted[k + 1]);
+                                    font.glyph.charsNew[ch].YEnd = font.glyph.charsNew[ch].YStart + font.glyph.charsNew[ch].CharHeight;
+                                    break;
+
+                                case "xoffset":
+                                    font.glyph.charsNew[ch].XOffset = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+
+                                case "yoffset":
+                                    font.glyph.charsNew[ch].YOffset = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+
+                                case "xadvance":
+                                    font.glyph.charsNew[ch].XAdvance = Convert.ToSingle(splitted[k + 1]);
+                                    break;
+
+                                case "page":
+                                    font.glyph.charsNew[ch].TexNum = Convert.ToInt32(splitted[k + 1]);
+                                    break;
+
+                                case "chnl":
+                                    font.glyph.charsNew[ch].Channel = Convert.ToInt32(splitted[k + 1]);
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                fillTableofCoordinates(font, true);
             }
 
         }

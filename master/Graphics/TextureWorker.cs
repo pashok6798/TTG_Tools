@@ -291,7 +291,15 @@ namespace TTG_Tools
                 Array.Copy(binContent, poz, tex.Content, 0, tex.Content.Length);
                 poz += tex.Content.Length;
 
-                if((tex.TexFlags != null) && (tex.TexFlags.TexSizes != null)) 
+                tmp = new byte[4];
+                Array.Copy(tex.Content, 16, tmp, 0, tmp.Length);
+                tex.Width = BitConverter.ToInt32(tmp, 0);
+
+                tmp = new byte[4];
+                Array.Copy(tex.Content, 12, tmp, 0, tmp.Length);
+                tex.Height = BitConverter.ToInt32(tmp, 0);
+
+                if ((tex.TexFlags != null) && (tex.TexFlags.TexSizes != null)) 
                 {
                     for (int j = 0; j < tex.TexFlags.TexSizes.Length; j++)
                     {

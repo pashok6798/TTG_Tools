@@ -25,6 +25,7 @@ namespace TTG_Tools.ClassesStructs
             public byte[] UnknownData; //4 bytes
             public byte Zero;
             public FlagsClass TexFlags;
+            public byte[] block; //temporary solution
             public int TexSize;
             public byte[] Content; //Texture
 

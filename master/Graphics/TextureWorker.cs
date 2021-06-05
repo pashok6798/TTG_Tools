@@ -278,9 +278,13 @@ namespace TTG_Tools
                 tex.OriginalHeight = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
-                //And just ignore some flags and etc. Just search DDS header
+                int lastPos = poz;
 
+                //And just ignore some flags and etc. Just search DDS header
                 poz = Methods.FindStartOfStringSomething(binContent, poz, "DDS ") - 4; //Get position for a size
+
+                tex.block = new byte[poz - lastPos];
+                Array.Copy(binContent, lastPos, tex.block, 0, tex.block.Length);
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);

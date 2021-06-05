@@ -2279,6 +2279,8 @@ namespace TTG_Tools
 
                 if (font.NewFormat)
                 {
+                    TextureClass.NewT3Texture[] tmpNewTex = null;
+
                     for (int m = 0; m < strings.Length; m++)
                     {
                         if (strings[m].ToLower().Contains("common lineheight"))
@@ -2290,6 +2292,61 @@ namespace TTG_Tools
                                 {
                                     case "lineheight":
                                         font.BaseSize = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+
+                                    case "pages":
+                                        tmpNewTex = new TextureClass.NewT3Texture[Convert.ToInt32(splitted[k + 1])];
+
+                                        if(Convert.ToInt32(splitted[k + 1]) > font.TexCount)
+                                        {
+                                            for(int j = 0; j < tmpNewTex.Length; j++)
+                                            {
+                                                tmpNewTex[j] = font.NewTex[0];
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for(int j = 0; j < tmpNewTex.Length; j++)
+                                            {
+                                                tmpNewTex[j] = font.NewTex[j];
+                                            }
+                                        }
+                                        break;
+                                }
+                            }
+                        }
+
+                        if(strings[m].Contains("page id"))
+                        {
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                            int idNum = 0;
+
+                            for (int k = 0; k < splitted.Length; k++)
+                            {
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "id":
+                                        idNum = Convert.ToInt32(splitted[k + 1]);
+                                        break;
+
+                                    case "file":
+                                        if(File.Exists(fi.DirectoryName + "\\" + splitted[k + 1]))
+                                        {
+                                            //THINK ABOUT GET NEEDED DATA FROM IMPORT TEXTURE
+                                            tmpNewTex[idNum].Tex.Content = File.ReadAllBytes(fi.DirectoryName + "\\" + splitted[k + 1]);
+                                            
+                                            tmpNewTex[idNum].textureSize = (uint)tmpNewTex[idNum].Tex.Content.Length - 128;
+                                            tmpNewTex[idNum].Tex.TexSize = tmpNewTex[idNum].textureSize;
+                                            tmpNewTex[idNum].Tex.Textures[0].MipSize = (int)tmpNewTex[idNum].textureSize;
+
+                                            byte[] tmp = new byte[4];
+                                            Array.Copy(tmpNewTex[idNum].Tex.Content, 12, tmp, 0, tmp.Length);
+                                            tmpNewTex[idNum].Width = BitConverter.ToInt32(tmp, 0);
+
+                                            tmp = new byte[4];
+                                            Array.Copy(tmpNewTex[idNum].Tex.Content, 16, tmp, 0, tmp.Length);
+                                            tmpNewTex[idNum].Height = BitConverter.ToInt32(tmp, 0);
+                                        }
                                         break;
                                 }
                             }
@@ -2373,9 +2430,18 @@ namespace TTG_Tools
                             }
                         }
                     }
+
+                    if(tmpNewTex != null)
+                    {
+                        font.NewTex = tmpNewTex;
+                        font.TexCount = font.NewTex.Length;
+                        fillTableofTextures(font);
+                    }
                 }
                 else
                 {
+                    TextureClass.OldT3Texture[] tmpOldTex = null;
+
                     for (int m = 0; m < strings.Length; m++)
                     {
                         if (strings[m].ToLower().Contains("common lineheight"))
@@ -2387,6 +2453,61 @@ namespace TTG_Tools
                                 {
                                     case "lineheight":
                                         font.BaseSize = Convert.ToSingle(splitted[k + 1]);
+                                        break;
+
+                                    case "pages":
+                                        tmpOldTex = new TextureClass.OldT3Texture[Convert.ToInt32(splitted[k + 1])];
+
+                                        if (Convert.ToInt32(splitted[k + 1]) > font.TexCount)
+                                        {
+                                            for(int c = 0; c < tmpOldTex.Length; c++)
+                                            {
+                                                tmpOldTex[c] = font.tex[0];
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (int c = 0; c < tmpOldTex.Length; c++)
+                                            {
+                                                tmpOldTex[c] = font.tex[c];
+                                            }
+                                        }
+
+                                        break;
+                                }
+                            }
+                        }
+
+                        if (strings[m].Contains("page id"))
+                        {
+                            string[] splitted = strings[m].Split(new char[] { ' ', '=', '\"', ',' });
+                            int idNum = 0;
+
+                            for (int k = 0; k < splitted.Length; k++)
+                            {
+                                switch (splitted[k].ToLower())
+                                {
+                                    case "id":
+                                        idNum = Convert.ToInt32(splitted[k + 1]);
+                                        break;
+
+                                    case "file":
+                                        if (File.Exists(fi.DirectoryName + "\\" +  splitted[k + 1]))
+                                        {
+                                            tmpOldTex[idNum].Content = File.ReadAllBytes(fi.DirectoryName + "\\" + splitted[k + 1]);
+                                            
+                                            byte[] tmp = new byte[4];
+                                            Array.Copy(tmpOldTex[idNum].Content, 12, tmp, 0, tmp.Length);
+                                            tmpOldTex[idNum].Height = BitConverter.ToInt32(tmp, 0);
+                                            tmpOldTex[idNum].OriginalHeight = tmpOldTex[idNum].Height;
+
+                                            tmp = new byte[4];
+                                            Array.Copy(tmpOldTex[idNum].Content, 16, tmp, 0, tmp.Length);
+                                            tmpOldTex[idNum].Width = BitConverter.ToInt32(tmp, 0);
+                                            tmpOldTex[idNum].OriginalWidth = tmpOldTex[idNum].Width;
+
+                                            tmpOldTex[idNum].TexSize = tmpOldTex[idNum].Content.Length;
+                                        }
                                         break;
                                 }
                             }
@@ -2461,6 +2582,13 @@ namespace TTG_Tools
                                 }
                             }
                         }
+                    }
+
+                    if (tmpOldTex != null)
+                    {
+                        font.tex = tmpOldTex;
+                        font.TexCount = font.tex.Length;
+                        fillTableofTextures(font);
                     }
                 }
 

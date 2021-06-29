@@ -307,7 +307,8 @@ namespace TTG_Tools
                 }
             }
 
-            bw.Close();
+            //bw.Close();
+            bw.Flush();
 
             return 0;
         }

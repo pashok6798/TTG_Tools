@@ -373,7 +373,6 @@ namespace TTG_Tools
             string whatImport;
             string pathInput = param[2];
             string pathOutput = param[3];
-            //string pathTemp = param[4];
             bool deleteFromInputSource = param[5] == "True";//false;
             bool deleteFromInputImported = param[4] == "True";//false;
             int version = Convert.ToInt32(param[6]);

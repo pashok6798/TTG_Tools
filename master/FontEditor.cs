@@ -27,6 +27,9 @@ namespace TTG_Tools
         bool iOS; //Для поддержки pvr текстур
         bool encripted; //В случае, если шрифт был зашифрован
         byte[] encKey;
+        byte[] tmpHeader;
+        byte[] check_header;
+        bool someTexData;
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -70,6 +73,8 @@ namespace TTG_Tools
                 tmp = new byte[4];
                 Array.Copy(temp, 28, tmp, 0, tmp.Length);
                 font.tex[file_n].Mip = BitConverter.ToInt32(tmp, 0);
+
+                font.BlockTexSize += font.tex[file_n].Content.Length - font.tex[file_n].TexSize;
 
                 font.tex[file_n].TexSize = font.tex[file_n].Content.Length;
             }
@@ -259,7 +264,7 @@ namespace TTG_Tools
 
                     poz = 4; //Begin position
 
-                    byte[] check_header = new byte[4];
+                    check_header = new byte[4];
                     Array.Copy(binContent, 0, check_header, 0, check_header.Length);
                     encKey = null;
 
@@ -305,7 +310,7 @@ namespace TTG_Tools
                     font.elements = new string[countElements];
                     font.binElements = new byte[countElements][];
                     int lenStr;
-                    bool someTexData = false;
+                    someTexData = false;
 
                     //version_used = countElements;
 
@@ -355,6 +360,9 @@ namespace TTG_Tools
                         }
                     }
 
+                    tmpHeader = new byte[poz];
+                    Array.Copy(binContent, 0, tmpHeader, 0, tmpHeader.Length);
+
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                     int nameLen = BitConverter.ToInt32(tmp, 0);
@@ -395,6 +403,7 @@ namespace TTG_Tools
 
                     tmp = new byte[4];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
+                    font.halfValue = 0.0f;
 
                     if ((BitConverter.ToSingle(tmp, 0) == 0.5)
                         || (BitConverter.ToSingle(tmp, 0) == 1.0))
@@ -725,8 +734,10 @@ namespace TTG_Tools
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Methods.DeleteCurrentFile((ofd.FileName));
-            FileStream fs = new FileStream((ofd.FileName), FileMode.OpenOrCreate);
+            Methods.DeleteCurrentFile(ofd.FileName);
+
+            FileStream fs = new FileStream(ofd.FileName, FileMode.OpenOrCreate);
+            SaveFont(fs, font);
             fs.Close();
 
             encFunc(ofd.FileName);
@@ -734,9 +745,116 @@ namespace TTG_Tools
             edited = false; //Файл сохранили, так что вернули флаг на ЛОЖЬ
         }
 
-        private void SaveFont(FileStream fs, ClassesStructs.FontClass.ClassFont font)
+        private void SaveFont(Stream fs, ClassesStructs.FontClass.ClassFont font)
         {
+            BinaryWriter bw = new BinaryWriter(fs);
+
+            bw.Write(tmpHeader);
             
+            //First need check textures import
+            font.texSize = 0;
+            font.headerSize = 0;
+
+            int len = Encoding.ASCII.GetBytes(font.FontName).Length;
+            font.headerSize += 4;
+
+            if (font.blockSize)
+            {
+                int subLen = len + 8;
+                font.headerSize += 4;
+                bw.Write(subLen);
+            }
+
+            bw.Write(len);
+            bw.Write(Encoding.ASCII.GetBytes(font.FontName));
+            font.headerSize += (uint)len;
+
+            bw.Write(font.One);
+            font.headerSize++;
+
+            if ((font.One == 0x31 && (Encoding.ASCII.GetString(check_header) == "5VSM"))
+                        || (Encoding.ASCII.GetString(check_header) == "6VSM"))
+            {
+                bw.Write(font.NewSomeValue);
+                font.headerSize += 4;
+            }
+
+            bw.Write(font.BaseSize);
+            font.headerSize += 4;
+
+            if(font.halfValue == 0.5f || font.halfValue == 1.0f)
+            {
+                bw.Write(font.halfValue);
+                font.headerSize += 4;
+            }
+
+            if (font.hasScaleValue)
+            {
+                bw.Write(font.oneValue);
+                font.headerSize += 4;
+            }
+
+            if (font.blockSize)
+            {
+                if (!font.NewFormat)
+                {
+                    font.glyph.BlockCoordSize = font.glyph.CharCount * (5 * 4);
+
+                    if (font.hasScaleValue) font.glyph.BlockCoordSize = font.glyph.CharCount * (7 * 4);
+
+                    font.glyph.BlockCoordSize += 4; //Includes char count block
+                }
+                else
+                {
+                    font.glyph.BlockCoordSize = font.glyph.CharCount * (12 * 4);
+                    font.glyph.BlockCoordSize += 4; //Includes char count block
+                }
+
+                font.glyph.BlockCoordSize += 4; //And block size itself
+
+                bw.Write(font.glyph.BlockCoordSize);
+                font.headerSize += 4;
+            }
+
+            bw.Write(font.glyph.CharCount);
+            font.headerSize += 4;
+
+            if (!font.NewFormat)
+            {
+                for(int i = 0; i < font.glyph.CharCount; i++)
+                {
+                    bw.Write(font.glyph.chars[i].TexNum);
+                    bw.Write(font.glyph.chars[i].XStart / font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                    bw.Write(font.glyph.chars[i].XEnd / font.tex[font.glyph.chars[i].TexNum].OriginalWidth);
+                    bw.Write(font.glyph.chars[i].YStart / font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+                    bw.Write(font.glyph.chars[i].YEnd / font.tex[font.glyph.chars[i].TexNum].OriginalHeight);
+
+                    if (font.hasScaleValue)
+                    {
+                        bw.Write(font.glyph.chars[i].CharWidth);
+                        bw.Write(font.glyph.chars[i].CharHeight);
+                    }
+                }
+
+                if (font.blockSize)
+                {
+                    bw.Write(font.BlockTexSize);
+                }
+
+                bw.Write(font.TexCount);
+
+                for (int i = 0; i < font.TexCount; i++)
+                {
+                    TextureWorker.ReplaceOldTextures(fs, font.tex[i], someTexData, false, null, 2);
+                }
+            }
+            else
+            {
+
+            }
+
+            bw.Close();
+            fs.Close();
         }
 
         private void textBox8_TextChanged(object sender, EventArgs e)
@@ -1817,17 +1935,17 @@ namespace TTG_Tools
                                         if(Convert.ToInt32(splitted[k + 1]) > font.TexCount)
                                         {
 
-                                            /*for(int j = 0; j < tmpNewTex.Length; j++)
+                                            for(int j = 0; j < tmpNewTex.Length; j++)
                                             {
-                                                tmpNewTex[j] = font.NewTex[0];
-                                            }*/
+                                                tmpNewTex[j] = new TextureClass.NewT3Texture(font.NewTex[0]);
+                                            }
                                         }
                                         else
                                         {
-                                            /*for(int j = 0; j < tmpNewTex.Length; j++)
+                                            for(int j = 0; j < tmpNewTex.Length; j++)
                                             {
-                                                tmpNewTex[j] = font.NewTex[j];
-                                            }*/
+                                                tmpNewTex[j] = new TextureClass.NewT3Texture(font.NewTex[j]);
+                                            }
                                         }
                                         break;
                                 }
@@ -1976,11 +2094,20 @@ namespace TTG_Tools
                                     case "pages":
                                         tmpOldTex = new TextureClass.OldT3Texture[Convert.ToInt32(splitted[k + 1])];
 
+                                        if (font.blockSize) 
+                                        {
+                                            for (int c = 0; c < font.TexCount; c++)
+                                            {
+                                                font.BlockTexSize -= font.tex[c].TexSize;
+                                            }
+                                        }
+
                                         if (Convert.ToInt32(splitted[k + 1]) > font.TexCount)
                                         {
                                             for(int c = 0; c < tmpOldTex.Length; c++)
                                             {
                                                 tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[0]);
+                                                font.BlockTexSize += tmpOldTex[c].TexSize;
                                             }
                                         }
                                         else
@@ -1988,6 +2115,7 @@ namespace TTG_Tools
                                             for (int c = 0; c < tmpOldTex.Length; c++)
                                             {
                                                 tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[c]);
+                                                font.BlockTexSize += tmpOldTex[c].TexSize;
                                             }
                                         }
 
@@ -2023,6 +2151,8 @@ namespace TTG_Tools
                                             Array.Copy(tmpOldTex[idNum].Content, 16, tmp, 0, tmp.Length);
                                             tmpOldTex[idNum].Width = BitConverter.ToInt32(tmp, 0);
                                             tmpOldTex[idNum].OriginalWidth = tmpOldTex[idNum].Width;
+
+                                            font.BlockTexSize += tmpOldTex[idNum].Content.Length - tmpOldTex[idNum].TexSize;
 
                                             tmpOldTex[idNum].TexSize = tmpOldTex[idNum].Content.Length;
                                         }

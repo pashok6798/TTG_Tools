@@ -123,6 +123,31 @@ namespace TTG_Tools.ClassesStructs
             public TextureInfo Tex;
 
             public NewT3Texture() { }
+
+            public NewT3Texture(NewT3Texture newClass)
+            {
+                headerSize = newClass.headerSize;
+                textureSize = newClass.textureSize;
+
+                SomeValue = newClass.SomeValue;
+                unknownFlags = newClass.unknownFlags;
+                platform = newClass.platform;
+                ObjectName = newClass.ObjectName;
+                SubObjectName = newClass.SubObjectName;
+                Zero = newClass.Zero;
+                OneValue = newClass.OneValue;
+                OneByte = newClass.OneByte;
+                UnknownData = newClass.UnknownData;
+                Mip = newClass.Mip;
+                Width = newClass.Width;
+                Height = newClass.Height;
+                Faces = newClass.Faces;
+                ArrayMembers = newClass.ArrayMembers;
+                TextureFormat = newClass.TextureFormat;
+                Unknown1 = newClass.Unknown1;
+                block = newClass.block;
+                Tex = newClass.Tex;
+            }
         }
     }
 }

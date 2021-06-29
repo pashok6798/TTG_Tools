@@ -774,8 +774,6 @@ namespace TTG_Tools
 
         private void button6_Click(object sender, EventArgs e)
         {
-            TexView tv = new TexView();
-            tv.Show();
         }
     }
 }

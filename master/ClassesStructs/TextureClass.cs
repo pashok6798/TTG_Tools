@@ -13,6 +13,7 @@ namespace TTG_Tools.ClassesStructs
         {
             public int sizeBlock; //For games since Hector
             public int someValue; //For games since Hector
+            public bool AdditionalSize;
             public string ObjectName;
             public string SubobjectName;
             public byte[] Flags;
@@ -30,6 +31,28 @@ namespace TTG_Tools.ClassesStructs
             public byte[] Content; //Texture
 
             public OldT3Texture() { }
+
+            public OldT3Texture(OldT3Texture newClass)
+            {
+                sizeBlock = newClass.sizeBlock;
+                someValue = newClass.someValue; //For games since Hector
+                AdditionalSize = newClass.AdditionalSize;
+                ObjectName = newClass.ObjectName;
+                SubobjectName = newClass.SubobjectName;
+                Flags = newClass.Flags;
+                Mip = newClass.Mip;
+                TextureFormat = newClass.TextureFormat;
+                OriginalWidth = newClass.OriginalWidth;
+                OriginalHeight = newClass.OriginalHeight;
+                Width = newClass.Width;
+                Height = newClass.Height;
+                UnknownData = newClass.UnknownData; //4 bytes
+                Zero = newClass.Zero;
+                TexFlags = newClass.TexFlags;
+                block = newClass.block; //temporary solution
+                TexSize = newClass.TexSize;
+                Content = newClass.Content; //Texture
+            }
         }
 
         public class NewT3Texture

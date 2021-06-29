@@ -23,11 +23,10 @@ namespace TTG_Tools
         }
 
         OpenFileDialog ofd = new OpenFileDialog();
-        FontStructure ffs = new FontStructure();
         bool edited; //Проверка на изменения в шрифте
         bool iOS; //Для поддержки pvr текстур
         bool encripted; //В случае, если шрифт был зашифрован
-        int platform = -1; //Номер платформы
+        byte[] encKey;
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -35,152 +34,50 @@ namespace TTG_Tools
         }
         private void FontEditor_Load(object sender, EventArgs e)
         {
-            edited = false; //Даем программе знать, что шрифт не изменен.
+            edited = false; //Tell a program about first launch window form so font is not modified.
             iOS = false;
-
-            #region//Шаблоны некоторых шрифтов.
-            byte[] i = {
-                           0xAC, 0xC7, 0x49, 0x03, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB, 0x95, 0x3E, 0xA6, 0xA9,
-                           0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53, 0xEC, 0xF4, 0x33, 0x77, 0xE2, 0xCC, 0x38, 0x6F,
-                           0x7E, 0x9E, 0x24, 0x3E, 0x3D, 0xD5, 0x38, 0x76, 0xE3, 0x88, 0x09, 0x7A, 0x48, 0x5D, 0x7F, 0x93,
-                           0xEA, 0x82, 0x11, 0xD6, 0x8C, 0x59, 0x05, 0x84, 0xB7, 0xFB, 0x88, 0x8E, 0x4D, 0x79, 0xAB, 0x26,
-                           0x07, 0x1A, 0x1F, 0xE6, 0x44, 0xA2, 0xBC, 0x7B, 0xAC, 0xD6, 0x8C, 0x2A, 0x0F, 0xF4, 0x20, 0xE6,
-                           0x20, 0xBA, 0xA1, 0xEF, 0xF5, 0x7A, 0x6B, 0xFF, 0xEA, 0x0E, 0x30, 0xAE, 0xF1, 0x19, 0x46, 0x58,
-                           0x07, 0x26, 0x57, 0xC2
-                       };
-            version_of_font.Add(new Version_of_font(i, "Wolf Among Us"));//6
-
-            byte[] i2 =
-            {
-                           0x6B, 0x8C, 0x53, 0xFB, 0x2C, 0x29, 0xC2, 0x04,
-                           0x23, 0xFA, 0x4B, 0xAB, 0x15, 0xA7, 0x5E, 0x33, 0x95, 0x38, 0x98, 0x86, 0xAA, 0xB3, 0xA0, 0x53,
-                           0xEC, 0xF4, 0x33, 0x77, 0xE2, 0xCC, 0x38, 0x6F, 0x7E, 0x9E, 0x24, 0x3E, 0xD9, 0xC9, 0x14, 0xAA,
-                           0xE3, 0x88, 0x09, 0x7A, 0x48, 0x5D, 0x7F, 0x93, 0xA8, 0xB2, 0x29, 0xD3
-            };
-            version_of_font.Add(new Version_of_font(i2, "Wolf Among Us PS4"));
-
-            byte[] j = {
-                           0xE1, 0xD1, 0xC0, 0x2B, 0x2C, 0x29, 0xC2, 0x04, 0x23, 0xFA, 0x4B, 0xAB, 0x15, 0xA7, 0x5E, 0x33
-                       };
-            version_of_font.Add(new Version_of_font(j, "Tales From the Borderlands"));//7
-            version_used = -1; //шрифты, не вошедшие в шаблоны
-            #endregion
-
         }
 
-        public List<Version_of_font> version_of_font = new List<Version_of_font>();
         public List<byte[]> head = new List<byte[]>();
         public ClassesStructs.FlagsClass fontFlags;
         FontClass.ClassFont font = null;
 
         byte[] start_version = { 0x81, 0x53, 0x37, 0x63, 0x9E, 0x4A, 0x3A, 0x9A }; //указывается начало заголовка. Не знаю, как можно было бы позицию по байтам сделать. Сделал по строке.
 
-        public class FontStructure
+        private void ReplaceTexture(string DdsFile, int file_n, ClassesStructs.FontClass.ClassFont font)
         {
-            public byte[] header_of_file;
-            public byte[] dds_lenght;
-            public byte[] count_dds;
-            public byte[] coord_lenght;
-            public byte[] coord_count;
-            public List<Coordinates> coord = new List<Coordinates>();
-            public List<Dds> dds = new List<Dds>();
+            FileStream fs = new FileStream(DdsFile, FileMode.Open);
+            byte[] temp = Methods.ReadFull(fs);
+            fs.Close();
 
-            public FontStructure() { }
-            
-            public void AddCoord(byte[] _h_start, byte[] _h_end, byte[] _w_start, byte[] _w_end, byte[] _n_texture, byte[] _widht, byte[] _height, byte[] _HZ, byte[] _kern_left_side, byte[] _to_top, byte[] _widht_with_kern, byte[] _symbol)
+            byte[] tmp = null;
+
+            if (!font.NewFormat)
             {
-                coord.Add(new Coordinates(_h_start, _h_end, _w_start, _w_end, _n_texture, _widht, _height, _HZ, _kern_left_side, _to_top, _widht_with_kern, _symbol));
+                font.tex[file_n].Content = new byte[temp.Length];
+                Array.Copy(temp, 0, font.tex[file_n].Content, 0, temp.Length);
+
+                tmp = new byte[4];
+                Array.Copy(temp, 12, tmp, 0, tmp.Length);
+                font.tex[file_n].OriginalHeight = BitConverter.ToInt32(tmp, 0);
+                font.tex[file_n].Height = BitConverter.ToInt32(tmp, 0);
+
+                tmp = new byte[4];
+                Array.Copy(temp, 16, tmp, 0, tmp.Length);
+                font.tex[file_n].OriginalWidth = BitConverter.ToInt32(tmp, 0);
+                font.tex[file_n].Width = BitConverter.ToInt32(tmp, 0);
+
+                tmp = new byte[4];
+                Array.Copy(temp, 28, tmp, 0, tmp.Length);
+                font.tex[file_n].Mip = BitConverter.ToInt32(tmp, 0);
+
+                font.tex[file_n].TexSize = font.tex[file_n].Content.Length;
             }
-            public void AddDds(byte[] _header, byte[] _height_in_font, byte[] _widht_in_font,
-                byte[] _size_in_font, byte[] _hz_data_after_sizes, byte[] _dds_content,
-                byte[] _height_in_dds, byte[] _widht_in_dds, byte[] _size_of_dds, List<byte[]> _pn2dds_head)
+            else
             {
-                dds.Add(new Dds(_header, _height_in_font, _widht_in_font, _size_in_font, _hz_data_after_sizes,
-                    _dds_content, _height_in_dds, _widht_in_dds, _size_of_dds, _pn2dds_head));
+
             }
         }
-
-        public class Dds
-        {
-            public byte[] header;
-            public byte[] height_in_font;//4 байта
-            public byte[] widht_in_font;//4 байта
-            public byte[] size_in_font;//4 байта
-            public byte[] hz_data_after_sizes; //47
-            public byte[] dds_content;
-            //потом пропустить 12 байт и получить это
-            public byte[] height_in_dds;//4 байта
-            public byte[] widht_in_dds;//4 байта
-            //это самому посчитать
-            public byte[] size_of_dds;//4 байта
-            public List<byte[]> pn2dds_head;//для Покера
-
-            public Dds() { }
-
-            public Dds(byte[] _header, byte[] _height_in_font, byte[] _widht_in_font,
-                byte[] _size_in_font, byte[] _hz_data_after_sizes, byte[] _dds_content,
-                byte[] _height_in_dds, byte[] _widht_in_dds, byte[] _size_of_dds, List<byte[]> _pn2dds_head)
-            {
-                this.header = _header;
-                this.height_in_dds = _height_in_dds;
-                this.height_in_font = _height_in_font;
-                this.hz_data_after_sizes = _hz_data_after_sizes;
-                this.size_in_font = _size_in_font;
-                this.widht_in_dds = _widht_in_dds;
-                this.widht_in_font = _widht_in_font;
-                this.size_of_dds = _size_of_dds;
-                this.pn2dds_head = _pn2dds_head;
-            }
-        }
-
-        public class Coordinates
-        {
-            public byte[] h_start;
-            public byte[] h_end;
-            public byte[] w_start;
-            public byte[] w_end;
-            public byte[] n_texture;
-            public byte[] widht;
-            public byte[] height;
-            public byte[] HZ;
-            public byte[] kern_left_side;
-            public byte[] to_top;
-            public byte[] widht_with_kern;
-            public byte[] symbol;
-
-            public Coordinates() { }
-
-            public Coordinates(byte[] _h_start, byte[] _h_end, byte[] _w_start, byte[] _w_end,
-                byte[] _n_texture, byte[] _widht, byte[] _height, byte[] _HZ, byte[] _kern_left_side, byte[] _to_top, byte[] _widht_with_kern, byte[] _symbol)
-            {
-                this.h_end = _h_end;
-                this.h_start = _h_start;
-                this.n_texture = _n_texture;
-                this.w_end = _w_end;
-                this.w_start = _w_start;
-                this.widht = _widht;
-                this.height = _height;
-                this.HZ = _HZ;
-                this.kern_left_side = _kern_left_side;
-                this.to_top = _to_top;
-                this.widht_with_kern = _widht_with_kern;
-                this.symbol = _symbol;
-            }
-        }
-
-        public class Version_of_font
-        {
-            public string games;
-            public byte[] header;
-
-            public Version_of_font() { }
-            public Version_of_font(byte[] _header, string _games)
-            {
-                this.games = _games;
-                this.header = _header;
-            }
-        }
-        public static int version_used;
 
         private void fillTableofCoordinates(FontClass.ClassFont font, bool Modified)
         {
@@ -293,125 +190,6 @@ namespace TTG_Tools
             }
         }
 
-        private void fillTableOfCoordinates()
-        {
-            dataGridViewWithCoord.RowCount = ffs.coord.Count;
-            //byte[] b = new byte[1];
-            //b[0] = 0;
-
-            if (version_used < 6)
-            {
-                dataGridViewWithCoord.ColumnCount = 7;
-            }
-            else if (version_used >= 6 && version_used < 9)
-            {
-                dataGridViewWithCoord.ColumnCount = 9;
-            }
-
-            //выводим в дата грид всю инфу
-            for (int i = 0; i < ffs.coord.Count; i++)
-            {
-                int z = 0;
-                if (ffs.coord[i].n_texture != null)
-                {
-                    z = BitConverter.ToInt32(ffs.coord[i].n_texture, 0);
-                }
-
-                int max_w = BitConverter.ToInt32(ffs.dds[z].widht_in_font, 0);
-                int max_h = BitConverter.ToInt32(ffs.dds[z].height_in_font, 0);
-
-                dataGridViewWithCoord[0, i].Value = i.ToString();
-
-                UnicodeEncoding unicode = new UnicodeEncoding();
-                dataGridViewWithCoord[1, i].Value = unicode.GetString(ffs.coord[i].symbol);
-
-
-                //dataGridViewWithCoord[1, i].Value = unicode.GetString(b);
-                // ASCIIEncoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(b);
-                double w_start = Math.Round(BitConverter.ToSingle(ffs.coord[i].w_start, 0) * max_w);
-                dataGridViewWithCoord[2, i].Value = w_start;
-                double w_end = Math.Round(BitConverter.ToSingle(ffs.coord[i].w_end, 0) * max_w);
-                dataGridViewWithCoord[3, i].Value = w_end;
-                if (w_end - w_start < 0)
-                {
-                    dataGridViewWithCoord[0, i].Style.BackColor = System.Drawing.Color.Red;
-                }
-                dataGridViewWithCoord[4, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].h_start, 0) * max_h);
-                dataGridViewWithCoord[5, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].h_end, 0) * max_h);
-                dataGridViewWithCoord[6, i].Value = BitConverter.ToInt32(ffs.coord[i].n_texture, 0);
-
-                if (version_used < 9) //Если пользователь грузит шрифты до покера 2, то лишние столбцы скрываются (зачем они ему?)
-                {
-                    byte[] ch = BitConverter.GetBytes(i);
-                    dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(ch).ToString();
-                    /*dataGridViewWithCoord.Columns[7].Visible = false;
-                    dataGridViewWithCoord.Columns[8].Visible = false;
-                    dataGridViewWithCoord.Columns[9].Visible = false;
-                    dataGridViewWithCoord.Columns[10].Visible = false;
-                    dataGridViewWithCoord.Columns[11].Visible = false;
-                    dataGridViewWithCoord.Columns[12].Visible = false;*/
-                }
-                /*else //А иначе они будут грузиться
-                {
-                    dataGridViewWithCoord.Columns[7].Visible = true;
-                    dataGridViewWithCoord.Columns[8].Visible = true;
-                    dataGridViewWithCoord.Columns[9].Visible = true;
-                    dataGridViewWithCoord.Columns[10].Visible = true;
-                    dataGridViewWithCoord.Columns[11].Visible = true;
-                    dataGridViewWithCoord.Columns[12].Visible = true;
-                }*/
-
-                if (version_used != -1 && version_used >= 6)
-                {
-                    //dataGridViewWithCoord.Columns[7].Visible = true;
-                    //dataGridViewWithCoord.Columns[8].Visible = true;
-                    dataGridViewWithCoord[7, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].widht, 0));
-                    dataGridViewWithCoord[8, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].height, 0));
-                }
-                /*else
-                {
-                    dataGridViewWithCoord.Columns[7].Visible = false;
-                    dataGridViewWithCoord.Columns[8].Visible = false;
-                }*/
-
-                if (version_used >= 9)
-                {
-                    dataGridViewWithCoord.Columns[7].Visible = true;
-                    dataGridViewWithCoord.Columns[8].Visible = true;
-                    dataGridViewWithCoord[0, i].Value = BitConverter.ToInt32(ffs.coord[i].symbol, 0);
-
-                    if (MainMenu.settings.unicodeSettings > 0)
-                    {
-                        dataGridViewWithCoord[1, i].Value = Encoding.GetEncoding(MainMenu.settings.ASCII_N).GetString(ffs.coord[i].symbol).ToString();//Methods.ConvertHexToString(ffs.coord[i].symbol, 0, 4, MainMenu.settings.ASCII_N, false);
-                    }
-                    else
-                    {
-                        dataGridViewWithCoord[1, i].Value = UnicodeEncoding.Unicode.GetString(ffs.coord[i].symbol, 0, 4);
-                    }
-
-                    dataGridViewWithCoord[2, i].Value = BitConverter.ToSingle(ffs.coord[i].w_start, 0) * max_w;
-                    dataGridViewWithCoord[3, i].Value = BitConverter.ToSingle(ffs.coord[i].w_end, 0) * max_w;
-                    dataGridViewWithCoord[4, i].Value = BitConverter.ToSingle(ffs.coord[i].h_start, 0) * max_h;
-                    dataGridViewWithCoord[5, i].Value = BitConverter.ToSingle(ffs.coord[i].h_end, 0) * max_h;
-                    dataGridViewWithCoord[6, i].Value = BitConverter.ToInt32(ffs.coord[i].n_texture, 0);
-                    dataGridViewWithCoord[7, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].widht, 0));
-                    dataGridViewWithCoord[8, i].Value = Math.Round(BitConverter.ToSingle(ffs.coord[i].height, 0));
-
-                    dataGridViewWithCoord[9, i].Value = BitConverter.ToInt32(ffs.coord[i].HZ, 0);
-                    dataGridViewWithCoord[10, i].Value = BitConverter.ToSingle(ffs.coord[i].kern_left_side, 0);
-                    dataGridViewWithCoord[11, i].Value = BitConverter.ToSingle(ffs.coord[i].to_top, 0);
-                    dataGridViewWithCoord[12, i].Value = BitConverter.ToSingle(ffs.coord[i].widht_with_kern, 0);
-                }
-
-                //b[0]++;
-                for (int j = 0; j < dataGridViewWithCoord.ColumnCount; j++)
-                {
-                    dataGridViewWithCoord[j, i].Style.BackColor = System.Drawing.Color.White;
-                }
-            }
-        }
-
-
         private string ConvertToString(byte[] mas)
         {
             string str = "";
@@ -419,18 +197,6 @@ namespace TTG_Tools
             { str += b.ToString("x") + " "; }
 
             return str;
-        }
-
-        private void fillTableOfTextures()
-        {
-            dataGridViewWithTextures.RowCount = ffs.dds.Count();
-            for (int i = 0; i < ffs.dds.Count(); i++)
-            {
-                dataGridViewWithTextures[0, i].Value = i.ToString();
-                dataGridViewWithTextures[1, i].Value = BitConverter.ToInt32(ffs.dds[i].height_in_dds, 0);
-                dataGridViewWithTextures[2, i].Value = BitConverter.ToInt32(ffs.dds[i].widht_in_dds, 0);
-                dataGridViewWithTextures[3, i].Value = BitConverter.ToInt32(ffs.dds[i].size_in_font, 0);
-            }
         }
 
         public bool CompareArray(byte[] arr0, byte[] arr1)
@@ -442,9 +208,6 @@ namespace TTG_Tools
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ffs.coord.Clear();
-            ffs.dds.Clear();
-
             //try
             //{
             ofd.Filter = "Font files (*.font)|*.font";
@@ -479,9 +242,6 @@ namespace TTG_Tools
                 }
                 if (read)
                 {
-                    version_used = -1;
-                    int DecKey = -1;
-
                     fontFlags = null;
 
                     byte[] header = new byte[4];
@@ -501,6 +261,7 @@ namespace TTG_Tools
 
                     byte[] check_header = new byte[4];
                     Array.Copy(binContent, 0, check_header, 0, check_header.Length);
+                    encKey = null;
 
                     if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
                     && (Encoding.ASCII.GetString(check_header) != "6VSM") && (Encoding.ASCII.GetString(check_header) != "NIBM")) //Supposed this font encrypted
@@ -508,7 +269,7 @@ namespace TTG_Tools
                         //First trying decrypt probably encrypted font
                         try
                         {
-                            string info = Methods.FindingDecrytKey(binContent, "font");
+                            string info = Methods.FindingDecrytKey(binContent, "font", ref encKey);
                             if (info != null)
                             {
                                 MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
@@ -546,7 +307,7 @@ namespace TTG_Tools
                     int lenStr;
                     bool someTexData = false;
 
-                    version_used = countElements;
+                    //version_used = countElements;
 
                     tmp = new byte[8];
                     Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -966,7 +727,6 @@ namespace TTG_Tools
         {
             Methods.DeleteCurrentFile((ofd.FileName));
             FileStream fs = new FileStream((ofd.FileName), FileMode.OpenOrCreate);
-            SaveFont(fs, ffs);
             fs.Close();
 
             encFunc(ofd.FileName);
@@ -974,238 +734,9 @@ namespace TTG_Tools
             edited = false; //Файл сохранили, так что вернули флаг на ЛОЖЬ
         }
 
-        private void SaveFont(FileStream fs, FontStructure ffs)
+        private void SaveFont(FileStream fs, ClassesStructs.FontClass.ClassFont font)
         {
-            //сохраняем из дата грид в прогу
-            for (int i = 0; i < ffs.coord.Count; i++)
-            {
-                int z = Convert.ToInt32(dataGridViewWithCoord[6, i].Value);
-                //int z = BitConverter.ToInt32(ffs.coord[i].n_texture, 0);
-                int max_x = BitConverter.ToInt32(ffs.dds[z].widht_in_dds, 0);
-                int max_y = BitConverter.ToInt32(ffs.dds[z].height_in_dds, 0);
-                ffs.coord[i].w_start = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[2, i].Value) / max_x);
-                ffs.coord[i].w_end = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[3, i].Value) / max_x);
-                ffs.coord[i].h_start = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[4, i].Value) / max_y);
-                ffs.coord[i].h_end = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[5, i].Value) / max_y);
-                ffs.coord[i].n_texture = BitConverter.GetBytes((int)Convert.ToInt32(dataGridViewWithCoord[6, i].Value.ToString()));
-
-                if (version_used != -1 && version_used >= 6)
-                {
-                    byte[] widht = BitConverter.GetBytes((float)(Convert.ToInt32(dataGridViewWithCoord[7, i].Value)));//-2 тут
-                    byte[] height = BitConverter.GetBytes((float)(Convert.ToInt32(dataGridViewWithCoord[8, i].Value)));
-                    ffs.coord[i].widht = widht;
-                    ffs.coord[i].height = height;
-                }
-
-                if (version_used >= 9)
-                {
-                    //dataGridViewWithCoord[1, i].Value = Methods.ConvertHexToString(ffs.coord[i].symbol, 0, 4, MainMenu.settings.ASCII_N, false);
-                    ffs.coord[i].HZ = BitConverter.GetBytes((int)Convert.ToInt32(dataGridViewWithCoord[9, i].Value.ToString()));
-                    ffs.coord[i].kern_left_side = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[10, i].Value.ToString()));
-                    ffs.coord[i].to_top = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[11, i].Value.ToString()));
-                    ffs.coord[i].widht_with_kern = BitConverter.GetBytes((float)Convert.ToDouble(dataGridViewWithCoord[12, i].Value.ToString()));
-                }
-            }
-
-
-            if (version_used < 9)
-            {
-                //записываем всё в файл
-                fs.Write(ffs.header_of_file, 0, ffs.header_of_file.Length);
-                fs.Write(ffs.coord_lenght, 0, ffs.coord_lenght.Length);
-                fs.Write(ffs.coord_count, 0, ffs.coord_count.Length);
-
-                for (int i = 0; i < ffs.coord.Count; i++)
-                {
-                    fs.Write(ffs.coord[i].n_texture, 0, ffs.coord[i].n_texture.Length);
-                    fs.Write(ffs.coord[i].w_start, 0, ffs.coord[i].w_start.Length);
-                    fs.Write(ffs.coord[i].w_end, 0, ffs.coord[i].w_end.Length);
-                    fs.Write(ffs.coord[i].h_start, 0, ffs.coord[i].h_start.Length);
-                    fs.Write(ffs.coord[i].h_end, 0, ffs.coord[i].h_end.Length);
-
-                    if (version_used != -1 && version_used >= 6)
-                    {
-                        fs.Write(ffs.coord[i].widht, 0, ffs.coord[i].widht.Length);
-                        fs.Write(ffs.coord[i].height, 0, ffs.coord[i].height.Length);
-                    }
-                }
-
-                for (int i = 0; i < ffs.dds.Count; i++)
-                {
-                    fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
-                    fs.Write(ffs.dds[i].widht_in_dds, 0, ffs.dds[i].widht_in_dds.Length);
-                    fs.Write(ffs.dds[i].height_in_dds, 0, ffs.dds[i].height_in_dds.Length);
-
-                    if (iOS == false)
-                    {
-                        fs.Write(ffs.dds[i].hz_data_after_sizes, 0, ffs.dds[i].hz_data_after_sizes.Length);
-                        fs.Write(ffs.dds[i].size_in_font, 0, ffs.dds[i].size_in_font.Length);
-                        fs.Write(ffs.dds[i].dds_content, 0, ffs.dds[i].dds_content.Length);
-                    }
-                    else
-                    {
-                        int position = ffs.dds[i].hz_data_after_sizes.Length;
-                        Array.Copy(ffs.dds[i].size_in_font, 0, ffs.dds[i].hz_data_after_sizes, position - 48, ffs.dds[i].size_in_font.Length);
-                        Array.Copy(ffs.dds[i].widht_in_dds, 0, ffs.dds[i].hz_data_after_sizes, position - 36, ffs.dds[i].widht_in_dds.Length);
-                        Array.Copy(ffs.dds[i].height_in_dds, 0, ffs.dds[i].hz_data_after_sizes, position - 40, ffs.dds[i].height_in_dds.Length);
-                        byte[] Binmeta = new byte[4];
-                        Array.Copy(ffs.dds[i].dds_content, 48, Binmeta, 0, 4);
-                        int meta_size = BitConverter.ToInt32(Binmeta, 0);
-
-                        byte[] texLength = new byte[4];
-                        texLength = BitConverter.GetBytes(ffs.dds[i].dds_content.Length - 52 - meta_size);
-                        Array.Copy(texLength, 0, ffs.dds[i].hz_data_after_sizes, position - 24, texLength.Length);
-
-                        fs.Write(ffs.dds[i].hz_data_after_sizes, 0, ffs.dds[i].hz_data_after_sizes.Length);
-
-                        byte[] pvrHead = { 0x50, 0x56, 0x52, 0x21, 0x01, 0x00, 0x00, 0x00 };
-                        fs.Write(pvrHead, 0, pvrHead.Length);
-
-                        byte[] temp = new byte[ffs.dds[i].dds_content.Length - 52 - meta_size];
-                        Array.Copy(ffs.dds[i].dds_content, 52 + meta_size, temp, 0, temp.Length);
-                        fs.Write(temp, 0, temp.Length);
-                    }
-                }
-            }
-            else if (version_used >= 9)//покер найт2
-            {
-                //записываем всё в файл
-                if (version_used >= 10)//Волк, Ходячие 2 и Ходячие 1 Remastered (Android, PS Vita, PS4 и Xbox One)
-                {
-                    byte[] ddsOffset, ddsLenght = new byte[4];
-                    int offset = ffs.header_of_file.Length - 128 + dataGridViewWithCoord.Rows.Count * 12 * 4 + 8 + 8;
-                    if (version_used == 14 || version_used == 15)
-                    {
-                        byte[] tmp = new byte[4];
-                        Array.Copy(ffs.header_of_file, 16, tmp, 0, tmp.Length);
-                        if (BitConverter.ToInt32(tmp, 0) == 13) offset -= 36; //Guardians of the Galaxy
-                        offset -= (24 + 11); //Batman 1, WD3
-                    }
-
-                    if (version_used >= 11)
-                    {
-                        offset++;
-                    }
-
-                    int lenght = 0;
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        offset += ffs.dds[i].header.Length;
-                        lenght += ffs.dds[i].dds_content.Length;
-
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
-                        {
-                            offset += ffs.dds[i].pn2dds_head[j].Length;
-                        }
-                    }
-
-                   
-
-                    if (version_used == 14 || version_used == 15) offset += 4 + 8 + 8 + 3;
-                    if (version_used == 16) offset -= 12; //Tales from the Borderlands Redux
-
-                    ddsOffset = BitConverter.GetBytes(offset);
-
-                    Array.Copy(ddsOffset, 0, ffs.header_of_file, 4, 4);
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        ddsLenght = BitConverter.GetBytes(lenght);
-                    }
-                    Array.Copy(ddsLenght, 0, ffs.header_of_file, 12, 4);
-                }
-
-                fs.Write(ffs.header_of_file, 0, ffs.header_of_file.Length);
-                byte[] temp = new byte[4];
-                ffs.coord_count = BitConverter.GetBytes(dataGridViewWithCoord.Rows.Count);
-                ffs.coord_lenght = BitConverter.GetBytes(dataGridViewWithCoord.Rows.Count * 12 * 4 + 8);
-                fs.Write(ffs.coord_lenght, 0, 4);
-                fs.Write(ffs.coord_count, 0, 4);
-
-                for (int i = 0; i < ffs.coord.Count; i++)
-                {
-                    fs.Write(ffs.coord[i].symbol, 0, 4);
-                    fs.Write(ffs.coord[i].n_texture, 0, 4);
-                    fs.Write(ffs.coord[i].HZ, 0, 4);
-                    fs.Write(ffs.coord[i].w_start, 0, 4);
-                    fs.Write(ffs.coord[i].w_end, 0, 4);
-                    fs.Write(ffs.coord[i].h_start, 0, 4);
-                    fs.Write(ffs.coord[i].h_end, 0, 4);
-                    fs.Write(ffs.coord[i].widht, 0, 4);
-                    fs.Write(ffs.coord[i].height, 0, 4);
-                    fs.Write(ffs.coord[i].kern_left_side, 0, 4);
-                    fs.Write(ffs.coord[i].to_top, 0, 4);
-                    fs.Write(ffs.coord[i].widht_with_kern, 0, 4);
-                }
-                int lenghtDds = 8;//сперва 8 байт
-
-                for (int i = 0; i < ffs.dds.Count; i++)
-                {
-                    if (version_used == 9)
-                    {
-                        lenghtDds += ffs.dds[i].dds_content.Length;
-                    }
-                    
-                    lenghtDds += ffs.dds[i].header.Length + ffs.dds[i].pn2dds_head.Count * 4;
-                }
-
-                if (version_used == 14 || version_used == 15) lenghtDds += ffs.dds[ffs.dds.Count - 1].pn2dds_head.Count * 4;
-
-                byte[] lenghtDdsByte = new byte[4];
-                lenghtDdsByte = BitConverter.GetBytes(lenghtDds);
-                fs.Write(lenghtDdsByte, 0, 4);
-                fs.Write(ffs.count_dds, 0, 4);
-                if (version_used == 9)
-                {
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
-                        {
-                            fs.Write(ffs.dds[i].pn2dds_head[j], 0, 4);
-                        }
-
-                        fs.Write(ffs.dds[i].dds_content, 0, ffs.dds[i].dds_content.Length);
-                    }
-                }
-                else if (version_used == 10)
-                {
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
-                        {
-                            fs.Write(ffs.dds[i].pn2dds_head[j], 0, 4);
-                        }
-                    }
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        fs.Write(ffs.dds[i].dds_content, 0, ffs.dds[i].dds_content.Length);
-                    }
-                }
-                else if (version_used >= 11)
-                {
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        fs.Write(ffs.dds[i].header, 0, ffs.dds[i].header.Length);
-
-                        for (int j = 0; j < ffs.dds[i].pn2dds_head.Count; j++)
-                        { 
-                           fs.Write(ffs.dds[i].pn2dds_head[j], 0, 4);
-                        }
-                    }
-
-                    byte[] z = { 0x30 };
-
-                    fs.Write(z, 0, z.Length);
-
-                    for (int i = 0; i < ffs.dds.Count; i++)
-                    {
-                        fs.Write(ffs.dds[i].dds_content, 0, ffs.dds[i].dds_content.Length);
-                    }
-                }
-
-
-            }
+            
         }
 
         private void textBox8_TextChanged(object sender, EventArgs e)
@@ -1387,40 +918,18 @@ namespace TTG_Tools
             {
                 FileStream fs = new FileStream(saveFD.FileName, FileMode.Create);
                 Methods.DeleteCurrentFile(saveFD.FileName);
-                if (version_used < 9)
+
+                switch (font.NewFormat)
                 {
-                    //fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);
-                    fs.Write(font.tex[file_n].Content, 0, font.tex[file_n].Content.Length);
+                    case true:
+                        fs.Write(font.tex[file_n].Content, 0, font.tex[file_n].Content.Length);
+                        break;
+
+                    default:
+                        fs.Write(font.NewTex[file_n].Tex.Content, 0, font.NewTex[file_n].Tex.Content.Length);
+                        break;
                 }
-                else if (version_used >= 9)
-                {
-                    fs.Write(font.NewTex[file_n].Tex.Content, 0, font.NewTex[file_n].Tex.Content.Length);
-                    /*int num = 4;
 
-                    if (version_used == 11 || version_used == 12) num = 5;
-                    else if (version_used == 13) num = 6;
-                    else if (version_used == 14) num = 4;
-                    else if (version_used == 16) num = 3; //Tales from the borderlands redux
-
-                    byte[] mip = new byte[4];
-                    mip = BitConverter.GetBytes(1);
-
-                    bool pvr = false;
-                    string result = null;
-
-                    //byte[] header = TextureWorker.genHeader(ffs.dds[file_n].widht_in_dds, ffs.dds[file_n].height_in_dds, mip, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), platform, ref pvr, ref result);
-                    //fs.Write(header, 0, header.Length);
-
-                    if(platform == 15)
-                    {
-                        int int_width = BitConverter.ToInt32(ffs.dds[file_n].widht_in_dds, 0);
-                        int int_height = BitConverter.ToInt32(ffs.dds[file_n].height_in_dds, 0);
-
-                        byte[] tmp_dds = Swizzle.NintendoSwizzle(ffs.dds[file_n].dds_content, int_width, int_height, BitConverter.ToInt32(ffs.dds[file_n].pn2dds_head[num], 0), true);
-                        fs.Write(tmp_dds, 0, tmp_dds.Length);
-                    }
-                    else fs.Write(ffs.dds[file_n].dds_content, 0, ffs.dds[file_n].dds_content.Length);*/
-                }
                 fs.Close();
             }
         }
@@ -1430,7 +939,9 @@ namespace TTG_Tools
             int file_n = dataGridViewWithTextures.SelectedCells[0].RowIndex;
             OpenFileDialog openFD = new OpenFileDialog();
 
-            if (iOS == true && version_used < 9)
+            openFD.Filter = "dds files (*.dds)|*.dds";
+
+            /*if (iOS == true && version_used < 9)
             {
                 openFD.Filter = "PVR files (*.pvr)|*.pvr";
             }
@@ -1438,19 +949,15 @@ namespace TTG_Tools
             {
                 openFD.Filter = "dds files (*.dds)|*.dds";
             }
-            else openFD.Filter = "DDS-files (*.dds)|*.dds|PVR-files (*.pvr)|*.pvr";
+            else openFD.Filter = "DDS-files (*.dds)|*.dds|PVR-files (*.pvr)|*.pvr";*/
 
 
             if (openFD.ShowDialog() == DialogResult.OK)
             {
-                FileStream fs = new FileStream(openFD.FileName, FileMode.Open);
-                byte[] temp = Methods.ReadFull(fs);
-                fs.Close();
-
-
                 int meta_size = 0;
 
-                //Решил сначала проверить заголовок, а потом приниматься за копирование данных о ширине и высоте текстуры,
+                #region Old code
+                /*//Решил сначала проверить заголовок, а потом приниматься за копирование данных о ширине и высоте текстуры,
                 //ну и длине самой текстуры. А то может выйти непонятно что.
 
                 if (version_used < 9)
@@ -1491,6 +998,9 @@ namespace TTG_Tools
                                 break;
                         }
                     }
+                    
+                    
+
                     ffs.dds[file_n].dds_content = temp;
                     if (iOS == false) ffs.dds[file_n].size_in_font = BitConverter.GetBytes(temp.Length);
                 }
@@ -1580,8 +1090,13 @@ namespace TTG_Tools
                         MessageBox.Show("Unknown texture format. Please contact me.", "Error");
                         return;
                     }
-                }
-                fillTableOfTextures();
+                }*/
+                #endregion
+
+                ReplaceTexture(openFD.FileName, file_n, font);
+
+                //fillTableOfTextures();
+                fillTableofTextures(font);
                 edited = true; //Отмечаем, что шрифт изменился
             }
         }
@@ -1595,7 +1110,7 @@ namespace TTG_Tools
             {
                 Methods.DeleteCurrentFile((saveFD.FileName));
                 FileStream fs = new FileStream((saveFD.FileName), FileMode.OpenOrCreate);
-                SaveFont(fs, ffs);
+                SaveFont(fs, font);
                 fs.Close();
 
                 encFunc(saveFD.FileName);
@@ -1617,13 +1132,11 @@ namespace TTG_Tools
                 else if (status == DialogResult.Yes) //Если (состояние == DialogResult.Да)
                 {
                     FileStream fs = new FileStream(ofd.SafeFileName, FileMode.Create); //Сохраняем в открытый файл.
-                    SaveFont(fs, ffs);
+                    SaveFont(fs, font);
                     //После соханения чистим списки
-                    version_of_font.Clear();
                 }
                 else //А иначе просто закрываем программу и чистим списки
                 {
-                    version_of_font.Clear();
                 }
             }
         }
@@ -1649,10 +1162,10 @@ namespace TTG_Tools
                         else if (end_edit_column == 6)
                         {
                             int temp = Convert.ToInt32(dataGridViewWithCoord[end_edit_column, end_edit_row].Value);
-                            if (temp >= ffs.dds.Count)
+                            /*if (temp >= ffs.dds.Count)
                             {
                                 dataGridViewWithCoord[end_edit_column, end_edit_row].Value = old_data;
-                            }
+                            }*/
                         }
                     }
                 }
@@ -1696,7 +1209,8 @@ namespace TTG_Tools
 
         private void importCoordinatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFD = new OpenFileDialog();
+            #region Old code
+            /*OpenFileDialog openFD = new OpenFileDialog();
             openFD.Filter = "txt files (*.txt)|*.txt";
             openFD.FileName = Methods.GetNameOfFileOnly(ofd.SafeFileName, ".font") + ".txt";
 
@@ -1753,7 +1267,8 @@ namespace TTG_Tools
                 }
                 sr.Close();
                 edited = true; //Измененный шрифт
-            }
+            }*/
+            #endregion
         }
 
         private void exportCoordinatesToolStripMenuItem1_Click(object sender, EventArgs e)
@@ -1856,7 +1371,7 @@ namespace TTG_Tools
 
         private void importCoordinatesToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFD = new OpenFileDialog();
+            /*OpenFileDialog openFD = new OpenFileDialog();
             openFD.Filter = "txt files (*.txt)|*.txt";
             //openFD.FileName = Methods.GetNameOfFileOnly(ofd.SafeFileName, ".font") + ".txt";
 
@@ -1891,12 +1406,13 @@ namespace TTG_Tools
                 }
                 sr.Close();
                 edited = true; //Шрифт изменился
-            }
+            }*/
         }
 
         public void importCoordinatesFromFontStudioxmlToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFD = new OpenFileDialog();
+            #region OldCode
+            /*OpenFileDialog openFD = new OpenFileDialog();
             openFD.Filter = "xml files (*.xml)|*.xml";
 
             if (openFD.ShowDialog() == DialogResult.OK)
@@ -2067,7 +1583,8 @@ namespace TTG_Tools
                 ///
                 sr.Close();
                 edited = true; //Шрифт изменился
-            }
+            }*/
+            #endregion
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -2299,17 +1816,18 @@ namespace TTG_Tools
 
                                         if(Convert.ToInt32(splitted[k + 1]) > font.TexCount)
                                         {
-                                            for(int j = 0; j < tmpNewTex.Length; j++)
+
+                                            /*for(int j = 0; j < tmpNewTex.Length; j++)
                                             {
                                                 tmpNewTex[j] = font.NewTex[0];
-                                            }
+                                            }*/
                                         }
                                         else
                                         {
-                                            for(int j = 0; j < tmpNewTex.Length; j++)
+                                            /*for(int j = 0; j < tmpNewTex.Length; j++)
                                             {
                                                 tmpNewTex[j] = font.NewTex[j];
-                                            }
+                                            }*/
                                         }
                                         break;
                                 }
@@ -2332,7 +1850,7 @@ namespace TTG_Tools
                                     case "file":
                                         if(File.Exists(fi.DirectoryName + "\\" + splitted[k + 1]))
                                         {
-                                            //THINK ABOUT GET NEEDED DATA FROM IMPORT TEXTURE
+
                                             tmpNewTex[idNum].Tex.Content = File.ReadAllBytes(fi.DirectoryName + "\\" + splitted[k + 1]);
                                             
                                             tmpNewTex[idNum].textureSize = (uint)tmpNewTex[idNum].Tex.Content.Length - 128;
@@ -2462,14 +1980,14 @@ namespace TTG_Tools
                                         {
                                             for(int c = 0; c < tmpOldTex.Length; c++)
                                             {
-                                                tmpOldTex[c] = font.tex[0];
+                                                tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[0]);
                                             }
                                         }
                                         else
                                         {
                                             for (int c = 0; c < tmpOldTex.Length; c++)
                                             {
-                                                tmpOldTex[c] = font.tex[c];
+                                                tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[c]);
                                             }
                                         }
 
@@ -2586,7 +2104,16 @@ namespace TTG_Tools
 
                     if (tmpOldTex != null)
                     {
-                        font.tex = tmpOldTex;
+                        font.tex = new TextureClass.OldT3Texture[tmpOldTex.Length];
+
+                        for(int i = 0; i < font.tex.Length; i++)
+                        {
+                            font.tex[i] = new TextureClass.OldT3Texture(tmpOldTex[i]);
+                        }
+
+                        tmpOldTex = null;
+                        GC.Collect();
+
                         font.TexCount = font.tex.Length;
                         fillTableofTextures(font);
                     }
@@ -2604,7 +2131,8 @@ namespace TTG_Tools
 
         private void changeCoordinatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
+            #region Old code
+            /*OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Font txt coords (*.txt) | *.txt";
 
             if (ofd.ShowDialog() == DialogResult.OK)
@@ -2749,12 +2277,13 @@ namespace TTG_Tools
 
                 sr.Close();
                 fs.Close();
-            }
+            }*/
+            #endregion
         }
 
         private void removeDuplicatesCharsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(ffs != null && ffs.coord.Count > 0)
+            /*if(ffs != null && ffs.coord.Count > 0)
             {
                 var tmp_array = ffs.coord.ToArray();
                 Array.Sort(tmp_array, (tmp_ar1, tmp_ar2) => BitConverter.ToInt32(tmp_ar1.symbol, 0).CompareTo(BitConverter.ToInt32(tmp_ar2.symbol, 0)));
@@ -2765,7 +2294,7 @@ namespace TTG_Tools
                 GC.Collect();
                 fillTableOfCoordinates();
                 if(!edited) edited = true;
-            }
+            }*/
         }
     }
 }

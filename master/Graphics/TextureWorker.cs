@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-using System.Threading.Tasks;
+using System.Drawing;
 
 namespace TTG_Tools
 {
@@ -30,7 +30,7 @@ namespace TTG_Tools
             }
         }
 
-        public static string ExtractTextures(string InputFile, string OutputDir)
+        public static string DoWork(string InputFile, string OutputDir, bool extract, bool FullEncrypt, int version)
         {
             string result = null;
             string additionalMessage = null;
@@ -42,6 +42,8 @@ namespace TTG_Tools
             byte[] check_header = new byte[4];
             Array.Copy(binContent, 0, check_header, 0, check_header.Length);
             int poz = 4;
+            int headerPos = 0;
+            byte[] EncKey = null;
 
             if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
             && (Encoding.ASCII.GetString(check_header) != "6VSM")) //Supposed this texture encrypted
@@ -49,7 +51,7 @@ namespace TTG_Tools
                 //First trying decrypt probably encrypted font
                 try
                 {
-                    string info = Methods.FindingDecrytKey(binContent, "texture");
+                    string info = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
                     if (info != null)
                     {
                         additionalMessage = "D3dtx file was encrypted, but I decrypted. " + info;
@@ -135,11 +137,11 @@ namespace TTG_Tools
                     }
                 }
 
+                headerPos = poz;
+
                 if (!NewFormat)
                 {
                     ClassesStructs.TextureClass.OldT3Texture oldTex = GetOldTextures(binContent, ref poz, flags, someData);
-
-                    result = "File " + fi.Name + " successfully extracted. ";
 
                     if (oldTex == null)
                     {
@@ -147,10 +149,65 @@ namespace TTG_Tools
                         return result;
                     }
 
-                    if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
-                    File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), oldTex.Content);
+                    if (extract)
+                    {
+                        try
+                        {
+                            result = "File " + fi.Name + " successfully extracted. ";
 
-                    if (additionalMessage != null) result += additionalMessage;
+                            if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
+                            File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), oldTex.Content);
+
+                            if (additionalMessage != null) result += additionalMessage;
+                        }
+                        catch
+                        {
+                            return "Something wrong with file " + fi.Name;
+                        }
+                    }
+                    else
+                    {
+                        result = "File " + fi.Name + " successfully imported. ";
+                        byte[] NewContent = File.ReadAllBytes(fi.FullName.Remove(fi.FullName.Length - 5) + "dds");
+                        oldTex.Content = new byte[NewContent.Length];
+                        Array.Copy(NewContent, 0, oldTex.Content, 0, oldTex.Content.Length);
+                        
+                        tmp = new byte[4];
+                        Array.Copy(NewContent, 12, tmp, 0, tmp.Length);
+                        oldTex.Height = BitConverter.ToInt32(tmp, 0);
+
+                        tmp = new byte[4];
+                        Array.Copy(NewContent, 16, tmp, 0, tmp.Length);
+                        oldTex.Width = BitConverter.ToInt32(tmp, 0);
+
+                        oldTex.TexSize = oldTex.Content.Length;
+
+                        tmp = new byte[4];
+                        Array.Copy(oldTex.Content, 28, tmp, 0, tmp.Length);
+                        oldTex.Mip = BitConverter.ToInt32(tmp, 0);
+                        if (oldTex.Mip == 0) oldTex.Mip = 1;
+
+                        if (File.Exists(OutputDir + "\\" + fi.Name)) File.Delete(OutputDir + "\\" + fi.Name);
+
+                        MemoryStream ms = new MemoryStream();
+                        tmp = new byte[headerPos];
+                        Array.Copy(binContent, 0, tmp, 0, tmp.Length);
+                        ms.Write(tmp, 0, tmp.Length);
+
+                        bool NeedEncrypt = false;
+
+                        if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM") && (Encoding.ASCII.GetString(check_header) != "6VSM")) NeedEncrypt = true;
+
+                        ReplaceOldTextures(ms, oldTex, someData, NeedEncrypt, EncKey, version);
+                        tmp = ms.ToArray();
+                        ms.Close();
+
+                        if (FullEncrypt) Methods.meta_crypt(tmp, EncKey, version, false);
+
+                        FileStream fs = new FileStream(OutputDir + "\\" + fi.Name, FileMode.CreateNew);
+                        fs.Write(tmp, 0, tmp.Length);
+                        fs.Close();
+                    }
 
                     return result;
                 }
@@ -159,16 +216,17 @@ namespace TTG_Tools
                 
                 ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, ref tmpPoz, flags, someData, false, ref additionalMessage);
 
-                result = "File " + fi.Name + " successfully extracted. ";
-
                 if (tex == null)
                 {
                     result = "Something wrong with this file: " + fi.Name;
                     return result;
                 }
 
+                result = "File " + fi.Name + " successfully extracted. ";
+
                 if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
                 File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Tex.Content);
+                
 
                 if (additionalMessage != null) result += additionalMessage;
 
@@ -178,6 +236,80 @@ namespace TTG_Tools
             {
                 return fi.Name + ": Unsupported format";
             }
+        }
+
+        public static int ReplaceOldTextures(Stream stream, ClassesStructs.TextureClass.OldT3Texture tex, bool someData, bool NeedEncrypt, byte[] EncKey, int version)
+        {
+            BinaryWriter bw = new BinaryWriter(stream);
+
+            if (someData)
+            {
+                bw.Write(tex.sizeBlock);
+                bw.Write(tex.someValue);
+            }
+
+            byte[] tmp = Encoding.ASCII.GetBytes(tex.ObjectName);
+            int len = tmp.Length;
+            int addLen = len;
+
+            if (tex.AdditionalSize)
+            {
+                addLen = len + 8;
+                bw.Write(addLen);
+            }
+
+            bw.Write(len);
+            bw.Write(tmp);
+
+            tmp = Encoding.ASCII.GetBytes(tex.SubobjectName);
+            len = tmp.Length;
+            addLen = len;
+
+            if (tex.AdditionalSize)
+            {
+                addLen = len + 8;
+                bw.Write(addLen);
+            }
+
+            bw.Write(len);
+            bw.Write(tmp);
+
+            bw.Write(tex.Flags);
+            bw.Write(tex.Mip);
+            bw.Write(tex.TextureFormat);
+            bw.Write(tex.Width);
+            bw.Write(tex.Height);
+            bw.Write(tex.block);
+            bw.Write(tex.TexSize);
+
+            if (NeedEncrypt)
+            {
+                BlowFishCS.BlowFish blowfish = new BlowFishCS.BlowFish(EncKey, version);
+                int size = 2048;
+                if (size > tex.Content.Length) size = tex.Content.Length;
+
+                tmp = new byte[size];
+                Array.Copy(tex.Content, 0, tmp, 0, tmp.Length);
+                tmp = blowfish.Crypt_ECB(tmp, version, false);
+                Array.Copy(tmp, 0, tex.Content, 0, tmp.Length);
+
+                blowfish = null;
+                GC.Collect();
+            }
+
+            bw.Write(tex.Content);
+
+            if ((tex.TexFlags != null) && (tex.TexFlags.TexSizes != null))
+            {
+                for (int j = 0; j < tex.TexFlags.TexSizes.Length; j++)
+                {
+                    bw.Write(tex.TexFlags.SubTexContent[j]);
+                }
+            }
+
+            bw.Close();
+
+            return 0;
         }
 
         public static ClassesStructs.TextureClass.OldT3Texture GetOldTextures(byte[] binContent, ref int poz, bool flags, bool someData)
@@ -216,6 +348,7 @@ namespace TTG_Tools
                 {
                     nameLen = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
+                    tex.AdditionalSize = true;
                 }
 
                 tmp = new byte[nameLen];
@@ -626,6 +759,7 @@ namespace TTG_Tools
             Array.Copy(binContent, 0, check_header, 0, 4);
             byte[] GetVers = new byte[4]; //Пытаемся проверить версию
             Array.Copy(binContent, 4, GetVers, 0, 4);
+            byte[] EncKey = null;
 
             if (((BitConverter.ToInt32(GetVers, 0) > 6) || (BitConverter.ToInt32(GetVers, 0) < 0)) && 
                ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
@@ -635,7 +769,7 @@ namespace TTG_Tools
 
                 if (index == -1)
                 {
-                    result = Methods.FindingDecrytKey(binContent, "texture");
+                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
                     if (result != null)
                     {
                         string temp = "File was decrypted! " + result;
@@ -656,7 +790,7 @@ namespace TTG_Tools
 
                 if (index == -1)
                 {
-                    result = Methods.FindingDecrytKey(binContent, "texture");
+                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
                     if (result != null)
                     {
                         string temp = "File was decrypted! " + result;
@@ -1370,11 +1504,12 @@ namespace TTG_Tools
 
             Array.Copy(d3dtxContent, 0, checkHeader, 0, 4);
             Array.Copy(d3dtxContent, 4, checkVer, 0, 4);
+            byte[] EncKey = null;
 
             if((Encoding.ASCII.GetString(checkHeader) != "5VSM" && Encoding.ASCII.GetString(checkHeader) != "ERTM"
                 && Encoding.ASCII.GetString(checkHeader) != "NIBM") && (BitConverter.ToInt32(checkVer, 0) < 0 || BitConverter.ToInt32(checkVer, 0) > 6))
             {
-                string result = Methods.FindingDecrytKey(d3dtxContent, "texture");
+                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey);
 
                 if (result != null)
                 {
@@ -1387,7 +1522,7 @@ namespace TTG_Tools
                 && (Methods.FindStartOfStringSomething(d3dtxContent, 8, "DDS") > d3dtxContent.Length - 100
                 && Methods.FindStartOfStringSomething(d3dtxContent, 8, "PVR!") > d3dtxContent.Length - 100))
             {
-                string result = Methods.FindingDecrytKey(d3dtxContent, "texture");
+                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey);
 
                 if (result != null)
                 {

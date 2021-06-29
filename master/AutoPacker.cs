@@ -951,7 +951,7 @@ namespace TTG_Tools
                         {
                             if ((BitConverter.ToInt32(checkVer, 0) < 0) || (BitConverter.ToInt32(checkVer, 0) > 6))
                             {
-                                Methods.FindingDecrytKey(fontContent, "font");
+                                Methods.FindingDecrytKey(fontContent, "font", ref encKey);
                                 //Methods.meta_crypt(fontContent, MainMenu.gamelist[selected_index].key, 2, true);
                                 checkVer = new byte[4];
                                 Array.Copy(fontContent, 4, checkVer, 0, 4);
@@ -972,7 +972,7 @@ namespace TTG_Tools
                             {
                                 if (Methods.FindStartOfStringSomething(fontContent, 0, "DDS") > fontContent.Length - 100)
                                 {
-                                    Methods.FindingDecrytKey(fontContent, "font");
+                                    Methods.FindingDecrytKey(fontContent, "font", ref encKey);
 
                                     if (File.Exists(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name)) File.Delete(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name);
                                     fs = new FileStream(MainMenu.settings.pathForOutputFolder + "\\" + fi[i].Name, FileMode.CreateNew);

@@ -106,7 +106,7 @@ namespace TTG_Tools
             return result;
         }
 
-        public static string FindingDecrytKey(byte[] bytes, string TypeFile) //Ищем ключ расшифровки для файлов langdb, dlog и d3dtx
+        public static string FindingDecrytKey(byte[] bytes, string TypeFile, ref byte[] KeyEnc) //Ищем ключ расшифровки для файлов langdb, dlog и d3dtx
         {
             string result = null;
             byte[] decKey;
@@ -164,6 +164,7 @@ namespace TTG_Tools
                         }
 
                         result = "Decryption key: " + MainMenu.gamelist[a].gamename + ". Blowfish type: old (versions 2-6)";
+                        KeyEnc = MainMenu.gamelist[a].key;
                         break;
                     }
                     else if ((BitConverter.ToInt32(CheckVerNew, 0) > 0) && (BitConverter.ToInt32(CheckVerNew, 0) < 6))
@@ -190,6 +191,7 @@ namespace TTG_Tools
                         }
 
                         result = "Decryption key: " + MainMenu.gamelist[a].gamename + ". Blowfish type: new (versions 7-9)";
+                        KeyEnc = MainMenu.gamelist[a].key;
                         break;
                     }
                 }
@@ -221,6 +223,7 @@ namespace TTG_Tools
                                 DDSstart = DDSPos;
 
                                 result = "Decryption key: " + MainMenu.gamelist[i].gamename + ". Blowfish type: old (versions 2-6)";
+                                KeyEnc = MainMenu.gamelist[i].key;
                             }
 
                         }
@@ -243,6 +246,7 @@ namespace TTG_Tools
                                     DDSstart = DDSPos;
 
                                     result = "Decryption key: " + MainMenu.gamelist[i].gamename + ". Blowfish type: new (versions 7-9)";
+                                    KeyEnc = MainMenu.gamelist[i].key;
                                 }
                             }
                         }

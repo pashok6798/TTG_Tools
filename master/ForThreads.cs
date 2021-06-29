@@ -385,6 +385,8 @@ namespace TTG_Tools
                 deleteFromInputImported = true;
             }
 
+            bool[] show = { false, false, false, false };
+
             List<string> destination = new List<string>();
             destination.Add(".d3dtx");
             destination.Add(".d3dtx");
@@ -404,14 +406,10 @@ namespace TTG_Tools
             extention.Add(".tsv");
             extention.Add(".txt");
 
-            bool show = false;
-
             for (int d = 0; d < destination.Count; d++)
             {
                 destinationForExport = destination[d];
                 whatImport = extention[d];
-
-                show = false;
 
                 if (Directory.Exists(pathInput) && Directory.Exists(pathOutput))
                 {
@@ -444,26 +442,28 @@ namespace TTG_Tools
                                     {
                                         case ".d3dtx":
                                             {
-                                                ImportDDSinD3DTX(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
-                                                show = true;
+                                            //ImportDDSinD3DTX(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
+                                            string result = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, false, false, 2);
+                                            ReportForWork(result);
+                                            show[0] = true;    
                                                 break;
                                             }
                                         case ".landb":
                                             {
                                                 ImportTXTinLANDB(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
-                                                show = true;
+                                            show[1] = true;
                                                 break;
                                             }
                                         case ".langdb":
                                             {
                                                 ImportTXTinLANGDB(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
-                                                show = true;
+                                            show[2] = true;
                                                 break;
                                             }
                                         case ".prop":
                                             {
                                                 ImportTXTinPROP(inputFiles, fileDestination, i, j, pathOutput, ref correct_work);
-                                                show = true;
+                                            show[3] = true;
                                                 break;
                                             }
                                         default:
@@ -491,8 +491,39 @@ namespace TTG_Tools
                 else
                 {
                     ReportForWork("Check for existing Input and Output folders and check pathes in config.xml!");
+                    return;
                 }
-                if(show) ReportForWork("IMPORT OF ALL *" + destinationForExport.ToUpper() + " IS COMPLETE!");
+            }
+
+            string message = "";
+
+            for (int i = 0; i < show.Length; i++)
+            {
+                if (show[i])
+                {
+                    message = "IMPORT OF ALL *";
+                    switch (i)
+                    {
+                        case 0:
+                            message += ".D3DTX";
+                            break;
+
+                        case 1:
+                            message += ".LANGDB";
+                            break;
+
+                        case 2:
+                            message += ".LANDB";
+                            break;
+
+                        case 3:
+                            message += ".PROP";
+                            break;
+                    }
+                    message += " IS COMPLETE!";
+
+                    ReportForWork(message);
+                }
             }
         }
 
@@ -916,6 +947,7 @@ namespace TTG_Tools
             AutoPacker.langdb[] database = new AutoPacker.langdb[5000];
             FileStream fs = new FileStream(inputFiles[i].FullName, FileMode.Open);
             byte[] binContent = Methods.ReadFull(fs);
+            byte[] encKey = null;
 
             tryRead:
 
@@ -952,7 +984,7 @@ namespace TTG_Tools
             {
                 try
                 {
-                    string info = Methods.FindingDecrytKey(binContent, "text"); //Пытаемся расшифровать текстовый файл.
+                    string info = Methods.FindingDecrytKey(binContent, "text", ref encKey); //Пытаемся расшифровать текстовый файл.
                     ReportForWork("File " + inputFiles[i].Name + " decrypted. " + info);
                     goto tryRead;
                 }
@@ -1000,7 +1032,6 @@ namespace TTG_Tools
 
                     if ((versionOfGame == " ") && MainMenu.settings.encLangdb == true)
                     {
-                        byte[] encKey;
                         if (MainMenu.settings.customKey) encKey = Methods.stringToKey(MainMenu.settings.encCustomKey);
                         else encKey = MainMenu.gamelist[TTG_Tools.AutoPacker.numKey].key;
 
@@ -1070,7 +1101,7 @@ namespace TTG_Tools
                                     }
                                 case ".d3dtx":
                                     {
-                                        string message = TextureWorker.ExtractTextures(inputFiles[i].FullName, pathOutput);
+                                        string message = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, true, false, 2);
                                         ReportForWork(message);
                                         //string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, MainMenu.settings.iOSsupport);
                                         //if (message != "") ReportForWork(message);
@@ -1112,6 +1143,7 @@ namespace TTG_Tools
                 byte[] header = new byte[0];
                 byte[] end_of_file = new byte[0];
                 byte[] lenght_of_all_text = new byte[4];
+                byte[] encKey = null;
 
                 byte version = 0;
                 try
@@ -1147,7 +1179,7 @@ namespace TTG_Tools
 
                     try 
                     {
-                        string info = Methods.FindingDecrytKey(binContent, "text");
+                        string info = Methods.FindingDecrytKey(binContent, "text", ref encKey);
                         ReportForWork("File " + inputFiles[i].Name + " decrypted. " + info);
                         goto tryAgain;
                     }

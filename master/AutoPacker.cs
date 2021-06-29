@@ -103,6 +103,9 @@ namespace TTG_Tools
             parametresD3DTX.Add(MainMenu.settings.pathForOutputFolder);
             parametresD3DTX.Add(MainMenu.settings.deleteD3DTXafterImport.ToString());
             parametresD3DTX.Add(MainMenu.settings.deleteDDSafterImport.ToString());
+            parametresD3DTX.Add(Convert.ToString(EncVersion));
+            parametresD3DTX.Add(MainMenu.settings.encLangdb.ToString());
+            
             var threadD3DTX = new Thread(new ParameterizedThreadStart(processD3DTX.DoImportEncoding));
             threadD3DTX.Start(parametresD3DTX);
             ////Работаем дальше

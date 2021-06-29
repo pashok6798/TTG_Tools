@@ -374,16 +374,18 @@ namespace TTG_Tools
             string pathInput = param[2];
             string pathOutput = param[3];
             //string pathTemp = param[4];
-            bool deleteFromInputSource = false;
-            bool deleteFromInputImported = false;
-            if (param[5] == "True")
+            bool deleteFromInputSource = param[5] == "True";//false;
+            bool deleteFromInputImported = param[4] == "True";//false;
+            int version = Convert.ToInt32(param[6]);
+            bool FullEncrypt = param[7] == "True";
+            /*if (param[5] == "True")
             {
                 deleteFromInputSource = true;
             }
             if (param[4] == "True")
             {
                 deleteFromInputImported = true;
-            }
+            }*/
 
             bool[] show = { false, false, false, false };
 
@@ -443,7 +445,7 @@ namespace TTG_Tools
                                         case ".d3dtx":
                                             {
                                             //ImportDDSinD3DTX(inputFiles, fileDestination, i, j, pathOutput, ref correct_work, versionOfGame);
-                                            string result = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, false, false, 2);
+                                            string result = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, false, FullEncrypt, version);
                                             ReportForWork(result);
                                             show[0] = true;    
                                                 break;
@@ -1101,7 +1103,7 @@ namespace TTG_Tools
                                     }
                                 case ".d3dtx":
                                     {
-                                        string message = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, true, false, 2);
+                                        string message = TextureWorker.DoWork(inputFiles[i].FullName, pathOutput, true, false, version);
                                         ReportForWork(message);
                                         //string message = TextureWorker.ExportTexture(inputFiles, i, AutoPacker.selected_index, key, version, versionOfGame, MainMenu.settings.iOSsupport);
                                         //if (message != "") ReportForWork(message);

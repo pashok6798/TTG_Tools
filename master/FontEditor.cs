@@ -25,8 +25,9 @@ namespace TTG_Tools
         OpenFileDialog ofd = new OpenFileDialog();
         bool edited; //Проверка на изменения в шрифте
         bool iOS; //Для поддержки pvr текстур
-        bool encripted; //В случае, если шрифт был зашифрован
+        bool encrypted; //В случае, если шрифт был зашифрован
         byte[] encKey;
+        int version;
         byte[] tmpHeader;
         byte[] check_header;
         bool someTexData;
@@ -224,7 +225,7 @@ namespace TTG_Tools
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                encripted = false;
+                encrypted = false;
                 bool read = false;
 
                 FileStream fs;
@@ -267,6 +268,7 @@ namespace TTG_Tools
                     check_header = new byte[4];
                     Array.Copy(binContent, 0, check_header, 0, check_header.Length);
                     encKey = null;
+                    version = 2;
 
                     if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
                     && (Encoding.ASCII.GetString(check_header) != "6VSM") && (Encoding.ASCII.GetString(check_header) != "NIBM")) //Supposed this font encrypted
@@ -274,11 +276,11 @@ namespace TTG_Tools
                         //First trying decrypt probably encrypted font
                         try
                         {
-                            string info = Methods.FindingDecrytKey(binContent, "font", ref encKey);
+                            string info = Methods.FindingDecrytKey(binContent, "font", ref encKey, ref version);
                             if (info != null)
                             {
                                 MessageBox.Show("Font was encrypted, but I decrypted.\r\n" + info);
-                                encripted = true;
+                                encrypted = true;
                             }
                         }
                         catch (Exception ex)
@@ -664,69 +666,23 @@ namespace TTG_Tools
         }
 
 
-        private void encFunc(string path) //Функция по шифрованию шрифтов
+        private void encFunc(string path) //Encrypts full font
         {
-            if (encripted == true) //Проверка на зашифрованность файла
+            if (encrypted == true) //Ask about a full enryption if you don't want build archive
             {
-                if (MessageBox.Show("We found out that font was encrypted. Do you want to encrypt back?", "About encrypted  font...",
+                if (MessageBox.Show("Do you want to make a full encryption?", "About encrypted font...",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     FileStream fs = new FileStream(path, FileMode.Open);
                     byte[] fontContent = Methods.ReadFull(fs);
                     fs.Close();
 
-                    byte[] checkHeader = new byte[4];
-                    byte[] checkVer = new byte[4];
+                    Methods.meta_crypt(fontContent, encKey, version, false);
 
-                    Array.Copy(fontContent, 0, checkHeader, 0, 4);
-                    Array.Copy(fontContent, 4, checkVer, 0, 4);
-
-                    if (Encoding.ASCII.GetString(checkHeader) != "ERTM" && Encoding.ASCII.GetString(checkHeader) != "5VSM"
-                        && (BitConverter.ToInt32(checkVer, 0) > 0 && BitConverter.ToInt32(checkVer, 0) < 6))
-                    {
-                        int selKey = -1;
-                        bool encMode = false; //true - старый режим, false - новый
-                        bool encFull = false; //Зашифровать полностью файл или только заголовок текстуры (для сборки архивов)
-                        bool customKey = false;
-
-
-                        EncryptionVariants f = new EncryptionVariants();
-                        f.ShowDialog();
-                        selKey = f.keyEnc;
-                        encMode = f.OldMode;
-                        encFull = f.fullEnc;
-                        customKey = f.customKey;
-
-                        if (selKey == -1) selKey = 0; //Поставлю по умолчанию Telltale's texas hold'em
-
-                        byte[] key = MainMenu.gamelist[selKey].key;
-
-                        if (customKey) key = Methods.stringToKey(f.key);
-                        if (key == null)
-                        {
-                            MessageBox.Show("Custom key wasn't correct. Set key from chosen list: " + MainMenu.gamelist[selKey].gamename + "\r\nYou'll need key like this: 96CA99A085CF988AE4DBE2CDA6968388C08B99E39ED89BB6D790DCBEAD9D9165B6A69EBBC2C69EB3E7E3E5D5AB6382A09CC4929FD1D5A4");
-                            key = MainMenu.gamelist[selKey].key;
-                        }
-
-                        int version = 2;
-                        if (encMode == false) version = 7;
-
-                        int TexPos = Methods.FindStartOfStringSomething(fontContent, 4, "DDS |");
-                        byte[] tempBytes = new byte[2048];
-                        if (tempBytes.Length > fontContent.Length - TexPos) tempBytes = new byte[fontContent.Length - TexPos];
-                        Array.Copy(fontContent, TexPos, tempBytes, 0, tempBytes.Length);
-
-                        BlowFishCS.BlowFish encTexHeader = new BlowFishCS.BlowFish(key, version);
-                        tempBytes = encTexHeader.Crypt_ECB(tempBytes, version, false);
-                        Array.Copy(tempBytes, 0, fontContent, TexPos, tempBytes.Length);
-
-                        if (encFull == true) Methods.meta_crypt(fontContent, key, version, false);
-
-                        if (File.Exists(path)) File.Delete(path);
-                        fs = new FileStream(path, FileMode.Create);
-                        fs.Write(fontContent, 0, fontContent.Length);
-                        fs.Close();
-                    }
+                    if (File.Exists(path)) File.Delete(path);
+                    fs = new FileStream(path, FileMode.Create);
+                    fs.Write(fontContent, 0, fontContent.Length);
+                    fs.Close();
                 }
 
             }
@@ -838,6 +794,16 @@ namespace TTG_Tools
 
                 if (font.blockSize)
                 {
+                    //bw.Write(font.BlockTexSize);
+                    font.BlockTexSize = 0;
+
+                    for (int j = 0; j < font.TexCount; j++)
+                    {
+                        font.BlockTexSize += font.tex[j].BlockPos + font.tex[j].TexSize;
+                    }
+
+                    font.BlockTexSize += 8; //4 bytes of block size and 4 bytes of block (if it empty)
+
                     bw.Write(font.BlockTexSize);
                 }
 
@@ -845,7 +811,7 @@ namespace TTG_Tools
 
                 for (int i = 0; i < font.TexCount; i++)
                 {
-                    TextureWorker.ReplaceOldTextures(fs, font.tex[i], someTexData, false, null, 2);
+                    TextureWorker.ReplaceOldTextures(fs, font.tex[i], someTexData, encrypted, encKey, version);
                 }
             }
             else
@@ -1040,11 +1006,11 @@ namespace TTG_Tools
                 switch (font.NewFormat)
                 {
                     case true:
-                        fs.Write(font.tex[file_n].Content, 0, font.tex[file_n].Content.Length);
+                        fs.Write(font.NewTex[file_n].Tex.Content, 0, font.NewTex[file_n].Tex.Content.Length);
                         break;
 
                     default:
-                        fs.Write(font.NewTex[file_n].Tex.Content, 0, font.NewTex[file_n].Tex.Content.Length);
+                        fs.Write(font.tex[file_n].Content, 0, font.tex[file_n].Content.Length);
                         break;
                 }
 
@@ -2078,6 +2044,12 @@ namespace TTG_Tools
                 {
                     TextureClass.OldT3Texture[] tmpOldTex = null;
 
+                    //Make all characters as first texture due bug after saving font if font was with multi textures and saves as font with a 1 texture.
+                    for(int i = 0; i < font.glyph.CharCount; i++)
+                    {
+                        font.glyph.chars[i].TexNum = 0;
+                    }
+
                     for (int m = 0; m < strings.Length; m++)
                     {
                         if (strings[m].ToLower().Contains("common lineheight"))
@@ -2094,20 +2066,11 @@ namespace TTG_Tools
                                     case "pages":
                                         tmpOldTex = new TextureClass.OldT3Texture[Convert.ToInt32(splitted[k + 1])];
 
-                                        if (font.blockSize) 
-                                        {
-                                            for (int c = 0; c < font.TexCount; c++)
-                                            {
-                                                font.BlockTexSize -= font.tex[c].TexSize;
-                                            }
-                                        }
-
                                         if (Convert.ToInt32(splitted[k + 1]) > font.TexCount)
                                         {
                                             for(int c = 0; c < tmpOldTex.Length; c++)
                                             {
                                                 tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[0]);
-                                                font.BlockTexSize += tmpOldTex[c].TexSize;
                                             }
                                         }
                                         else
@@ -2115,7 +2078,6 @@ namespace TTG_Tools
                                             for (int c = 0; c < tmpOldTex.Length; c++)
                                             {
                                                 tmpOldTex[c] = new TextureClass.OldT3Texture(font.tex[c]);
-                                                font.BlockTexSize += tmpOldTex[c].TexSize;
                                             }
                                         }
 
@@ -2151,8 +2113,6 @@ namespace TTG_Tools
                                             Array.Copy(tmpOldTex[idNum].Content, 16, tmp, 0, tmp.Length);
                                             tmpOldTex[idNum].Width = BitConverter.ToInt32(tmp, 0);
                                             tmpOldTex[idNum].OriginalWidth = tmpOldTex[idNum].Width;
-
-                                            font.BlockTexSize += tmpOldTex[idNum].Content.Length - tmpOldTex[idNum].TexSize;
 
                                             tmpOldTex[idNum].TexSize = tmpOldTex[idNum].Content.Length;
                                         }

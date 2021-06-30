@@ -949,6 +949,7 @@ namespace TTG_Tools
             FileStream fs = new FileStream(inputFiles[i].FullName, FileMode.Open);
             byte[] binContent = Methods.ReadFull(fs);
             byte[] encKey = null;
+            int encVer = 2;
 
             tryRead:
 
@@ -985,7 +986,7 @@ namespace TTG_Tools
             {
                 try
                 {
-                    string info = Methods.FindingDecrytKey(binContent, "text", ref encKey); //Пытаемся расшифровать текстовый файл.
+                    string info = Methods.FindingDecrytKey(binContent, "text", ref encKey, ref encVer); //Пытаемся расшифровать текстовый файл.
                     ReportForWork("File " + inputFiles[i].Name + " decrypted. " + info);
                     goto tryRead;
                 }
@@ -1139,6 +1140,7 @@ namespace TTG_Tools
                 FileStream fs = new FileStream(inputFiles[i].FullName, FileMode.Open);
                 byte[] binContent = Methods.ReadFull(fs);
                 fs.Close();
+                int encVer = 2;
 
             tryAgain:
                 byte[] header = new byte[0];
@@ -1180,7 +1182,7 @@ namespace TTG_Tools
 
                     try 
                     {
-                        string info = Methods.FindingDecrytKey(binContent, "text", ref encKey);
+                        string info = Methods.FindingDecrytKey(binContent, "text", ref encKey, ref encVer);
                         ReportForWork("File " + inputFiles[i].Name + " decrypted. " + info);
                         goto tryAgain;
                     }

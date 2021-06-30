@@ -51,7 +51,7 @@ namespace TTG_Tools
                 //First trying decrypt probably encrypted font
                 try
                 {
-                    string info = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
+                    string info = Methods.FindingDecrytKey(binContent, "texture", ref EncKey, ref version);
                     if (info != null)
                     {
                         additionalMessage = "D3dtx file was encrypted, but I decrypted. " + info;
@@ -322,6 +322,7 @@ namespace TTG_Tools
                 tex.TexFlags = null;
 
                 if (flags) tex.TexFlags = new ClassesStructs.FlagsClass();
+                tex.BlockPos = 0;
 
                 if (someData)
                 {
@@ -329,11 +330,13 @@ namespace TTG_Tools
                     Array.Copy(binContent, poz, someBinData, 0, someBinData.Length);
                     tex.sizeBlock = BitConverter.ToInt32(someBinData, 0);
                     poz += 4;
+                    tex.BlockPos += 4;
 
                     someBinData = new byte[4];
                     Array.Copy(binContent, poz, someBinData, 0, someBinData.Length);
                     tex.someValue = BitConverter.ToInt32(someBinData, 0);
                     poz += 4;
+                    tex.BlockPos += 4;
 
                     someBinData = null;
                 }
@@ -342,6 +345,7 @@ namespace TTG_Tools
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 int nameLen = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -349,18 +353,22 @@ namespace TTG_Tools
                 {
                     nameLen = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
+                    tex.BlockPos += 4;
+
                     tex.AdditionalSize = true;
                 }
 
                 tmp = new byte[nameLen];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 poz += nameLen;
+                tex.BlockPos += nameLen;
                 tex.ObjectName = Encoding.ASCII.GetString(tmp);
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 nameLen = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -368,11 +376,13 @@ namespace TTG_Tools
                 {
                     nameLen = BitConverter.ToInt32(tmp, 0);
                     poz += 4;
+                    tex.BlockPos += 4;
                 }
 
                 tmp = new byte[nameLen];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 poz += nameLen;
+                tex.BlockPos += nameLen;
                 tex.SubobjectName = Encoding.ASCII.GetString(tmp);
 
                 tmp = new byte[8];
@@ -391,26 +401,31 @@ namespace TTG_Tools
                 tex.Flags = new byte[counter];
                 Array.Copy(binContent, poz, tex.Flags, 0, tex.Flags.Length);
                 poz += tex.Flags.Length;
+                tex.BlockPos += tex.Flags.Length;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.Mip = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 poz += 4;
+                tex.BlockPos += 4;
                 tex.TextureFormat = BitConverter.ToInt32(tmp, 0);
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.OriginalWidth = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.OriginalHeight = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 int lastPos = poz;
 
@@ -419,11 +434,13 @@ namespace TTG_Tools
 
                 tex.block = new byte[poz - lastPos];
                 Array.Copy(binContent, lastPos, tex.block, 0, tex.block.Length);
+                tex.BlockPos += tex.block.Length;
 
                 tmp = new byte[4];
                 Array.Copy(binContent, poz, tmp, 0, tmp.Length);
                 tex.TexSize = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
+                tex.BlockPos += 4;
 
                 tex.Content = new byte[tex.TexSize];
                 Array.Copy(binContent, poz, tex.Content, 0, tex.Content.Length);
@@ -761,6 +778,7 @@ namespace TTG_Tools
             byte[] GetVers = new byte[4]; //Пытаемся проверить версию
             Array.Copy(binContent, 4, GetVers, 0, 4);
             byte[] EncKey = null;
+            int encVer = 2;
 
             if (((BitConverter.ToInt32(GetVers, 0) > 6) || (BitConverter.ToInt32(GetVers, 0) < 0)) && 
                ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM")
@@ -770,7 +788,7 @@ namespace TTG_Tools
 
                 if (index == -1)
                 {
-                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
+                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey, ref encVer);
                     if (result != null)
                     {
                         string temp = "File was decrypted! " + result;
@@ -791,7 +809,7 @@ namespace TTG_Tools
 
                 if (index == -1)
                 {
-                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey);
+                    result = Methods.FindingDecrytKey(binContent, "texture", ref EncKey, ref encVer);
                     if (result != null)
                     {
                         string temp = "File was decrypted! " + result;
@@ -1506,11 +1524,12 @@ namespace TTG_Tools
             Array.Copy(d3dtxContent, 0, checkHeader, 0, 4);
             Array.Copy(d3dtxContent, 4, checkVer, 0, 4);
             byte[] EncKey = null;
+            int encVer = 2;
 
             if((Encoding.ASCII.GetString(checkHeader) != "5VSM" && Encoding.ASCII.GetString(checkHeader) != "ERTM"
                 && Encoding.ASCII.GetString(checkHeader) != "NIBM") && (BitConverter.ToInt32(checkVer, 0) < 0 || BitConverter.ToInt32(checkVer, 0) > 6))
             {
-                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey);
+                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey, ref encVer);
 
                 if (result != null)
                 {
@@ -1523,7 +1542,7 @@ namespace TTG_Tools
                 && (Methods.FindStartOfStringSomething(d3dtxContent, 8, "DDS") > d3dtxContent.Length - 100
                 && Methods.FindStartOfStringSomething(d3dtxContent, 8, "PVR!") > d3dtxContent.Length - 100))
             {
-                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey);
+                string result = Methods.FindingDecrytKey(d3dtxContent, "texture", ref EncKey, ref encVer );
 
                 if (result != null)
                 {

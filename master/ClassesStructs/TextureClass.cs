@@ -26,8 +26,9 @@ namespace TTG_Tools.ClassesStructs
             public byte[] UnknownData; //4 bytes
             public byte Zero;
             public FlagsClass TexFlags;
-            public byte[] block; //temporary solution
+            public byte[] block;
             public int TexSize;
+            public int BlockPos; //Need for correct font texture size
             public byte[] Content; //Texture
 
             public OldT3Texture() { }
@@ -35,7 +36,7 @@ namespace TTG_Tools.ClassesStructs
             public OldT3Texture(OldT3Texture newClass)
             {
                 sizeBlock = newClass.sizeBlock;
-                someValue = newClass.someValue; //For games since Hector
+                someValue = newClass.someValue;
                 AdditionalSize = newClass.AdditionalSize;
                 ObjectName = newClass.ObjectName;
                 SubobjectName = newClass.SubobjectName;
@@ -46,12 +47,13 @@ namespace TTG_Tools.ClassesStructs
                 OriginalHeight = newClass.OriginalHeight;
                 Width = newClass.Width;
                 Height = newClass.Height;
-                UnknownData = newClass.UnknownData; //4 bytes
+                UnknownData = newClass.UnknownData;
                 Zero = newClass.Zero;
                 TexFlags = newClass.TexFlags;
-                block = newClass.block; //temporary solution
+                block = newClass.block;
                 TexSize = newClass.TexSize;
-                Content = newClass.Content; //Texture
+                BlockPos = newClass.BlockPos;
+                Content = newClass.Content;
             }
         }
 

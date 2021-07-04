@@ -212,25 +212,33 @@ namespace TTG_Tools
                     return result;
                 }
 
-                uint tmpPoz = 0;
-                
-                ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, ref tmpPoz, flags, someData, false, ref additionalMessage);
+                    uint tmpPoz = 0;
 
-                if (tex == null)
+                    ClassesStructs.TextureClass.NewT3Texture tex = GetNewTextures(binContent, ref poz, ref tmpPoz, flags, someData, false, ref additionalMessage);
+
+                    if (tex == null)
+                    {
+                        result = "Something wrong with this file: " + fi.Name;
+                        return result;
+                    }
+                
+                if (extract)
                 {
-                    result = "Something wrong with this file: " + fi.Name;
+                    result = "File " + fi.Name + " successfully extracted. ";
+
+                    if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
+                    File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Tex.Content);
+
+                    if (additionalMessage != null) result += additionalMessage;
+
                     return result;
                 }
+                else
+                {
+                    result = "File " + fi.Name + " successfully imported.";
 
-                result = "File " + fi.Name + " successfully extracted. ";
-
-                if (File.Exists(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"))) File.Delete(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"));
-                File.WriteAllBytes(OutputDir + "\\" + fi.Name.Replace(".d3dtx", ".dds"), tex.Tex.Content);
-                
-
-                if (additionalMessage != null) result += additionalMessage;
-
-                return result;
+                    return result;
+                }
             }
             catch
             {
@@ -480,10 +488,8 @@ namespace TTG_Tools
             Array.Copy(binContent, 0, tmp, 0, tmp.Length);
             string checkHeader = Encoding.ASCII.GetString(tmp);
 
-            if (checkHeader != "ERTM")
+            if ((checkHeader != "ERTM") && !IsFont)
             {
-                if (!IsFont)
-                {
                     tmp = new byte[4];
                     Array.Copy(binContent, 4, tmp, 0, tmp.Length);
                     tex.headerSize = BitConverter.ToInt32(tmp, 0);
@@ -491,7 +497,6 @@ namespace TTG_Tools
                     tmp = new byte[4];
                     Array.Copy(binContent, 12, tmp, 0, tmp.Length);
                     tex.textureSize = BitConverter.ToUInt32(tmp, 0);
-                }
             }
 
             Array.Copy(binContent, poz, tmp, 0, tmp.Length);
@@ -638,7 +643,6 @@ namespace TTG_Tools
                 case 4:
                     blSize = 0x30;
                     break;
-
                 case 5:
                     blSize = 0x3c;
                     break;
@@ -930,85 +934,6 @@ namespace TTG_Tools
             else return null; //Иначе отправим ничего
         }
 
-        public static byte[] getFontHeader(byte[] binContent, ref byte[] code, ref byte[] width, ref byte[] height, ref byte[] tex_size, ref byte[] tex_kratnost)
-        {
-            byte[] checkHeader = new byte[4];
-            Array.Copy(binContent, 0, checkHeader, 0, checkHeader.Length);
-
-            byte[] t_height = new byte[4];
-            byte[] t_width = new byte[4];
-            byte[] t_mip = new byte[4]; //Если кто-то засунет с несколькими мип-мапами текстуру, прога выдернет только 1
-
-            bool pvr = false;
-            int height_pos = 12;
-            int width_pos = 16;
-            int mip_pos = 28;
-            int header_length = 128;
-            int check_header_length = 28;
-            int check_header_pos = 80;
-
-            if (Encoding.ASCII.GetString(checkHeader) == "PVR\x03")
-            {
-                height_pos = 24;
-                width_pos = 28;
-                mip_pos = 44;
-                header_length = 52;
-                check_header_length = 8;
-                check_header_pos = 8;
-                pvr = true;
-            }
-
-            Array.Copy(binContent, height_pos, t_height, 0, t_height.Length);
-            Array.Copy(binContent, width_pos, t_width, 0, t_width.Length);
-            Array.Copy(binContent, mip_pos, t_mip, 0, t_mip.Length);
-
-            int index = -1;
-
-            for (int i = 0; i < MainMenu.texture_header.Count; i++)
-            {
-                if (header_length == MainMenu.texture_header[i].sample.Length)
-                {
-                    byte[] texHeader = new byte[check_header_length];
-                    byte[] SampleHeader = new byte[check_header_length];
-
-                    Array.Copy(binContent, check_header_pos, texHeader, 0, check_header_length);
-                    Array.Copy(MainMenu.texture_header[i].sample, check_header_pos, SampleHeader, 0, check_header_length);
-
-                    if (BitConverter.ToString(texHeader) == BitConverter.ToString(SampleHeader) && (TTG_Tools.MainMenu.texture_header[i].PVR_header == pvr))
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-            }
-
-            if (index != -1)
-            {
-                height = t_height;
-                width = t_width;
-                int tex_length = 0;
-                int tex_krat = 0;
-                Methods.get_kratnost_and_size(BitConverter.ToInt32(width, 0), BitConverter.ToInt32(height, 0), TTG_Tools.MainMenu.texture_header[index].code, ref tex_length, ref tex_krat);
-
-                int tex_pos = 128; //Для DDS текстур
-                
-                if (pvr)
-                {
-                    byte[] GetMeta = new byte[4];
-                    Array.Copy(binContent, 48, GetMeta, 0, GetMeta.Length);
-                    tex_pos = 52 + BitConverter.ToInt32(GetMeta, 0);
-                }
-
-                code = BitConverter.GetBytes(TTG_Tools.MainMenu.texture_header[index].code);
-                tex_size = BitConverter.GetBytes(tex_length);
-                tex_kratnost = BitConverter.GetBytes(tex_krat);
-
-                byte[] texContent = new byte[tex_length];
-                Array.Copy(binContent, tex_pos, texContent, 0, texContent.Length);
-                return texContent;
-            }
-            else return null;
-        }
 
         //Generate header for PVR and DDS files (need destroy it and use from DDS directory!)
         public static byte[] genHeader(int width, int height, int mip, int code, int platform, ref bool pvr, ref string format)

@@ -698,7 +698,7 @@ namespace TTG_Tools
 
             encFunc(ofd.FileName);
 
-            edited = false; //Файл сохранили, так что вернули флаг на ЛОЖЬ
+            edited = false; //After saving return trigger to FALSE
         }
 
         private void SaveFont(Stream fs, ClassesStructs.FontClass.ClassFont font)

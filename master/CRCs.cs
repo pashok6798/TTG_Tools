@@ -8,7 +8,7 @@ namespace TTG_Tools
 {
     class CRCs
     {
-        public static byte[] CRC32_generator(byte[] bytes) //Функция генерации CRC32 кода
+        public static byte[] CRC32_generator(byte[] bytes) //CRC32 generator function
         {
             byte[] source = new byte[bytes.Length];
             source = bytes;
@@ -43,7 +43,7 @@ namespace TTG_Tools
 
         public static ulong CRC64(UInt64 crc, string file_name)
         {
-            UInt64[] hash_table = { //хеш-таблица
+            UInt64[] hash_table = { //hash table
         0x0000000000000000, 0x42f0e1eba9ea3693, 0x85e1c3d753d46d26, 0xc711223cfa3e5bb5,
         0x493366450e42ecdf, 0x0bc387aea7a8da4c, 0xccd2a5925d9681f9, 0x8e224479f47cb76a,
         0x9266cc8a1c85d9be, 0xd0962d61b56fef2d, 0x17870f5d4f51b498, 0x5577eeb6e6bb820b,
@@ -109,14 +109,12 @@ namespace TTG_Tools
         0x14dea25f3af9026d, 0x562e43b4931334fe, 0x913f6188692d6f4b, 0xd3cf8063c0c759d8,
         0x5dedc41a34bbeeb2, 0x1f1d25f19d51d821, 0xd80c07cd676f8394, 0x9afce626ce85b507  };
 
-            uint __len = (uint)file_name.Length; //длина названия файла
+            uint __len = (uint)file_name.Length; //Get length of file name
             int pos = 0;
-
-            string new_file_name = file_name.ToLower(); //новая строка названия файла (сделано в случае наличия заглавных букв в названии файла)
 
             while ((uint)pos < __len)
             {
-                uint __tab_index = ((uint)(crc >> 56) ^ (uint)new_file_name[pos++]) & 0xFF;
+                uint __tab_index = ((uint)(crc >> 56) ^ (uint)file_name[pos++]) & 0xFF;
                 crc = hash_table[__tab_index] ^ (crc << 8);
             }
 

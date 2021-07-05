@@ -10,6 +10,9 @@ namespace TTG_Tools
 {
     public class TextureWorker
     {
+        static uint[] TexCodes = { 0x00, 0x4, 0x10, 0x11, 0x25, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+        static string[] FourCC = { "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "DXT1", "DXT3", "DXT5", "ATI1", "ATI2", "ATI1", "ATI1" };
+        //NEED REMOVE THAT!
         public class TexData //класс для формата текстур
         {
             public byte[] sample; //Небольшой фрагмент из заголовка
@@ -31,8 +34,39 @@ namespace TTG_Tools
             }
         }
 
-        public static byte[] GenHeader(int format, uint width, uint height, uint MipCount)
+        public static byte[] GenHeader(int Format, uint Width, uint Height, uint Size, uint MipCount)
         {
+            dds.header head;
+            byte[] header = new byte[128];
+            head.head = "DDS ";
+            head.Size = 124;
+            head.Width = Width;
+            head.Height = Height;
+            head.PitchOrLinearSize = Size;
+            head.MipMapCount = MipCount;
+            head.PF.Size = 32;
+            head.Flags = 0;
+            Flags flags = new Flags();
+            head.Flags = flags.DDSD_WIDTH | flags.DDSD_LINEARSIZE | flags.DDSD_HEIGHT;
+
+            if (MipCount > 1) head.Flags |= flags.DDSD_MIPMAPCOUNT;
+            if (Format < 0x40) head.Flags |= flags.DDSD_CAPS;
+
+            head.PF.Flags = Format >= 0x40 ? flags.DDPF_FOURCC : flags.DDPF_RGB;
+            if (Format == 0x11) head.PF.Flags = flags.DDPF_LUMINANCE;
+
+            head.PF.FourCC = "\0\0\0\0";
+
+            for(int i = 0; i < TexCodes.Length; i++)
+            {
+                if(TexCodes[i] == Format)
+                {
+                    head.PF.FourCC = FourCC[i];
+                    break;
+                }
+            }
+
+            //byte[] tmp = Encoding.ASCII.GetBytes()
 
             return null;
         }

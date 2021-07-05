@@ -13,7 +13,7 @@ namespace TTG_Tools.Graphics.DDS
         {
             public uint Size;
             public uint Flags;
-            public uint FourCC;
+            public string FourCC;
             public uint RgbBitCount;
             public uint RBitMask;
             public uint GBitMask;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using TTG_Tools.Graphics.DDS;
 using System.Drawing;
 
 namespace TTG_Tools
@@ -28,6 +29,12 @@ namespace TTG_Tools
                 this.Is_iOS = _Is_iOS;
                 this.PVR_header = _PVR_header;
             }
+        }
+
+        public static byte[] GenHeader(int format, uint width, uint height, uint MipCount)
+        {
+
+            return null;
         }
 
         public static string DoWork(string InputFile, string OutputDir, bool extract, bool FullEncrypt, int version)

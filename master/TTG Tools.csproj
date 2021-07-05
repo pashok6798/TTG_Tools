@@ -112,6 +112,9 @@
     </Compile>
     <Compile Include="ClassesStructs\FontClass.cs" />
     <Compile Include="ClassesStructs\TextureClass.cs" />
+    <Compile Include="Graphics\DDS\Caps.cs" />
+    <Compile Include="Graphics\DDS\dds.cs" />
+    <Compile Include="Graphics\DDS\Flags.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="ForThreads.cs" />
     <Compile Include="FontEditor.cs">

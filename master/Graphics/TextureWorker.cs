@@ -11,7 +11,9 @@ namespace TTG_Tools
     public class TextureWorker
     {
         static uint[] TexCodes = { 0x00, 0x4, 0x10, 0x11, 0x25, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
-        static string[] FourCC = { "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "DXT1", "DXT3", "DXT5", "ATI1", "ATI2", "ATI1", "ATI1" };
+        static string[] FourCC = { "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\x74\0\0\0", "DXT1", "DXT3", "DXT5", "ATI1", "ATI2", "ATI1", "ATI1" };
+        static string[] Formats = { "uncompressed 8.8.8.8 ARGB", "uncompressed 4.4.4.4 ARGB", "Alpha 8 bit (A8)", "IL8", "uncompressed 32f.32f.32f.32f ARGB", "DXT1", "DXT3", "DXT5", "BC4", "BC5", "BC6", "BC7" };
+
         //NEED REMOVE THAT!
         public class TexData //класс для формата текстур
         {
@@ -34,41 +36,156 @@ namespace TTG_Tools
             }
         }
 
-        public static byte[] GenHeader(int Format, uint Width, uint Height, uint Size, uint MipCount)
+        public static byte[] GenHeader(int Format, uint Width, uint Height, uint Size, uint MipCount, ref string StrFormat)
         {
-            dds.header head;
-            byte[] header = new byte[128];
-            head.head = "DDS ";
-            head.Size = 124;
-            head.Width = Width;
-            head.Height = Height;
-            head.PitchOrLinearSize = Size;
-            head.MipMapCount = MipCount;
-            head.PF.Size = 32;
-            head.Flags = 0;
-            Flags flags = new Flags();
-            head.Flags = flags.DDSD_WIDTH | flags.DDSD_LINEARSIZE | flags.DDSD_HEIGHT;
-
-            if (MipCount > 1) head.Flags |= flags.DDSD_MIPMAPCOUNT;
-            if (Format < 0x40) head.Flags |= flags.DDSD_CAPS;
-
-            head.PF.Flags = Format >= 0x40 ? flags.DDPF_FOURCC : flags.DDPF_RGB;
-            if (Format == 0x11) head.PF.Flags = flags.DDPF_LUMINANCE;
-
-            head.PF.FourCC = "\0\0\0\0";
-
-            for(int i = 0; i < TexCodes.Length; i++)
+            MemoryStream ms = new MemoryStream();
+            BinaryWriter bw = new BinaryWriter(ms);
+            try
             {
-                if(TexCodes[i] == Format)
+                dds.header head;
+                head.head = "DDS ";
+                byte[] tmp = Encoding.ASCII.GetBytes(head.head);
+                bw.Write(tmp);
+
+                head.Size = 124;
+                bw.Write(head.Size);
+
+                head.Flags = 0;
+                Flags flags = new Flags();
+                head.Flags = flags.DDSD_WIDTH | flags.DDSD_LINEARSIZE | flags.DDSD_HEIGHT;
+
+                if (MipCount > 1) head.Flags |= flags.DDSD_MIPMAPCOUNT;
+                if (Format < 0x40) head.Flags |= flags.DDSD_CAPS;
+
+                bw.Write(head.Flags);
+
+                head.Height = Height;
+                bw.Write(head.Height);
+
+                head.Width = Width;
+                bw.Write(head.Width);
+
+                head.PitchOrLinearSize = Size;
+                bw.Write(head.PitchOrLinearSize);
+
+                head.Depth = 0;
+                bw.Write(head.Depth);
+
+                head.MipMapCount = MipCount;
+                bw.Write(head.MipMapCount);
+
+                head.Reserved1 = new uint[11];
+
+                for(int i = 0; i < 11; i++)
                 {
-                    head.PF.FourCC = FourCC[i];
-                    break;
+                    bw.Write(head.Reserved1[i]);
                 }
+
+                head.PF.Size = 32;
+                bw.Write(head.PF.Size);
+
+                head.PF.Flags = (Format >= 0x40 || Format == 0x25) ? flags.DDPF_FOURCC : flags.DDPF_RGB;
+                if (Format == 0x11) head.PF.Flags = flags.DDPF_LUMINANCE;
+                bw.Write(head.PF.Flags);
+
+                head.PF.FourCC = "\0\0\0\0";
+
+                for (int i = 0; i < TexCodes.Length; i++)
+                {
+                    if (TexCodes[i] == Format)
+                    {
+                        head.PF.FourCC = FourCC[i];
+                        StrFormat = Formats[i];
+                        break;
+                    }
+                }
+
+                tmp = Encoding.ASCII.GetBytes(head.PF.FourCC);
+                bw.Write(tmp);
+
+                head.PF.RgbBitCount = 0;
+                if(Format < 0x40)
+                {
+                    switch (Format)
+                    {
+                        case 0:
+                            head.PF.RgbBitCount = 32;
+                            break;
+
+                        default:
+                            head.PF.RgbBitCount = 0;
+                            break;
+                    }
+                }
+
+                bw.Write(head.PF.RgbBitCount);
+                head.PF.RBitMask = 0;
+                head.PF.GBitMask = 0;
+                head.PF.BBitMask = 0;
+                head.PF.ABitMask = 0;
+
+                if (Format < 0x40)
+                {
+                    switch (Format)
+                    {
+                        case 0x11:
+                            head.PF.RBitMask = 0;
+                            head.PF.GBitMask = 0;
+                            head.PF.BBitMask = 0;
+                            head.PF.ABitMask = 0;
+                            break;
+
+                        case 0x10:
+                            head.PF.RBitMask = 0;
+                            head.PF.GBitMask = 0;
+                            head.PF.BBitMask = 0;
+                            head.PF.ABitMask = 0;
+                            break;
+
+                        case 0x4:
+                        case 0:
+                            head.PF.RBitMask = 0x00FF0000;
+                            head.PF.GBitMask = 0x0000FF00;
+                            head.PF.BBitMask = 0x000000FF;
+                            head.PF.ABitMask = 0xFF000000;
+                            break;
+                    }
+                }
+
+                bw.Write(head.PF.RBitMask);
+                bw.Write(head.PF.GBitMask);
+                bw.Write(head.PF.BBitMask);
+                bw.Write(head.PF.ABitMask);
+
+                Caps caps = new Caps();
+
+                head.Caps = caps.DDSCAPS_TEXTURE;
+                head.Caps2 = 0;
+                head.Caps3 = 0;
+                head.Caps4 = 0;
+                head.Reserved2 = 0;
+
+                if (MipCount > 1) head.Caps |= caps.DDSCAPS_COMPLEX | caps.DDSCAPS_MIPMAP;
+
+                bw.Write(head.Caps);
+                bw.Write(head.Caps2);
+                bw.Write(head.Caps3);
+                bw.Write(head.Caps4);
+                bw.Write(head.Reserved2);
+
+                //NEED THINK ABOUT DX10 FORMAT!
+
+                byte[] header = ms.ToArray();
+                bw.Close();
+                ms.Close();
+                return header;
             }
-
-            //byte[] tmp = Encoding.ASCII.GetBytes()
-
-            return null;
+            catch
+            {
+                bw.Close();
+                ms.Close();
+                return null;
+            }
         }
 
         public static string DoWork(string InputFile, string OutputDir, bool extract, bool FullEncrypt, int version)
@@ -237,7 +354,7 @@ namespace TTG_Tools
 
                         bool NeedEncrypt = false;
 
-                        if ((Encoding.ASCII.GetString(check_header) != "5VSM") && (Encoding.ASCII.GetString(check_header) != "ERTM") && (Encoding.ASCII.GetString(check_header) != "6VSM")) NeedEncrypt = true;
+                        if (Encoding.ASCII.GetString(check_header) != "ERTM") NeedEncrypt = true;
 
                         ReplaceOldTextures(ms, oldTex, someData, NeedEncrypt, EncKey, version);
                         tmp = ms.ToArray();
@@ -774,11 +891,12 @@ namespace TTG_Tools
             }
 
             string format = "";
-            bool pvr = false;
+            //bool pvr = false;
 
-            byte[] header = genHeader(tex.Width, tex.Height, tex.Mip, tex.TextureFormat, tex.platform.platform, ref pvr, ref format);
+            //byte[] header = genHeader(tex.Width, tex.Height, tex.Mip, tex.TextureFormat, tex.platform.platform, ref pvr, ref format);
+            byte[] header = GenHeader(tex.TextureFormat, (uint)tex.Width, (uint)tex.Height, tex.Tex.TexSize, (uint)tex.Mip, ref format);
 
-            if(header == null)
+            if (header == null)
             {
                 return null;
             }

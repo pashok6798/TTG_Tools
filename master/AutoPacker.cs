@@ -32,6 +32,8 @@ namespace TTG_Tools
         public static int EncVersion;
 
         public static bool sizzleNintendo;
+        Thread threadExport;
+        Thread threadImport; 
 
         public struct langdb
         {
@@ -93,22 +95,21 @@ namespace TTG_Tools
 
             sizzleNintendo = checkBox1.Checked;
 
-            //Создаем нить для импорта текстур в DDS
-            var processD3DTX = new ForThreads();
-            processD3DTX.ReportForWork += AddNewReport;
-            List<string> parametresD3DTX = new List<string>();
-            parametresD3DTX.Add(versionOfGame);
-            parametresD3DTX.Add(".dds");
-            parametresD3DTX.Add(MainMenu.settings.pathForInputFolder);
-            parametresD3DTX.Add(MainMenu.settings.pathForOutputFolder);
-            parametresD3DTX.Add(MainMenu.settings.deleteD3DTXafterImport.ToString());
-            parametresD3DTX.Add(MainMenu.settings.deleteDDSafterImport.ToString());
-            parametresD3DTX.Add(Convert.ToString(EncVersion));
-            parametresD3DTX.Add(MainMenu.settings.encLangdb.ToString());
+            //Create import files thread
+            var processImport = new ForThreads();
+            processImport.ReportForWork += AddNewReport;
+            List<string> parametresImport = new List<string>();
+            parametresImport.Add(versionOfGame);
+            parametresImport.Add(".dds");
+            parametresImport.Add(MainMenu.settings.pathForInputFolder);
+            parametresImport.Add(MainMenu.settings.pathForOutputFolder);
+            parametresImport.Add(MainMenu.settings.deleteD3DTXafterImport.ToString());
+            parametresImport.Add(MainMenu.settings.deleteDDSafterImport.ToString());
+            parametresImport.Add(Convert.ToString(EncVersion));
+            parametresImport.Add(MainMenu.settings.encLangdb.ToString());
             
-            var threadD3DTX = new Thread(new ParameterizedThreadStart(processD3DTX.DoImportEncoding));
-            threadD3DTX.Start(parametresD3DTX);
-            ////Работаем дальше
+            threadImport = new Thread(new ParameterizedThreadStart(processImport.DoImportEncoding));
+            threadImport.Start(parametresImport);
 
 
             for (int i = 0; i < fi.Length; i++)
@@ -770,17 +771,17 @@ namespace TTG_Tools
                 return;
             }
             //Создаем нить для экспорта текста из LANGDB
-            var processLANGDB = new ForThreads();
-            processLANGDB.ReportForWork += AddNewReport;
-            List<string> parametresLANGDB = new List<string>();
-            parametresLANGDB.Add(MainMenu.settings.pathForInputFolder);
-            parametresLANGDB.Add(MainMenu.settings.pathForOutputFolder);
-            parametresLANGDB.Add(versionOfGame);
-            parametresLANGDB.Add(BitConverter.ToString(encKey).Replace("-", ""));
-            parametresLANGDB.Add(Convert.ToString(arc_version));
+            var processExport = new ForThreads();
+            processExport.ReportForWork += AddNewReport;
+            List<string> parametresExport = new List<string>();
+            parametresExport.Add(MainMenu.settings.pathForInputFolder);
+            parametresExport.Add(MainMenu.settings.pathForOutputFolder);
+            parametresExport.Add(versionOfGame);
+            parametresExport.Add(BitConverter.ToString(encKey).Replace("-", ""));
+            parametresExport.Add(Convert.ToString(arc_version));
 
-            var threadLANGDB = new Thread(new ParameterizedThreadStart(processLANGDB.DoExportEncoding));
-            threadLANGDB.Start(parametresLANGDB);
+            threadExport = new Thread(new ParameterizedThreadStart(processExport.DoExportEncoding));
+            threadExport.Start(parametresExport);
 
             for (int i = 0; i < fi.Length; i++)
             {
@@ -2557,6 +2558,15 @@ namespace TTG_Tools
 
         private void AutoPacker_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if ((threadExport != null) && threadExport.IsAlive)
+            {
+                threadExport.Abort();
+            }
+
+            if((threadImport != null) && threadImport.IsAlive)
+            {
+                threadImport.Abort();
+            }
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)

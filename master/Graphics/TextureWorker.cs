@@ -10,8 +10,8 @@ namespace TTG_Tools
 {
     public class TextureWorker
     {
-        static uint[] TexCodes = { 0x00, 0x4, 0x10, 0x11, 0x25, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
-        static string[] FourCC = { "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\x74\0\0\0", "DXT1", "DXT3", "DXT5", "ATI1", "ATI2", "ATI1", "ATI1" };
+        static uint[] TexCodes = { 0x00, 0x4, 0x10, 0x11, 0x25, 0x40, 0x41, 0x42, 0x43, 0x43, 0x44, 0x45, 0x46 };
+        static string[] FourCC = { "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\0\0\0\0", "\x74\0\0\0", "DXT1", "DXT3", "DXT5", "BC4U", "ATI1", "ATI2", "BC6H", "ATI2" };
         static string[] Formats = { "uncompressed 8.8.8.8 ARGB", "uncompressed 4.4.4.4 ARGB", "Alpha 8 bit (A8)", "IL8", "uncompressed 32f.32f.32f.32f ARGB", "DXT1", "DXT3", "DXT5", "BC4", "BC5", "BC6", "BC7" };
 
         //NEED REMOVE THAT!
@@ -38,6 +38,7 @@ namespace TTG_Tools
 
         public static byte[] GenHeader(int Format, uint Width, uint Height, uint Size, uint MipCount, ref string StrFormat)
         {
+            if (FourCC.Length != TexCodes.Length) throw new Exception("Length array FourCC is not equal length array TexCodes");
             MemoryStream ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
             try
@@ -52,10 +53,10 @@ namespace TTG_Tools
 
                 head.Flags = 0;
                 Flags flags = new Flags();
-                head.Flags = flags.DDSD_WIDTH | flags.DDSD_LINEARSIZE | flags.DDSD_HEIGHT;
+                head.Flags = flags.DDSD_WIDTH | flags.DDSD_HEIGHT | flags.DDSD_PIXELFORMAT | flags.DDSD_CAPS;
+                head.Flags |= Format < 0x40 ? flags.DDSD_PITCH : flags.DDSD_LINEARSIZE;
 
                 if (MipCount > 1) head.Flags |= flags.DDSD_MIPMAPCOUNT;
-                if (Format < 0x40) head.Flags |= flags.DDSD_CAPS;
 
                 bw.Write(head.Flags);
 
@@ -85,7 +86,22 @@ namespace TTG_Tools
                 bw.Write(head.PF.Size);
 
                 head.PF.Flags = (Format >= 0x40 || Format == 0x25) ? flags.DDPF_FOURCC : flags.DDPF_RGB;
-                if (Format == 0x11) head.PF.Flags = flags.DDPF_LUMINANCE;
+                //if (Format == 0x11) head.PF.Flags = flags.DDPF_LUMINANCE;
+                switch (Format)
+                {
+                    case 0x00:
+                        head.PF.Flags = flags.DDPF_RGB | flags.DDPF_ALPHAPIXELS;
+                        break;
+
+                    case 0x10:
+                        head.PF.Flags = flags.DDPF_ALPHA;
+                        break;
+
+                    case 0x11:
+                        head.PF.Flags = flags.DDPF_LUMINANCE;
+                        break;
+                }
+
                 bw.Write(head.PF.Flags);
 
                 head.PF.FourCC = "\0\0\0\0";
@@ -111,6 +127,13 @@ namespace TTG_Tools
                         case 0:
                             head.PF.RgbBitCount = 32;
                             break;
+                        case 4:
+                            head.PF.RgbBitCount = 16;
+                            break;
+
+                        case 0x10:
+                            head.PF.RgbBitCount = 8;
+                            break;
 
                         default:
                             head.PF.RgbBitCount = 0;
@@ -128,6 +151,20 @@ namespace TTG_Tools
                 {
                     switch (Format)
                     {
+                        case 0:
+                            head.PF.RBitMask = 0xFF0000;
+                            head.PF.GBitMask = 0xFF00;
+                            head.PF.BBitMask = 0xFF;
+                            head.PF.ABitMask = 0xFF000000;
+                            break;
+
+                        case 4:
+                            head.PF.RBitMask = 0xF00;
+                            head.PF.GBitMask = 0xF0;
+                            head.PF.BBitMask = 0xF;
+                            head.PF.ABitMask = 0xF000;
+                            break;
+
                         case 0x11:
                             head.PF.RBitMask = 0;
                             head.PF.GBitMask = 0;
@@ -139,15 +176,7 @@ namespace TTG_Tools
                             head.PF.RBitMask = 0;
                             head.PF.GBitMask = 0;
                             head.PF.BBitMask = 0;
-                            head.PF.ABitMask = 0;
-                            break;
-
-                        case 0x4:
-                        case 0:
-                            head.PF.RBitMask = 0x00FF0000;
-                            head.PF.GBitMask = 0x0000FF00;
-                            head.PF.BBitMask = 0x000000FF;
-                            head.PF.ABitMask = 0xFF000000;
+                            head.PF.ABitMask = 0xFF;
                             break;
                     }
                 }
@@ -166,6 +195,9 @@ namespace TTG_Tools
                 head.Reserved2 = 0;
 
                 if (MipCount > 1) head.Caps |= caps.DDSCAPS_COMPLEX | caps.DDSCAPS_MIPMAP;
+
+                //Need find out how caps2 value works
+                head.Caps2 = caps.DDSCAPS2_CUBEMAP_POSITIVEY;
 
                 bw.Write(head.Caps);
                 bw.Write(head.Caps2);

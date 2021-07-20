@@ -168,11 +168,11 @@ namespace TTG_Tools
                         return;
                     }
 
-                    byte[] beg_chunk; //Скопируется начальный шаблон
+                    byte[] beg_chunk; //Copy begin of font file
                     byte[] block_sz = new byte[4];
-                    byte[] hz_size = new byte[4]; //Не знаю, зачем считаются ещё 8 байт к размеру шрифта
-                    byte[] font_size = new byte[4]; //Для размера шрифта
-                    byte[] last_chunk; //пригодится для после разъяснений с размерами шрифта
+                    byte[] hz_size = new byte[4]; //I don't know why calculate addition 8 bytes to font size
+                    byte[] font_size = new byte[4]; //Font size
+                    byte[] last_chunk; //Copy ending font files after ttf file
 
                     int pos = 32;
                     int beg_pos = pos;
@@ -2462,57 +2462,6 @@ namespace TTG_Tools
                 MyFileStream.Write(hex_data, 0, hex_data.Length);
             }
         }
-
-        public static string CheckVersionOfGameFromCombobox(int selectedIndexFromComboBox1)
-        {
-            switch (selectedIndexFromComboBox1)
-            {
-                case -1:
-                    {
-                        return " ";
-                    }
-                case 0:
-                    {
-                        return " ";
-                    }
-                case 1:
-                    {
-                        return "12 ";
-                    }
-                case 2:
-                    {
-                        return "13 ";
-                    }
-                case 3:
-                    {
-                        return "14 ";
-                    }
-                case 4:
-                    {
-                        return "15 ";
-                    }
-                case 5:
-                    {
-                        return "16 ";
-                    }
-                case 6:
-                    {
-                        return "WAU";
-                    }
-                case 7:
-                    {
-                        return "TFTB";
-                    }
-                default:
-                    {
-                        MessageBox.Show("Error select game version. Please send me a file.", "Error");
-                        return null;
-                    }
-
-            }
-        }
-
-
 
 
         private void AutoPacker_Load(object sender, EventArgs e)

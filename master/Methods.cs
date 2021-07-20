@@ -22,6 +22,20 @@ namespace TTG_Tools
             }
         }
 
+        public static int CalculateMip(int width, int height, int codeFormat)
+        {
+            int mip = 1;
+
+            while (width > 1 && height > 1)
+            {
+                width /= 2;
+                height /= 2;
+                mip++;
+            }
+
+            return mip;
+        }
+
         public static void get_kratnost_and_size(int width, int height, int code, ref int ddsContentLength, ref int kratnost)
         {
             kratnost = width * height;
@@ -263,111 +277,6 @@ namespace TTG_Tools
             return result;
         }
 
-        public static string GetChaptersOfDDS(byte[] d3dtx, int poz, List<byte[]> head, List<TTG_Tools.AutoPacker.chapterOfDDS> chaptersOfDDS, string version)
-        {
-            //теперь разбираем 
-                                string s_temp = "";
-            //Волк среди нас и Ходячие 2: 23 шт.
-            //Покер 2: 22 шт.
-            //Борда и ИП: 27 шт.
-                                int countHeadByte = 23;
-                                if (version == "TFTB" || version == "WDM")
-                                {
-                                    countHeadByte = 27;
-                                }
-                                else if (version == "PN2")
-                                {
-                                    countHeadByte = 22;
-                                }
-                                else if (version == "Batman")
-                                {
-                                    countHeadByte = 32;
-                                }
-
-                                for (int q = 0; q < countHeadByte; q++)//25
-                                {
-                                    byte[] temp = new byte[4];
-                                    Array.Copy(d3dtx, poz, temp, 0, 4);
-                                    head.Add(temp);
-                                    poz += 4;
-                                    s_temp += BitConverter.ToInt32(temp, 0).ToString() + "\r\n";
-                                }
-
-                                int kolvo;
-                                if (version == "TFTB" || version == "WDM")
-                                {
-                                   kolvo  = BitConverter.ToInt32(head[24], 0);
-                                }
-                                else if (version == "PN2")
-                                {
-                                    kolvo = BitConverter.ToInt32(head[19], 0);
-                                }
-                                else if (version == "Batman")
-                                {
-                                    kolvo = BitConverter.ToInt32(head[29], 0);
-                                }
-                                else kolvo = BitConverter.ToInt32(head[20],0);//найти смещение для количества текстур и подумать насчет 27
-
-                                //System.Windows.Forms.MessageBox.Show(Convert.ToString(kolvo));
-                                //Смещения для количества текстур в играх:
-                                //Покер 2 - 19
-                                //Волк среди нас - 20
-                                //Борда - 24
-
-                                for (int k = 0; k < kolvo; k++)
-                                {
-                                    List<byte[]> bTemp = new List<byte[]>();
-                                    int countHeadByteChapterDDS = 4; //Волк среди нас
-                                    if (version == "TFTB" || version == "WDM")
-                                    {
-                                        countHeadByteChapterDDS = 5; //Борда
-                                    }
-                                    else if (version == "PN2")
-                                    {
-                                        countHeadByteChapterDDS = 3; //Покер 2
-                                    }
-                                    else if (version == "Batman")
-                                    {
-                                        countHeadByteChapterDDS = 6; //Бэтмен
-                                    }
-
-
-                                    for (int b = 0; b < countHeadByteChapterDDS; b++)
-                                    {
-                                        byte[] t = new byte[4];
-                                        Array.Copy(d3dtx,poz,t,0,4);
-                                        bTemp.Add(t);
-                                        poz+=4;
-                                    }
-                                    
-                                    if (version == "TFTB" || version == "WDM" )
-                                    {
-                                        chaptersOfDDS.Add(new TTG_Tools.AutoPacker.chapterOfDDS(bTemp[0], bTemp[1], bTemp[3], bTemp[2], null, bTemp[4]));
-                                    }
-                                    else if (version == "PN2")
-                                    {
-                                        chaptersOfDDS.Add(new TTG_Tools.AutoPacker.chapterOfDDS(bTemp[0], null, bTemp[1], bTemp[2], null, null));
-                                    }
-                                    else if (version == "Batman")
-                                    {
-                                        chaptersOfDDS.Add(new TTG_Tools.AutoPacker.chapterOfDDS(bTemp[1], bTemp[2], bTemp[3], bTemp[2], null, bTemp[5]));
-                                    }
-                                    else
-                                    {
-                                        chaptersOfDDS.Add(new TTG_Tools.AutoPacker.chapterOfDDS(bTemp[0], bTemp[1], bTemp[2], bTemp[3], null, null));
-                                    }
-                                }
-                                
-                                for (int k = 0; k < kolvo; k++)
-                                {
-                                    int len = BitConverter.ToInt32(chaptersOfDDS[k].lenght_of_chapter, 0);
-                                    chaptersOfDDS[k].content_chapter = new byte[len];
-                                    Array.Copy(d3dtx, poz, chaptersOfDDS[k].content_chapter, 0, len);
-                                    poz += len;
-                                }
-                                return "\r\n" + s_temp + "                                                        ";
-        }
-
         public static byte[] ReadFull(Stream stream)
         {
             byte[] buffer = new byte[3207];
@@ -421,8 +330,6 @@ namespace TTG_Tools
             }
             catch { }
         }
-
-      
 
         public static bool MakePause()
         {

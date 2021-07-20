@@ -67,6 +67,13 @@ namespace TTG_Tools
                 bw.Write(head.Width);
 
                 head.PitchOrLinearSize = Size;
+                if (Format < 0x40)
+                {
+                    int Pitch = 0;
+                    int sz = 0;
+                    Methods.get_kratnost_and_size((int)head.Width, (int)head.Height, Format, ref sz, ref Pitch);
+                    head.PitchOrLinearSize = (uint)Pitch;
+                }
                 bw.Write(head.PitchOrLinearSize);
 
                 head.Depth = 0;
@@ -505,9 +512,26 @@ namespace TTG_Tools
                 }
             }
 
-            //bw.Close();
             bw.Flush();
 
+            return 0;
+        }
+
+        public static int ReplaceNewTextures(Stream stream, ClassesStructs.TextureClass.NewT3Texture tex)
+        {
+
+            //TO DO: THINK ABOUT READING DDS HEADER AND GET PIXEL FORMAT!
+            BinaryWriter bw = new BinaryWriter(stream);
+            dds.header head;
+
+
+            if(BitConverter.ToInt32(tmp, 0) > 1)
+            {
+                //int mip = CalculateMip(tex.Width, tex.Height)
+            }
+
+
+            bw.Flush();
             return 0;
         }
 
@@ -813,7 +837,7 @@ namespace TTG_Tools
                 tex.ArrayMembers = BitConverter.ToInt32(tmp, 0);
                 poz += 4;
 
-                //if (tex.Surfaces > 1 || tex.Faces > 1) return null; //Need think about it!
+                if (tex.Faces > 1 || tex.ArrayMembers > 1) return null; //Need think about it!
             }
 
             tmp = new byte[4];
@@ -925,7 +949,6 @@ namespace TTG_Tools
             string format = "";
             //bool pvr = false;
 
-            //byte[] header = genHeader(tex.Width, tex.Height, tex.Mip, tex.TextureFormat, tex.platform.platform, ref pvr, ref format);
             byte[] header = GenHeader(tex.TextureFormat, (uint)tex.Width, (uint)tex.Height, tex.Tex.TexSize, (uint)tex.Mip, ref format);
 
             if (header == null)
